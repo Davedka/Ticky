@@ -108,10 +108,10 @@ if ($uri === '/') {
         </div>
         <div>
           <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-          <a href="/termek" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
-            <span style="font-size:24px;" class="block mb-2">📱</span>
-            <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">QR szkennelés</h3>
-            <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">/terem/{szám}</p>
+          <a href="/qr" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
+            <span style="font-size:24px;" class="block mb-2">🖨️</span>
+            <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">QR Generátor</h3>
+            <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Nyomtatható kódok</p>
           </a>
         </div>
       </div>
@@ -139,6 +139,9 @@ if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
 }
 if (match_route('/terem/{szam}', $uri) !== false) {
     require __DIR__ . '/pages/terem.php'; exit;
+}
+if ($uri === '/qr') {
+    require __DIR__ . '/pages/qr.php'; exit;
 }
 
 // ─── API Routes ───────────────────────────────────────
