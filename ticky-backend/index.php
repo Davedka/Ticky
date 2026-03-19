@@ -26,6 +26,18 @@ if ($uri === '/api/ping' || $uri === '/') {
     ]);
 }
 
+
+// Frontend oldalak
+if ($uri === '/termek') {
+    require __DIR__ . '/pages/termek.php';
+    exit;
+}
+
+if (match_route('/tanar/{kod}', $uri) !== false) {
+    require __DIR__ . '/pages/tanar.php';
+    exit;
+}
+
 if ($uri === '/api/termek') {
     require __DIR__ . '/api/termek.php';
     exit;
