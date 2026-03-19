@@ -1,8 +1,0 @@
-{
-  "name": "davedka/ticky-api",
-  "description": "Ticky – PHP Backend API",
-  "type": "project",
-  "require": {
-    "php": ">=8.1"
-  }
-}
