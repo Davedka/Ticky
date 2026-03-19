@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ticky-api
+    runtime: php
+    buildCommand: echo "No build needed"
+    startCommand: php -S 0.0.0.0:$PORT index.php
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: TIMEZONE
+        value: Europe/Budapest
