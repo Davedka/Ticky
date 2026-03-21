@@ -296,18 +296,25 @@
     <!-- ── TERMEK ── -->
     <section class="section" id="section-termek">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Termek</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Emelet és egyéb beállítások kezelése</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Emelet beállítás és aktiválás kezelése</p>
 
       <div class="card">
         <div class="card-title" style="justify-content:space-between;margin-bottom:12px;">
           <span>🏫 Termek listája</span>
-          <span class="page-info" id="terem-count">–</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="page-info" id="terem-count">–</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadTermek()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="terem-refresh-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Frissít
+            </button>
+          </div>
         </div>
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input type="search" id="terem-search" class="inp inp-sm" placeholder="Keresés…" oninput="filterTermek()">
         </div>
         <div id="terem-table"><div class="skel" style="height:300px;border-radius:10px;"></div></div>
+        <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:12px;">💡 Az emelet és aktív állapot közvetlenül szerkeszthető. Az inaktív termeknél nem jelenik meg órarend.</p>
       </div>
     </section>
 
@@ -602,7 +609,7 @@ let allTermek = []
 
 async function loadTermek() {
   try {
-    const d = await fetch('/api/termek').then(r=>r.json())
+    const d = await fetch('/api/termek?aktiv=mind').then(r=>r.json())
     allTermek = d.termek||[]
     document.getElementById('terem-count').textContent = allTermek.length + ' terem'
     renderTermekTable(allTermek)
@@ -621,18 +628,65 @@ function renderTermekTable(termek) {
   }
   document.getElementById('terem-table').innerHTML = `
     <table class="data-table">
-      <thead><tr><th>Terem</th><th>Emelet</th><th>Linkek</th></tr></thead>
-      <tbody>${termek.map(t=>`
-        <tr>
+      <thead><tr><th>Terem</th><th>Emelet</th><th>Aktív</th><th>Linkek</th></tr></thead>
+      <tbody>${termek.map(t=>{
+        const aktiv = t.aktiv !== false
+        return `<tr>
           <td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">${t.terem_szam}</td>
-          <td style="color:rgba(255,255,255,.45);">${t.emelet!==null?t.emelet+'. emelet':'–'}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" min="0" max="5" value="${t.emelet!==null&&t.emelet!==undefined?t.emelet:''}"
+                placeholder="–" class="inp inp-sm" style="width:70px;"
+                onchange="saveEmelet('${t.terem_szam}',this.value)"
+                title="Emelet száma (0=földszint)">
+              <span style="font-size:11px;color:rgba(255,255,255,.3);">. em.</span>
+            </div>
+          </td>
+          <td>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <div class="toggle-wrap" onclick="toggleAktiv('${t.terem_szam}',${!aktiv})" style="width:40px;height:22px;border-radius:11px;background:${aktiv?'rgba(0,200,150,.35)':('rgba(255,255,255,.1)')};border:1px solid ${aktiv?'rgba(0,200,150,.5)':('rgba(255,255,255,.15)')};position:relative;transition:all .2s;flex-shrink:0;cursor:pointer;">
+                <div style="position:absolute;top:3px;${aktiv?'right:3px':'left:3px'};width:14px;height:14px;border-radius:50%;background:${aktiv?'#00c896':'rgba(255,255,255,.3)'};transition:all .2s;"></div>
+              </div>
+              <span style="font-size:12px;color:${aktiv?'#00c896':'rgba(255,255,255,.35)'};font-weight:600;">${aktiv?'Aktív':'Inaktív'}</span>
+            </label>
+          </td>
           <td style="display:flex;gap:6px;flex-wrap:wrap;">
             <a href="/terem/${t.terem_szam}" target="_blank" class="btn btn-ghost btn-sm">🚪 QR</a>
             <a href="/terem/${t.terem_szam}/nap" target="_blank" class="btn btn-ghost btn-sm">📅 Napirend</a>
           </td>
-        </tr>`).join('')}
+        </tr>`
+      }).join('')}
       </tbody>
     </table>`
+}
+
+async function saveEmelet(szam, val) {
+  const emelet = val===''||val===null ? null : parseInt(val)
+  try {
+    const res = await fetch(`/api/admin/terem/${encodeURIComponent(szam)}`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({emelet})
+    })
+    const d = await res.json()
+    if(d.ok) toast(`✅ ${szam} – emelet mentve`,'ok')
+    else toast(d.error||'Hiba','err')
+  } catch(e) { toast('API hiba','err') }
+}
+
+async function toggleAktiv(szam, aktiv) {
+  try {
+    const res = await fetch(`/api/admin/terem/${encodeURIComponent(szam)}`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({aktiv})
+    })
+    const d = await res.json()
+    if(d.ok) {
+      toast(`${aktiv?'✅':'⏸'} ${szam} – ${aktiv?'aktiválva':'inaktiválva'}`,'ok')
+      loadTermek()
+    } else toast(d.error||'Hiba','err')
+  } catch(e) { toast('API hiba','err') }
 }
 
 // ── IMPORT STATS ─────────────────────────────────────
