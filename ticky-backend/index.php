@@ -166,6 +166,20 @@ if (match_route('/api/admin/terem/{szam}', $uri) !== false) {
     require __DIR__ . '/api/admin_terem.php'; exit;
 }
 
+// ─── Admin debug (csak development) ──────────────────
+if ($uri === '/api/admin/debug-env') {
+    $pw = trim(getenv('ADMIN_PASSWORD') ?: '');
+    $pw2 = trim($_ENV['ADMIN_PASSWORD'] ?? '');
+    $pw3 = trim($_SERVER['ADMIN_PASSWORD'] ?? '');
+    json_response([
+        'getenv'   => !empty($pw)  ? 'SET ('. strlen($pw)  .' kar)' : 'ÜRES',
+        '_ENV'     => !empty($pw2) ? 'SET ('. strlen($pw2) .' kar)' : 'ÜRES',
+        '_SERVER'  => !empty($pw3) ? 'SET ('. strlen($pw3) .' kar)' : 'ÜRES',
+        'php_ver'  => PHP_VERSION,
+        'tip'      => 'A jelszó értékét biztonsági okból nem mutatjuk',
+    ]);
+}
+
 // 404
 http_response_code(404);
 echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
