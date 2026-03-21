@@ -347,7 +347,7 @@
 <div class="topbar">
   <div class="tb-brand">
     <div class="brand-dot"></div>
-    <span>Ticky</span>
+    <a href="/" style="color:white;text-decoration:none;">Ticky</a>
     <span style="color:rgba(255,255,255,.2);font-weight:400;font-size:16px;">·</span>
     <span style="color:rgba(255,255,255,.45);font-size:15px;font-weight:400;font-family:'DM Sans',sans-serif;">Folyosói kijelző</span>
   </div>
