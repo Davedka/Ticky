@@ -70,6 +70,7 @@ if ($uri === '/') {
     <div class="flex items-center gap-1">
       <a href="/termek" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
       <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
+      <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
     </div>
   </nav>
 
@@ -131,17 +132,23 @@ if ($uri === '/api/ping') {
 }
 
 // ─── Frontend oldalak ─────────────────────────────────
+// FONTOS: a specifikusabb route-ok ELŐBB jönnek!
+
 if ($uri === '/termek') {
     require __DIR__ . '/pages/termek.php'; exit;
 }
 if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
     require __DIR__ . '/pages/tanar.php'; exit;
 }
-if (match_route('/terem/{szam}', $uri) !== false) {
-    require __DIR__ . '/pages/terem.php'; exit;
-}
 if ($uri === '/qr') {
     require __DIR__ . '/pages/qr.php'; exit;
+}
+// /terem/204/nap  –  ELŐBB mint /terem/204, különben a {szam} wildcard elkapja!
+if (match_route('/terem/{szam}/nap', $uri) !== false) {
+    require __DIR__ . '/pages/napirend.php'; exit;
+}
+if (match_route('/terem/{szam}', $uri) !== false) {
+    require __DIR__ . '/pages/terem.php'; exit;
 }
 
 // ─── API Routes ───────────────────────────────────────
