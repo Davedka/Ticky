@@ -15,7 +15,7 @@ if ($params === false) {
     json_error('Hiányzó tanár kód', 400);
 }
 
-$tanar_kod = strtoupper(trim($params['kod']));
+$tanar_kod = strtoupper(trim(urldecode($params['kod'])));
 $nap_param = $_GET['nap'] ?? null;
 $het_egeszben = ($nap_param === 'heten');
 
