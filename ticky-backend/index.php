@@ -161,6 +161,9 @@ if ($uri === '/admin') {
 if ($uri === '/api/admin/tanar') {
     require __DIR__ . '/api/admin_tanar.php'; exit;
 }
+if (match_route('/api/admin/terem/{szam}', $uri) !== false) {
+    require __DIR__ . '/api/admin_terem.php'; exit;
+}
 
 // 404
 http_response_code(404);
