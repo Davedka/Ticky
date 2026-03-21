@@ -154,6 +154,14 @@ if (match_route('/api/napirend/{szam}', $uri) !== false) {
     require __DIR__ . '/api/napirend.php'; exit;
 }
 
+// ─── Admin ────────────────────────────────────────────
+if ($uri === '/admin') {
+    require __DIR__ . '/pages/admin.php'; exit;
+}
+if ($uri === '/api/admin/tanar') {
+    require __DIR__ . '/api/admin_tanar.php'; exit;
+}
+
 // 404
 http_response_code(404);
 echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
