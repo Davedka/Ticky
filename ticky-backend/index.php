@@ -59,6 +59,7 @@ if ($uri === '/') {
       <a href="/termek" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
       <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
       <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
+      <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
     </div>
   </nav>
   <div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
@@ -123,6 +124,9 @@ if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
 }
 if ($uri === '/qr') {
     require __DIR__ . '/pages/qr.php'; exit;
+}
+if ($uri === '/kijelzo') {
+    require __DIR__ . '/pages/kijelzo.php'; exit;
 }
 // Napirend ELŐBB mint /terem/{szam}!
 if (match_route('/terem/{szam}/nap', $uri) !== false) {
