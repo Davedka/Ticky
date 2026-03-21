@@ -13,7 +13,7 @@ $ido = aktualis_ido();
 
 // ─── 1. Összes terem ─────────────────────────────────
 $termek = sb_get('termek', [
-    'select' => 'id,terem_szam,emelet,aktiv',
+    'select' => 'id,terem_szam,emelet',
     'order'  => 'terem_szam.asc',
 ]);
 
