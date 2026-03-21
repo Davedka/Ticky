@@ -1,17 +1,47 @@
 <?php
+// Session beállítás Render kompatibilis módban
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.use_strict_mode', 1);
+session_name('ticky_admin_sess');
 session_start();
+
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-$admin_pw = getenv('ADMIN_PASSWORD') ?: '';
+// Env var olvasás – trim() a véletlen whitespace ellen
+$admin_pw = trim(getenv('ADMIN_PASSWORD') ?: '');
+// Fallback: $_ENV és $_SERVER is megpróbálja
+if (empty($admin_pw)) $admin_pw = trim($_ENV['ADMIN_PASSWORD'] ?? '');
+if (empty($admin_pw)) $admin_pw = trim($_SERVER['ADMIN_PASSWORD'] ?? '');
 
-if (isset($_GET['logout'])) { session_destroy(); header('Location: /admin'); exit; }
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: /admin');
+    exit;
+}
 
 $login_error = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
-    if ($admin_pw && $_POST['pw'] === $admin_pw) {
-        $_SESSION['ticky_admin'] = true; header('Location: /admin'); exit;
-    } else { $login_error = true; }
+    $input = trim($_POST['pw']);
+    if ($admin_pw && $input === $admin_pw) {
+        $_SESSION['ticky_admin'] = true;
+        $_SESSION['ticky_time']  = time();
+        header('Location: /admin');
+        exit;
+    } else {
+        $login_error = true;
+    }
+}
+
+// Session timeout: 8 óra
+if (!empty($_SESSION['ticky_admin']) && isset($_SESSION['ticky_time'])) {
+    if (time() - $_SESSION['ticky_time'] > 8 * 3600) {
+        session_destroy();
+        $_SESSION = [];
+    } else {
+        $_SESSION['ticky_time'] = time(); // refresh
+    }
 }
 
 $no_pw_set = empty($admin_pw);
