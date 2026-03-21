@@ -53,6 +53,14 @@
   </button>
 </nav>
 
+<!-- Hétvége banner -->
+<div id="weekend-info" class="hidden relative z-10 max-w-5xl mx-auto px-4 pt-4">
+  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm" style="background:rgba(200,151,42,.10);border:1px solid rgba(200,151,42,.25);color:#f0c76b;">
+    <span>🌙</span>
+    <span>Hétvége – az órarendek hétfőn frissülnek. A termek listája elérhető, de foglaltság nem jelenik meg.</span>
+  </div>
+</div>
+
 <!-- Filter bar -->
 <div class="relative z-10 max-w-5xl mx-auto px-4 pt-5 pb-3">
   <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
@@ -102,7 +110,16 @@ async function fetchRooms() {
   try {
     const d=await fetch('/api/termek?allapot=1').then(r=>r.json())
     if(d.error){showError(d.error);return}
-    allRooms=d.termek||[]
+    // Hétvégén (nap:0) nincs allapot mező – alapból szabad minden terem
+    allRooms=(d.termek||[]).map(r=>({
+      ...r,
+      allapot: r.allapot ?? 'szabad',
+      aktualis: r.aktualis ?? null,
+    }))
+    if(d.nap===0){
+      const wi=document.getElementById('weekend-info')
+      if(wi) wi.style.display='flex'
+    }
     updateCounts(); renderGrid()
     document.getElementById('footer-ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
   } catch(e){showError('Nem sikerült csatlakozni')}
