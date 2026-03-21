@@ -500,7 +500,7 @@ async function autoDetectAll() {
       d.ok?ok++:err++
     } catch(e){err++}
   }
-  toast(`✅ ${ok} terem frissítve${err?', '+err+' hiba':'`}`,'ok')
+  toast(`✅ ${ok} terem frissítve${err ? ', '+err+' hiba' : ''}`,'ok')
   loadTermek()
 }
 
