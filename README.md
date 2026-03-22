@@ -1,36 +1,36 @@
 # Ticky – PHP Backend API
 
-QR-kód alapú iskolai terem-azonosító rendszer. Megmutatja ki tart éppen órát, melyik teremben, valós időben.
+QR code-based classroom identification system for schools. Shows who is currently teaching, in which room, in real time.
 
 ## Stack
 
 - **PHP 8.x** – Backend API (Render.com)
-- **Supabase** – PostgreSQL adatbázis
+- **Supabase** – PostgreSQL database
 - **Tailwind CSS** – Frontend
-- **Node.js** – Órarend importer (lokálisan futtatva)
+- **Node.js** – Timetable importer (run locally)
 
 ---
 
-## API Endpointok
+## API Endpoints
 
-| Endpoint | Leírás |
+| Endpoint | Description |
 |---|---|
 | `GET /api/ping` | Health check |
-| `GET /api/termek` | Összes terem listája |
-| `GET /api/termek?allapot=1` | Termek + mai foglaltsági státusz |
-| `GET /api/terem/{szam}` | Adott terem aktuális és következő órája |
-| `GET /api/napirend/{szam}` | Adott terem mai napirendje |
-| `GET /api/napirend/{szam}?nap=1` | Adott nap napirendje (1=H … 5=P) |
-| `GET /api/napirend/{szam}?nap=heten` | Teljes heti napirend |
-| `GET /api/tanarok` | Összes tanár kód + nevek |
-| `GET /api/tanar/{kod}/orarend` | Adott tanár mai napirendje |
-| `GET /api/tanar/{kod}/orarend?nap=heten` | Adott tanár heti napirendje |
+| `GET /api/termek` | List of all rooms |
+| `GET /api/termek?allapot=1` | Rooms with today's availability status |
+| `GET /api/terem/{number}` | Current and next class for a given room |
+| `GET /api/napirend/{number}` | Today's schedule for a given room |
+| `GET /api/napirend/{number}?nap=1` | Schedule for a specific day (1=Mon … 5=Fri) |
+| `GET /api/napirend/{number}?nap=heten` | Full weekly schedule for a room |
+| `GET /api/tanarok` | All teacher codes and names |
+| `GET /api/tanar/{code}/orarend` | Today's schedule for a given teacher |
+| `GET /api/tanar/{code}/orarend?nap=heten` | Weekly schedule for a given teacher |
 
 ---
 
-## Példa válaszok
+## Example Responses
 
-### `GET /api/terem/204` – Foglalt
+### `GET /api/terem/204` – Occupied
 
 ```json
 {
@@ -53,7 +53,7 @@ QR-kód alapú iskolai terem-azonosító rendszer. Megmutatja ki tart éppen ór
 }
 ```
 
-### `GET /api/terem/204` – Szabad
+### `GET /api/terem/204` – Free
 
 ```json
 {
@@ -92,45 +92,45 @@ QR-kód alapú iskolai terem-azonosító rendszer. Megmutatja ki tart éppen ór
 
 ---
 
-## Frontend Oldalak
+## Frontend Pages
 
-| URL | Leírás |
+| URL | Description |
 |---|---|
-| `/` | Főoldal |
-| `/termek` | Összes terem élő státusz dashboard |
-| `/terem/{szam}` | Terem QR oldal + heti időtengel |
-| `/terem/{szam}/nap` | Terem heti napirendje |
-| `/tanar` | Tanár kereső |
-| `/tanar/{kod}` | Adott tanár nézete |
-| `/kijelzo` | Folyosói kijelző mód (TV/tablet) |
-| `/qr` | QR kód generáló + nyomtatás |
-| `/admin` | Admin panel (jelszóval védett) |
+| `/` | Home page |
+| `/termek` | All rooms — live status dashboard |
+| `/terem/{number}` | Room QR page + weekly timeline |
+| `/terem/{number}/nap` | Room's weekly schedule |
+| `/tanar` | Teacher search |
+| `/tanar/{code}` | Individual teacher view |
+| `/kijelzo` | Hallway display mode (TV/tablet) |
+| `/qr` | QR code generator + print |
+| `/admin` | Admin panel (password protected) |
 
 ---
 
-## Fájlstruktúra
+## File Structure
 
 ```
 ticky-backend/
-├── index.php              ← Router (minden kérés ide jön)
-├── render.yaml            ← Render deploy konfig
+├── index.php              ← Router (all requests go here)
+├── render.yaml            ← Render deploy config
 ├── composer.json
 ├── config/
-│   └── supabase.php       ← Supabase kapcsolat + HTTP helpers
+│   └── supabase.php       ← Supabase connection + HTTP helpers
 ├── utils/
 │   └── helpers.php        ← json_response, routing, CORS
 ├── api/
-│   ├── terem.php          ← GET /api/terem/{szam}
+│   ├── terem.php          ← GET /api/terem/{number}
 │   ├── termek.php         ← GET /api/termek
-│   ├── napirend.php       ← GET /api/napirend/{szam}
+│   ├── napirend.php       ← GET /api/napirend/{number}
 │   ├── tanarok.php        ← GET /api/tanarok
-│   ├── tanar_orarend.php  ← GET /api/tanar/{kod}/orarend
+│   ├── tanar_orarend.php  ← GET /api/tanar/{code}/orarend
 │   ├── admin_tanar.php    ← POST /api/admin/tanar
-│   └── admin_terem.php    ← PATCH /api/admin/terem/{szam}
+│   └── admin_terem.php    ← PATCH /api/admin/terem/{number}
 └── pages/
-    ├── terem.php          ← /terem/{szam}
+    ├── terem.php          ← /terem/{number}
     ├── termek.php         ← /termek
-    ├── napirend.php       ← /terem/{szam}/nap
+    ├── napirend.php       ← /terem/{number}/nap
     ├── tanar.php          ← /tanar
     ├── kijelzo.php        ← /kijelzo
     ├── qr.php             ← /qr
@@ -139,32 +139,32 @@ ticky-backend/
 
 ---
 
-## Telepítés – Render.com
+## Deployment – Render.com
 
-1. GitHub repóba töltsd fel a `ticky-backend/` mappát
+1. Push the `ticky-backend/` folder to a GitHub repository
 2. Render → **New Web Service** → Connect repo
 3. **Build command:** `echo "No build needed"`
 4. **Start command:** `php -S 0.0.0.0:$PORT index.php`
-5. Environment variables beállítása (lásd lent)
-6. Deploy – kb. 1–2 perc
+5. Set the required environment variables (see below)
+6. Deploy – takes about 1–2 minutes
 
-### Szükséges Environment Variables
+### Required Environment Variables
 
-| Változó | Leírás |
+| Variable | Description |
 |---|---|
-| `SUPABASE_URL` | Supabase projekt URL |
-| `SUPABASE_ANON_KEY` | Publikus anon kulcs |
-| `SUPABASE_SERVICE_KEY` | Service role kulcs (admin műveletekhez) |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_ANON_KEY` | Public anon key |
+| `SUPABASE_SERVICE_KEY` | Service role key (for admin operations) |
 | `TIMEZONE` | `Europe/Budapest` |
-| `ADMIN_PASSWORD` | Admin panel jelszó |
+| `ADMIN_PASSWORD` | Admin panel password |
 
-> ⚠️ A kulcsokat **soha ne commitold** a repóba. Render dashboard → Environment Variables menüben add meg őket.
+> ⚠️ **Never commit these keys** to your repository. Set them via Render dashboard → Environment Variables.
 
 ---
 
 ## Importer (Node.js)
 
-Az órarendadatok a `tanárok.js` fájlból kerülnek a Supabase adatbázisba.
+Timetable data is loaded into Supabase from the `tanárok.js` file.
 
 ```bash
 cd importer
@@ -172,33 +172,33 @@ npm install
 node importer.js
 ```
 
-**Előfeltétel:** A `.env` fájlban legyen megadva `SUPABASE_URL` és `SUPABASE_SERVICE_KEY`.
+**Prerequisite:** A `.env` file must contain `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`.
 
-Az importer törli a régi adatokat és feltölti az újakat. Futtasd minden alkalommal amikor megváltozik az órarend.
+The importer deletes existing data and uploads the new set. Run it every time the timetable changes.
 
 ---
 
-## Adatbázis sémája (Supabase)
+## Database Schema (Supabase)
 
-| Tábla | Leírás |
+| Table | Description |
 |---|---|
-| `termek` | Terem szám, emelet |
-| `tanarok` | Tanár kód, teljes név |
-| `orarendek` | Órarend bejegyzések (terem, tanár, osztály, tantárgy, nap, idő) |
+| `termek` | Room number, floor |
+| `tanarok` | Teacher code, full name |
+| `orarendek` | Timetable entries (room, teacher, class, subject, day, time) |
 
-Az `orarendek` tábla `het_napja` mezője: `1`=Hétfő … `5`=Péntek.
+The `het_napja` field in `orarendek`: `1` = Monday … `5` = Friday.
 
 ---
 
-## Iskolai időbeosztás
+## School Bell Schedule
 
-| Óra | Kezdés | Vége |
+| Period | Start | End |
 |---|---|---|
-| 1. | 07:30 | 08:10 |
-| 2. | 08:20 | 09:05 |
-| 3. | 09:15 | 10:00 |
-| 4. | 10:15 | 11:00 |
-| 5. | 11:10 | 11:55 |
-| 6. | 12:05 | 12:50 |
-| 7. | 12:50 | 13:35 |
-| 8. | 13:40 | 14:20 |
+| 1st | 07:30 | 08:10 |
+| 2nd | 08:20 | 09:05 |
+| 3rd | 09:15 | 10:00 |
+| 4th | 10:15 | 11:00 |
+| 5th | 11:10 | 11:55 |
+| 6th | 12:05 | 12:50 |
+| 7th | 12:50 | 13:35 |
+| 8th | 13:40 | 14:20 |
