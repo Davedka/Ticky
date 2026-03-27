@@ -428,7 +428,9 @@
 <!-- Auto-refresh progress bar -->
 <div class="refresh-bar"><div class="refresh-bar-fill" id="prog-bar" style="width:0%;"></div></div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
+const { formatHMS, nowMinutes, nowParts, weekdayIndex } = window.TickyTime
 // ── Konfig ──────────────────────────────────────────
 const REFRESH_SEC = 30
 const NAP_NEVEK   = ['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat']
@@ -455,23 +457,23 @@ let prevStates    = {}
 
 // ── Óra ─────────────────────────────────────────────
 function updateClock() {
-  const n   = new Date()
-  const hm  = n.toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
-  const s   = n.getSeconds().toString().padStart(2,'0')
+  const p   = nowParts()
+  const hm  = formatHMS().slice(0,5)
+  const s   = p.second.toString().padStart(2,'0')
   document.getElementById('clock-hm').textContent = hm
   document.getElementById('clock-s').textContent  = s
 }
 
 function updateDate() {
-  const n = new Date()
-  document.getElementById('tb-nap').textContent   = NAP_NEVEK[n.getDay()]
+  const p = nowParts()
+  document.getElementById('tb-nap').textContent   = NAP_NEVEK[weekdayIndex()]
   document.getElementById('tb-datum').textContent =
-    `${n.getFullYear()}. ${HONAP_NEVEK[n.getMonth()]} ${n.getDate()}.`
+    `${p.year}. ${HONAP_NEVEK[p.month-1]} ${p.day}.`
 }
 
 // ── Szünet detektor ──────────────────────────────────
 function isSzunet() {
-  const n=new Date(), c=n.getHours()*60+n.getMinutes()
+  const c=nowMinutes()
   const isOra = ORA_IDOK.some(o=>{
     const[kh,km]=o.kezdes.split(':').map(Number)
     const[vh,vm]=o.vegzes.split(':').map(Number)
@@ -484,7 +486,7 @@ function isSzunet() {
 // ── Segédfüggvények ──────────────────────────────────
 function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
 function calcPct(k,v){
-  const c=new Date().getHours()*60+new Date().getMinutes()
+  const c=nowMinutes()
   return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100)))
 }
 
@@ -502,7 +504,7 @@ async function fetchRooms() {
     }))
     renderGrid()
     document.getElementById('last-update').textContent =
-      new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+      formatHMS()
   } catch(e){ console.error(e) }
   dot.classList.remove('loading')
 }
@@ -546,7 +548,7 @@ function renderGrid() {
     let bodyHTML = ''
     if(isFoglalt && a) {
       const pct = calcPct(a.kezdes, a.vegzes)
-      const percMaradt = Math.round((toMin(a.vegzes) - (new Date().getHours()*60+new Date().getMinutes())))
+      const percMaradt = Math.round(toMin(a.vegzes) - nowMinutes())
       bodyHTML = `
         <div class="card-body">
           <div class="card-tanar">${a.tanar}</div>

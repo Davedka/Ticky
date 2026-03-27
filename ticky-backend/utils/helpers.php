@@ -41,6 +41,102 @@ function aktualis_ido(): string {
 /**
  * Idő összehasonlítás: $ido >= $start AND $ido <= $end ?
  */
+function render_time_sync_bootstrap(): void {
+    $server_epoch_ms = (int) round(microtime(true) * 1000);
+    $timezone = TZ;
+    ?>
+<script>
+(() => {
+  const timezone = <?= json_encode($timezone, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+  const serverEpochMs = <?= $server_epoch_ms ?>;
+  const bootPerfNow = typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : null;
+  const bootClientNow = Date.now();
+
+  const partsFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  });
+  const hmFormatter = new Intl.DateTimeFormat('hu-HU', {
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  });
+  const hmsFormatter = new Intl.DateTimeFormat('hu-HU', {
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  });
+  const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+  function nowMs() {
+    if (bootPerfNow !== null && typeof performance !== 'undefined' && typeof performance.now === 'function') {
+      return serverEpochMs + (performance.now() - bootPerfNow);
+    }
+    return serverEpochMs + (Date.now() - bootClientNow);
+  }
+
+  function nowDate() {
+    return new Date(nowMs());
+  }
+
+  function nowParts() {
+    const raw = {};
+    for (const part of partsFormatter.formatToParts(nowDate())) {
+      if (part.type !== 'literal') raw[part.type] = part.value;
+    }
+    return {
+      year: Number(raw.year),
+      month: Number(raw.month),
+      day: Number(raw.day),
+      weekday: weekdayMap[raw.weekday] ?? 0,
+      hour: Number(raw.hour),
+      minute: Number(raw.minute),
+      second: Number(raw.second),
+    };
+  }
+
+  function nowMinutes() {
+    const parts = nowParts();
+    return parts.hour * 60 + parts.minute;
+  }
+
+  window.TickyTime = {
+    timezone,
+    nowDate,
+    nowMs,
+    nowParts,
+    nowMinutes,
+    weekdayIndex() {
+      return nowParts().weekday;
+    },
+    schoolDayIndex() {
+      const day = nowParts().weekday;
+      return (day === 0 || day === 6) ? 1 : day;
+    },
+    formatHM() {
+      return hmFormatter.format(nowDate());
+    },
+    formatHMS() {
+      return hmsFormatter.format(nowDate());
+    },
+  };
+})();
+</script>
+    <?php
+}
+
 function ido_kozott(string $ido, string $start, string $end): bool {
     return $ido >= $start && $ido <= $end;
 }

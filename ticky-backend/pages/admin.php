@@ -286,9 +286,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
   </main>
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
+const { formatHMS, weekdayIndex } = window.TickyTime
 // ── Óra ──────────────────────────────────────────────
-setInterval(()=>{document.getElementById('nav-time').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000)
+setInterval(()=>{document.getElementById('nav-time').textContent=formatHMS()},1000)
 
 // ── Sidebar ───────────────────────────────────────────
 function showSection(id) {
@@ -370,7 +372,7 @@ async function loadDashboard() {
       <div class="status-row"><span class="status-label">API Backend</span><span class="status-badge badge-ok"><span class="badge-dot pulse" style="background:#00c896;"></span> Online</span></div>
       <div class="status-row"><span class="status-label">Supabase DB</span><span class="status-badge ${td.count>0?'badge-ok':'badge-warn'}"><span class="badge-dot" style="background:${td.count>0?'#00c896':'#f0c76b'};"></span> ${td.count>0?'Kapcsolódva':'Ellenőrizd'}</span></div>
       <div class="status-row"><span class="status-label">Időzóna</span><span class="tag tag-gold">Europe/Budapest</span></div>
-      <div class="status-row"><span class="status-label">Mai nap</span><span class="status-badge ${nap===0?'badge-warn':'badge-ok'}"><span class="badge-dot" style="background:${nap===0?'#f0c76b':'#00c896'};"></span>${['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'][new Date().getDay()]}</span></div>`
+      <div class="status-row"><span class="status-label">Mai nap</span><span class="status-badge ${nap===0?'badge-warn':'badge-ok'}"><span class="badge-dot" style="background:${nap===0?'#f0c76b':'#00c896'};"></span>${['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'][weekdayIndex()]}</span></div>`
     const fo2=(ta.termek||[]).filter(t=>t.allapot==='foglalt')
     document.getElementById('mai-list').innerHTML=nap===0
       ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">🌙 Hétvége</div>`

@@ -114,7 +114,9 @@
   </div>
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
+const { formatHM, nowMinutes } = window.TickyTime
 const REFRESH = 60_000
 let curKod = null
 
@@ -179,7 +181,7 @@ function setAllapot(a) {
 
 // ── Idő segédfüggvények ───────────────────────────────
 function toMin(t) { const [h,m] = t.split(':').map(Number); return h*60+m }
-function nowMin()  { return new Date().getHours()*60 + new Date().getMinutes() }
+function nowMin()  { return nowMinutes() }
 function isAktiv(k,v) { const c = nowMin(); return c >= toMin(k) && c <= toMin(v) }
 function isMult(v)     { return nowMin() > toMin(v) }
 function calcPct(k,v)  { return Math.min(100, Math.max(0, Math.round(((nowMin()-toMin(k))/(toMin(v)-toMin(k)))*100))) }
@@ -220,7 +222,7 @@ async function loadData() {
     setAllapot('idle')
   }
 
-  document.getElementById('ido').textContent = new Date().toLocaleTimeString('hu-HU', {hour:'2-digit', minute:'2-digit'})
+  document.getElementById('ido').textContent = formatHM()
 }
 
 // ── Aktuális blokk ────────────────────────────────────

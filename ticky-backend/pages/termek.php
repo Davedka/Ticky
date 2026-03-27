@@ -105,7 +105,9 @@
   </div>
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
+const { formatHM, nowMinutes } = window.TickyTime
 let allRooms=[], curFilter='mind', curSearch=''
 
 async function fetchRooms() {
@@ -123,7 +125,7 @@ async function fetchRooms() {
       if(wi) wi.style.display='flex'
     }
     updateCounts(); renderGrid()
-    document.getElementById('footer-ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
+    document.getElementById('footer-ido').textContent=formatHM()
   } catch(e){showError('Nem sikerült csatlakozni')}
 }
 
@@ -149,7 +151,7 @@ function filterRooms() {
   renderGrid()
 }
 
-function calcPct(k,v){const n=new Date();const[kh,km]=k.split(':').map(Number);const[vh,vm]=v.split(':').map(Number);const c=n.getHours()*60+n.getMinutes();return Math.min(100,Math.max(0,Math.round(((c-kh*60-km)/((vh*60+vm)-(kh*60+km)))*100)))}
+function calcPct(k,v){const[kh,km]=k.split(':').map(Number);const[vh,vm]=v.split(':').map(Number);const c=nowMinutes();return Math.min(100,Math.max(0,Math.round(((c-kh*60-km)/((vh*60+vm)-(kh*60+km)))*100)))}
 
 function renderGrid() {
   const grid=document.getElementById('rooms-grid'), empty=document.getElementById('empty-state')

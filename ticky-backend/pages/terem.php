@@ -151,7 +151,9 @@
   <span style="font-size:11px;color:rgba(255,255,255,.2);" id="footer-ido2">–</span>
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
+const { formatHM, nowMinutes, schoolDayIndex } = window.TickyTime
 const REFRESH_MS = 60_000
 const NAP   = {1:'H',2:'K',3:'Sze',4:'Cs',5:'P'}
 const NAP_T = {1:'Hétfő',2:'Kedd',3:'Szerda',4:'Csütörtök',5:'Péntek'}
@@ -171,13 +173,13 @@ function getTerem() {
   if(q) return q.toUpperCase()
   return null
 }
-function maiNap() { const d=new Date().getDay(); return(d===0||d===6)?1:d }
+function maiNap() { return schoolDayIndex() }
 function toMin(t) { const[h,m]=t.split(':').map(Number); return h*60+m }
 function topPx(m) { return Math.max(0,(m-START)*PPM) }
-function isAktiv(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return c>=toMin(k)&&c<=toMin(v) }
-function isMult(v) { return new Date().getHours()*60+new Date().getMinutes()>toMin(v) }
-function calcPct(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
-function nowM() { return new Date().getHours()*60+new Date().getMinutes() }
+function isAktiv(k,v) { const c=nowMinutes(); return c>=toMin(k)&&c<=toMin(v) }
+function isMult(v) { return nowMinutes()>toMin(v) }
+function calcPct(k,v) { const c=nowMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
+function nowM() { return nowMinutes() }
 
 // ── Státusz kártya ───────────────────────────────────
 function setAllapot(a) {
@@ -305,7 +307,7 @@ async function fetchStatus() {
       renderStatus(d)
     }
   } catch(e){}
-  const t=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
+  const t=formatHM()
   document.getElementById('footer-ido').textContent=t
   document.getElementById('footer-ido2').textContent=t
 }
