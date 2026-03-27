@@ -4,6 +4,43 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
+// Serve existing static assets like /favicon.ico before routing everything through PHP.
+$requested_file = realpath(__DIR__ . rawurldecode($uri));
+if (
+    $uri !== '/'
+    && $requested_file !== false
+    && is_file($requested_file)
+    && str_starts_with($requested_file, __DIR__ . DIRECTORY_SEPARATOR)
+) {
+    if (PHP_SAPI === 'cli-server') {
+        return false;
+    }
+
+    $mime_types = [
+        'ico'  => 'image/x-icon',
+        'svg'  => 'image/svg+xml',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'webp' => 'image/webp',
+        'gif'  => 'image/gif',
+        'css'  => 'text/css; charset=utf-8',
+        'js'   => 'application/javascript; charset=utf-8',
+        'json' => 'application/json; charset=utf-8',
+        'txt'  => 'text/plain; charset=utf-8',
+    ];
+    $extension = strtolower(pathinfo($requested_file, PATHINFO_EXTENSION));
+    if (isset($mime_types[$extension])) {
+        header('Content-Type: ' . $mime_types[$extension]);
+    }
+    header('Content-Length: ' . filesize($requested_file));
+    readfile($requested_file);
+    exit;
+}
+
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('X-XSS-Protection: 1; mode=block');
@@ -11,9 +48,6 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 header_remove('X-Powered-By');
 
 handle_cors();
-
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
 
 // ─── Gyökér → Landing ────────────────────────────────
 if ($uri === '/') {
