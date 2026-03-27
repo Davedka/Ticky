@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Ticky – Folyosói kijelző</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -339,8 +338,9 @@
     transition:width .5s linear;
   }
 </style>
+<?= ticky_head_assets('Ticky - Folyosoi kijelzo', 'Nagy kijelzos, valos ideju teremfoglaltsagi attekintes.') ?>
 </head>
-<body>
+<body class="tky-display">
 <div class="top-line"></div>
 <div class="scanlines"></div>
 
