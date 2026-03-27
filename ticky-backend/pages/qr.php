@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – QR Generátor</title>
-<link rel="icon" type="image/x-icon" href="/favicon.ico?v=20260327b">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327b">
+<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
+<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
