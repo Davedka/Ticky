@@ -27,7 +27,6 @@ if ($uri === '/') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -48,10 +47,11 @@ if ($uri === '/') {
   .gold-line { height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a); }
   a { text-decoration:none; }
 </style>
+<?= ticky_head_assets('Ticky', 'Digitalis terem- es tanarkereso rendszer valos ideju terem- es tanarnezettel.') ?>
 </head>
-<body class="relative">
+<body class="relative tky-page tky-home">
   <div class="top-line"></div>
-  <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
+  <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="tky-public-nav sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
     <span style="font-family:'Playfair Display',serif;color:white;font-size:20px;font-weight:700;" class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 10px #c8972a;display:inline-block;"></span>
       Ticky
@@ -64,6 +64,27 @@ if ($uri === '/') {
       <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
     </div>
   </nav>
+  <section class="tky-section-card">
+    <div class="tky-section-copy">
+      <span class="tky-eyebrow">Digitalis teremterkep</span>
+      <h2 class="tky-title">Gyorsabban latod, hol mi tortenik.</h2>
+      <p class="tky-copy">A Ticky egy helyre huzza be a termek foglaltsagat, a tanarok aktualis helyet es a heti napirendet, hogy a fo flow mar az elso kattintastol atlathato legyen.</p>
+    </div>
+    <div class="tky-chip-row">
+      <div class="tky-chip tky-chip-gold">
+        <span class="tky-chip-label">Nezetek</span>
+        <strong>5</strong>
+      </div>
+      <div class="tky-chip">
+        <span class="tky-chip-label">Fokusz</span>
+        <strong>Live</strong>
+      </div>
+      <div class="tky-chip tky-chip-note">
+        <span class="tky-chip-label">Aktiv</span>
+        <strong><?= htmlspecialchars($nap_nevek[$nap]) ?> · <?= htmlspecialchars($ido) ?></strong>
+      </div>
+    </div>
+  </section>
   <div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
     <div class="w-full max-w-md">
       <div class="fade-up text-center mb-10">

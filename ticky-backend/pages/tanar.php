@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Tanár kereső</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -66,10 +65,18 @@
 
   a { text-decoration:none; }
 </style>
+<?= ticky_head_assets('Ticky - Tanar kereso', 'Tanar helyzet es mai napirend gyors keresovel.') ?>
 </head>
-<body class="flex flex-col items-center justify-start p-4 pb-16">
+<body class="tky-page flex flex-col items-center justify-start p-4 pb-16">
 <div class="top-line"></div>
 
+<div class="tky-section-card tky-section-card-compact" style="width:100%;max-width:420px;">
+  <div class="tky-section-copy">
+    <span class="tky-eyebrow">Tanar keresese</span>
+    <div class="tky-title-sm">Ki hol tanit most?</div>
+    <p class="tky-copy-sm">Valassz tanart, es azonnal megkapod az aktualis termet, a kovetkezo orat es a mai teljes sorrendet.</p>
+  </div>
+</div>
 <div class="w-full max-w-sm slide-up relative z-10 mt-6">
   <div class="glass rounded-2xl overflow-hidden">
 
