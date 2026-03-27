@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – QR Generátor</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -109,13 +110,12 @@
     .qr-wrap { padding:6px !important; border-radius:8px !important; border:1px solid #eee !important; }
   }
 </style>
-<?= ticky_head_assets('Ticky - QR generator', 'Nyomtathato QR kodok a ticky teremoldalakhoz.') ?>
 </head>
-<body class="tky-page">
+<body>
 <div class="top-line"></div>
 
 <!-- Navbar -->
-<nav class="tky-public-nav sticky top-0 z-50 px-5 h-16 flex items-center justify-between screen-only" style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);">
+<nav class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between screen-only" style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);">
   <div class="flex items-center gap-3">
     <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;" class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;animation:pulseDot 2s infinite;"></span>
@@ -128,24 +128,6 @@
     <a href="/termek" class="nav-btn">← Termek</a>
   </div>
 </nav>
-
-<section class="tky-section-card screen-only">
-  <div class="tky-section-copy">
-    <span class="tky-eyebrow">Nyomtathato kodok</span>
-    <h1 class="tky-title">QR lapok teremajtokra</h1>
-    <p class="tky-copy">Jelold ki csak azokat a termeket, amelyek kellenek, vagy nyomtasd ki az egesz csomagot egy lepesben.</p>
-  </div>
-  <div class="tky-chip-row">
-    <div class="tky-chip">
-      <span class="tky-chip-label">Termek</span>
-      <strong id="hero-room-count">-</strong>
-    </div>
-    <div class="tky-chip tky-chip-note">
-      <span class="tky-chip-label">Workflow</span>
-      <strong>Kijelol, nyomtat, kitesz</strong>
-    </div>
-  </div>
-</section>
 
 <!-- Fejléc + akciók -->
 <div class="relative z-10 max-w-5xl mx-auto px-5 pt-7 pb-4 screen-only">
@@ -194,8 +176,6 @@ async function loadRooms() {
   try {
     const data = await fetch('/api/termek').then(r => r.json())
     allRooms = (data.termek || []).map(t => t.terem_szam)
-    const heroCount = document.getElementById('hero-room-count')
-    if (heroCount) heroCount.textContent = allRooms.length
     renderCards()
   } catch(e) {
     document.getElementById('qr-grid').innerHTML = `

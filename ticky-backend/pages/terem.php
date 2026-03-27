@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Terem</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -80,9 +81,8 @@
   /* Footer */
   .footer { position:relative;z-index:10;max-width:580px;margin:12px auto 40px;padding:0 16px;display:flex;align-items:center;justify-content:space-between; }
 </style>
-<?= ticky_head_assets('Ticky - Terem', 'Egy terem aktualis allapota es heti napirendje egy oldalon.') ?>
 </head>
-<body class="tky-page">
+<body>
 <div class="top-line"></div>
 
 <div class="relative z-10 max-w-sm mx-auto px-4 pt-8 slide-up">
