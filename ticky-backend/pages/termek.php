@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Termek</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -33,13 +34,12 @@
   @keyframes modalIn { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:none} }
   a { text-decoration:none; }
 </style>
-<?= ticky_head_assets('Ticky - Termek', 'Valos ideju teremlista, foglaltsag, kereses es gyors reszletek.') ?>
 </head>
-<body class="tky-page">
+<body>
 <div class="top-line"></div>
 
 <!-- Navbar -->
-<nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="tky-public-nav sticky top-0 z-50 px-5 h-16 flex items-center justify-between">
+<nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between">
   <div class="flex items-center gap-3">
     <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;" class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
@@ -53,28 +53,6 @@
     <span id="footer-ido">–</span>
   </button>
 </nav>
-
-<section class="tky-section-card">
-  <div class="tky-section-copy">
-    <span class="tky-eyebrow">Valos ideju nezet</span>
-    <h1 class="tky-title">Termek egy pillantassal</h1>
-    <p class="tky-copy">Szurokkel, kereso mezovel es gyors teremablakkal hamar elered, melyik terem szabad most, es melyikben milyen ora fut eppen.</p>
-  </div>
-  <div class="tky-chip-row">
-    <div class="tky-chip">
-      <span class="tky-chip-label">Osszes</span>
-      <strong id="hero-cnt-mind">-</strong>
-    </div>
-    <div class="tky-chip tky-chip-green">
-      <span class="tky-chip-label">Szabad</span>
-      <strong id="hero-cnt-szabad">-</strong>
-    </div>
-    <div class="tky-chip tky-chip-red">
-      <span class="tky-chip-label">Foglalt</span>
-      <strong id="hero-cnt-foglalt">-</strong>
-    </div>
-  </div>
-</section>
 
 <!-- Hétvége banner -->
 <div id="weekend-info" class="hidden relative z-10 max-w-5xl mx-auto px-4 pt-4">
@@ -154,12 +132,6 @@ function updateCounts() {
   document.getElementById('cnt-mind').textContent=allRooms.length
   document.getElementById('cnt-szabad').textContent=sz
   document.getElementById('cnt-foglalt').textContent=fo
-  const heroMind = document.getElementById('hero-cnt-mind')
-  const heroSz = document.getElementById('hero-cnt-szabad')
-  const heroFo = document.getElementById('hero-cnt-foglalt')
-  if (heroMind) heroMind.textContent = allRooms.length
-  if (heroSz) heroSz.textContent = sz
-  if (heroFo) heroFo.textContent = fo
 }
 
 function setFilter(f) {

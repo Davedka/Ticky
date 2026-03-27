@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Napirend</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -129,13 +130,12 @@
   .skel { background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:8px; }
   @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
-<?= ticky_head_assets('Ticky - Napirend', 'Heti teremnapirend desktop es mobil nezetben.') ?>
 </head>
-<body class="tky-page">
+<body>
 <div class="top-line"></div>
 
 <!-- Navbar -->
-<nav class="navbar tky-public-nav">
+<nav class="navbar">
   <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">
     <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
     <a href="/">Ticky</a>
