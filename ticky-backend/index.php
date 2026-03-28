@@ -138,6 +138,17 @@ if ($uri === '/') {
           </a>
         </div>
       </div>
+      <div class="fade-up-3 mt-3">
+        <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
+        <a href="/assistant" class="glass card-hover block px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
+          <div>
+            <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.35);">Új · AI asszisztens</p>
+            <h2 style="font-family:'Playfair Display',serif;color:white;font-size:22px;font-weight:700;">Kérdezz a Ticky adatairól</h2>
+            <p class="text-sm mt-0.5" style="color:rgba(255,255,255,.45);">Szabad termek, teremállapot és gyors navigáció egy helyen</p>
+          </div>
+          <span style="font-size:30px;">✦</span>
+        </a>
+      </div>
       <p class="fade-up-3 text-center text-xs mt-8" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
     </div>
   </div>
@@ -162,6 +173,9 @@ if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
 if ($uri === '/qr') {
     require __DIR__ . '/pages/qr.php'; exit;
 }
+if ($uri === '/assistant') {
+    require __DIR__ . '/pages/assistant.php'; exit;
+}
 if ($uri === '/kijelzo') {
     require __DIR__ . '/pages/kijelzo.php'; exit;
 }
@@ -179,6 +193,9 @@ if ($uri === '/api/termek') {
 }
 if ($uri === '/api/tanarok') {
     require __DIR__ . '/api/tanarok.php'; exit;
+}
+if ($uri === '/api/assistant') {
+    require __DIR__ . '/api/assistant.php'; exit;
 }
 // Tanár órarend – ELŐBB mint /api/terem/{szam}!
 if (match_route('/api/tanar/{kod}/orarend', $uri) !== false) {
