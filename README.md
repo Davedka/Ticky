@@ -12,16 +12,16 @@
 ## 📸 Screenshots
 
 ### Home Page
-![Home](docs/screenshots/home.png)
+![Home](screenshots/home.png)
 
-### Live Room Dashboard (Corridor Display)
-![Corridor Display](docs/screenshots/kijelzo.png)
+### Live Room Dashboard — Corridor Display
+![Corridor Display](screenshots/kijelzo.png)
 
 ### Teacher Finder
-![Teacher Finder](docs/screenshots/tanar.png)
+![Teacher Finder](screenshots/tanar.png)
 
 ### QR Code Generator
-![QR Generator](docs/screenshots/qr.png)
+![QR Generator](screenshots/qr.png)
 
 ---
 
@@ -145,15 +145,13 @@ ticky-backend/
 
 ## 📥 Timetable Importer (Node.js)
 
-Loads timetable data into Supabase from a structured source file.
-
 ```bash
 cd importer
 npm install
 node importer.js
 ```
 
-Requires a `.env` file with `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`.  
+Requires a `.env` file with `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`.
 The importer wipes existing data and re-uploads. Run it whenever the timetable changes.
 
 ---
@@ -187,16 +185,14 @@ The importer wipes existing data and re-uploads. Run it whenever the timetable c
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how to get started:
-
 1. **Fork** the repository
 2. **Clone** your fork: `git clone https://github.com/your-username/Ticky.git`
 3. **Create a branch**: `git checkout -b feature/your-feature`
-4. **Make your changes** and commit: `git commit -m "Add your feature"`
-5. **Push** to your branch: `git push origin feature/your-feature`
-6. **Open a Pull Request** on GitHub
+4. **Commit**: `git commit -m "Add your feature"`
+5. **Push**: `git push origin feature/your-feature`
+6. **Open a Pull Request**
 
-Please open an **Issue** first for major changes so we can discuss what you'd like to change.
+Please open an **Issue** first for major changes.
 
 ---
 
