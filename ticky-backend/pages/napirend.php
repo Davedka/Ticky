@@ -403,5 +403,16 @@ if(!teremSzam){
   setInterval(fetchData,5*60_000)
 }
 </script>
+<?php render_assistant_widget([
+  'title' => 'Napirend AI',
+  'eyebrow' => 'Heti nézet',
+  'intro' => 'Meg tudom nézni egy terem mai állapotát, ajánlok szabad termeket, vagy továbblépek a megfelelő nézetre.',
+  'prompts' => [
+    'Melyik termek szabadok most?',
+    'Mi van most a 204-es teremben?',
+    'Melyik termek foglaltak most?',
+    'Nyisd meg a tanárkeresőt',
+  ],
+]); ?>
 </body>
 </html>
