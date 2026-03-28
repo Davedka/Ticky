@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="hu">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ticky – Napirend</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<?php render_app_head('Ticky - Napirend'); ?>
 <style>
   body {
     font-family:'DM Sans',sans-serif; color:white;
@@ -43,7 +36,7 @@
   .sum-pill.gold { background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.25);color:#f0c76b; }
   .sum-pill.green { background:rgba(26,138,74,.12);border-color:rgba(26,138,74,.25);color:#4ade80; }
 
-  /* ── TIMETABLE ── */
+  /* â”€â”€ TIMETABLE â”€â”€ */
   .tt-outer { position:relative;z-index:10;max-width:1200px;margin:20px auto 0;padding:0 20px;overflow-x:auto; }
 
   .tt-grid {
@@ -99,7 +92,7 @@
   .now-line { position:absolute;left:0;right:0;height:2px;pointer-events:none;z-index:15; background:linear-gradient(90deg,transparent 0%,#ff6b82 20%,#ff6b82 80%,transparent 100%); }
   .now-dot { position:absolute;left:0;top:-4px;width:10px;height:10px;border-radius:50%;background:#ff6b82;box-shadow:0 0 8px #ff6b82;animation:pd 1.5s infinite; }
 
-  /* ── MOBIL ── */
+  /* â”€â”€ MOBIL â”€â”€ */
   .mob-section { display:none; }
   @media (max-width:700px) {
     .tt-outer { display:none; }
@@ -140,22 +133,22 @@
   <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">
     <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
     <a href="/">Ticky</a>
-    <span style="color:rgba(255,255,255,.2);font-weight:400;">·</span>
+    <span style="color:rgba(255,255,255,.2);font-weight:400;">Â·</span>
     <span id="nav-cim" style="color:rgba(255,255,255,.45);font-size:15px;font-weight:400;">Napirend</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    <a id="nav-vissza" href="/termek" class="nav-btn">← QR nézet</a>
+    <a id="nav-vissza" href="/termek" class="nav-btn">â† QR nÃ©zet</a>
     <button onclick="refresh()" class="nav-btn" style="display:flex;align-items:center;gap:4px;padding:7px 10px;">
       <svg id="ri" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
   </div>
 </nav>
 
-<!-- Fejléc -->
+<!-- FejlÃ©c -->
 <div class="page-header">
-  <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:4px;">Terem · Heti napirend</p>
+  <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:4px;">Terem Â· Heti napirend</p>
   <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:12px;">
-    <h1 class="terem-num" id="terem-cim">–</h1>
+    <h1 class="terem-num" id="terem-cim">â€“</h1>
     <div id="summary" style="display:flex;gap:6px;flex-wrap:wrap;padding-bottom:6px;">
       <span class="sum-pill skel" style="width:90px;height:30px;"></span>
       <span class="sum-pill skel" style="width:110px;height:30px;"></span>
@@ -190,11 +183,11 @@
 <?php render_time_sync_bootstrap(); ?>
 <script>
 const { nowMinutes, schoolDayIndex } = window.TickyTime
-const NAP   = {1:'Hétfő',2:'Kedd',3:'Szerda',4:'Csütörtök',5:'Péntek'}
+const NAP   = {1:'HÃ©tfÅ‘',2:'Kedd',3:'Szerda',4:'CsÃ¼tÃ¶rtÃ¶k',5:'PÃ©ntek'}
 const START = 7*60+30   // 450
 const END   = 14*60+30  // 870
 const TOTAL = END-START // 420
-const PPM   = 2         // px per perc → 840px magasság
+const PPM   = 2         // px per perc â†’ 840px magassÃ¡g
 
 let teremSzam = null
 let hetData   = null
@@ -213,7 +206,7 @@ function isMult(v) { return nowMinutes()>toMin(v) }
 function pct(k,v) { const c=nowMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
 function nowM() { return nowMinutes() }
 
-// ── Fetch ────────────────────────────────────────────
+// â”€â”€ Fetch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function fetchData() {
   try {
     const d=await fetch(`/api/napirend/${teremSzam}?nap=heten`).then(r=>r.json())
@@ -221,36 +214,36 @@ async function fetchData() {
     hetData={}
     ;(d.het||[]).forEach(nd=>{hetData[nd.nap]=nd.orak||[]})
     build()
-  } catch(e){showErr('Nem sikerült csatlakozni')}
+  } catch(e){showErr('Nem sikerÃ¼lt csatlakozni')}
 }
 
-// ── Summary ──────────────────────────────────────────
+// â”€â”€ Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function buildSummary() {
   const mai=maiNap(), orak=hetData[mai]||[]
   const el=document.getElementById('summary')
-  if(!orak.length){el.innerHTML=`<span class="sum-pill">📭 Ma nincs óra</span>`;return}
+  if(!orak.length){el.innerHTML=`<span class="sum-pill">ðŸ“­ Ma nincs Ã³ra</span>`;return}
   const akt=orak.find(o=>isAktiv(o.kezdes,o.vegzes))
   const kov=orak.find(o=>!isMult(o.vegzes)&&!isAktiv(o.kezdes,o.vegzes))
-  let h=`<span class="sum-pill">📚 ${orak.length} óra ma</span>`
-  h+=`<span class="sum-pill">🕐 ${orak[0].kezdes} – ${orak[orak.length-1].vegzes}</span>`
-  if(akt) h+=`<span class="sum-pill gold">⚡ ${akt.ora_sorszam}. óra · ${100-pct(akt.kezdes,akt.vegzes)}% van hátra</span>`
-  else if(kov) h+=`<span class="sum-pill green">⏭ Következő: ${kov.kezdes}</span>`
-  else h+=`<span class="sum-pill">✅ Mára vége</span>`
+  let h=`<span class="sum-pill">ðŸ“š ${orak.length} Ã³ra ma</span>`
+  h+=`<span class="sum-pill">ðŸ• ${orak[0].kezdes} â€“ ${orak[orak.length-1].vegzes}</span>`
+  if(akt) h+=`<span class="sum-pill gold">âš¡ ${akt.ora_sorszam}. Ã³ra Â· ${100-pct(akt.kezdes,akt.vegzes)}% van hÃ¡tra</span>`
+  else if(kov) h+=`<span class="sum-pill green">â­ KÃ¶vetkezÅ‘: ${kov.kezdes}</span>`
+  else h+=`<span class="sum-pill">âœ… MÃ¡ra vÃ©ge</span>`
   el.innerHTML=h
 }
 
-// ── Desktop timetable ────────────────────────────────
+// â”€â”€ Desktop timetable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function buildTT() {
   const mai=maiNap()
   const el=document.getElementById('tt')
 
-  // Rácsvonal időpontok
+  // RÃ¡csvonal idÅ‘pontok
   const ticks=[]
   for(let m=START;m<=END;m+=30) ticks.push(m)
 
   let html=''
 
-  // ── Fejléc sor ──
+  // â”€â”€ FejlÃ©c sor â”€â”€
   html+=`<div class="tt-hdr-time"></div>`
   for(let n=1;n<=5;n++){
     const isMa=n===mai
@@ -259,7 +252,7 @@ function buildTT() {
     </div>`
   }
 
-  // ── Idő oszlop ──
+  // â”€â”€ IdÅ‘ oszlop â”€â”€
   let tcol=`<div class="tt-timecol" style="height:${TOTAL*PPM}px;position:relative;">`
   ticks.forEach(m=>{
     const t=topPx(m)
@@ -270,20 +263,20 @@ function buildTT() {
   tcol+=`</div>`
   html+=tcol
 
-  // ── Nap oszlopok ──
+  // â”€â”€ Nap oszlopok â”€â”€
   for(let n=1;n<=5;n++){
     const isMa=n===mai
     const orak=hetData[n]||[]
     let col=`<div class="tt-daycol${isMa?' ma':''}" style="height:${TOTAL*PPM}px;">`
 
-    // Rácsvonalak
+    // RÃ¡csvonalak
     ticks.forEach(m=>{
       const t=topPx(m)
       const bold=(m%60===0)
       col+=`<div class="hline${bold?' bold':''}" style="top:${t}px;"></div>`
     })
 
-    // Jelenlegi idő vonal (csak mai)
+    // Jelenlegi idÅ‘ vonal (csak mai)
     if(isMa){
       const nm=nowM()
       if(nm>=START&&nm<=END){
@@ -291,7 +284,7 @@ function buildTT() {
       }
     }
 
-    // Óra blokkok
+    // Ã“ra blokkok
     orak.forEach(o=>{
       const top=topPx(toMin(o.kezdes))
       const h=Math.max(24,(toMin(o.vegzes)-toMin(o.kezdes))*PPM)
@@ -302,10 +295,10 @@ function buildTT() {
       const nm=o.tanar_nev||o.tanar
 
       col+=`<div class="ora-blk ${cl}" style="top:${top}px;height:${h}px;"
-        title="${nm} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
+        title="${nm} Â· ${o.osztaly} Â· ${o.tantargy} Â· ${o.kezdes}â€“${o.vegzes}">
         <div class="ob-tanar">${nm}</div>
-        ${h>38?`<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>`:''}
-        ${h>56?`<div class="ob-meta">${o.kezdes}–${o.vegzes}</div>`:''}
+        ${h>38?`<div class="ob-meta">${o.osztaly} Â· ${o.tantargy}</div>`:''}
+        ${h>56?`<div class="ob-meta">${o.kezdes}â€“${o.vegzes}</div>`:''}
         ${ak?`<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>`:''}
       </div>`
     })
@@ -319,11 +312,11 @@ function buildTT() {
   el.style.display='grid'
 }
 
-// ── Mobil tabs ───────────────────────────────────────
+// â”€â”€ Mobil tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function buildMobTabs() {
   const mai=maiNap()
   document.getElementById('mob-tabs').innerHTML=[1,2,3,4,5].map(n=>
-    `<button onclick="setMob(${n})" id="mt${n}" class="mob-tab${n===curMob?' active':''}${n===mai&&n!==curMob?' ma':''}">${NAP[n]}${n===mai?' · Ma':''}</button>`
+    `<button onclick="setMob(${n})" id="mt${n}" class="mob-tab${n===curMob?' active':''}${n===mai&&n!==curMob?' ma':''}">${NAP[n]}${n===mai?' Â· Ma':''}</button>`
   ).join('')
 }
 
@@ -341,7 +334,7 @@ function buildMobList() {
   const el=document.getElementById('mob-list')
   const orak=hetData?.[curMob]||[]
   const isMa=curMob===maiNap()
-  if(!orak.length){el.innerHTML=`<div style="text-align:center;padding:40px 0;"><span style="font-size:36px;">📭</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">Nincs óra ezen a napon</p></div>`;return}
+  if(!orak.length){el.innerHTML=`<div style="text-align:center;padding:40px 0;"><span style="font-size:36px;">ðŸ“­</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">Nincs Ã³ra ezen a napon</p></div>`;return}
   let h=''
   orak.forEach((o,i)=>{
     const ak=isMa&&isAktiv(o.kezdes,o.vegzes)
@@ -350,25 +343,25 @@ function buildMobList() {
     h+=`<div class="mob-row${ak?' aktiv':mu?' mult':''}">
       <div class="mob-num">${o.ora_sorszam||i+1}</div>
       <div class="mob-body">
-        <div class="mob-ido">${o.kezdes} – ${o.vegzes}</div>
+        <div class="mob-ido">${o.kezdes} â€“ ${o.vegzes}</div>
         <div class="mob-tanar">${o.tanar_nev||o.tanar}</div>
-        <div class="mob-meta">${o.osztaly} · ${o.tantargy}</div>
+        <div class="mob-meta">${o.osztaly} Â· ${o.tantargy}</div>
       </div>
       <div class="mob-prog"><div class="mob-prog-fill" style="height:${p}%;"></div></div>
     </div>`
     const kov=orak[i+1]
-    if(kov){const sz=toMin(kov.kezdes)-toMin(o.vegzes);if(sz>0)h+=`<div class="szu-row"><div class="szu-line"></div><span>${sz} perc szünet</span><div class="szu-line"></div></div>`}
+    if(kov){const sz=toMin(kov.kezdes)-toMin(o.vegzes);if(sz>0)h+=`<div class="szu-row"><div class="szu-line"></div><span>${sz} perc szÃ¼net</span><div class="szu-line"></div></div>`}
   })
   el.innerHTML=h
 }
 
-// ── Build all ────────────────────────────────────────
+// â”€â”€ Build all â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function build(){
   buildSummary()
   buildTT()
   buildMobTabs()
   buildMobList()
-  // Now-line frissítése percenként
+  // Now-line frissÃ­tÃ©se percenkÃ©nt
   if(nowTimer) clearInterval(nowTimer)
   nowTimer=setInterval(()=>{
     const nl=document.getElementById('now-line')
@@ -379,7 +372,7 @@ function build(){
 
 function showErr(msg){
   document.getElementById('tt-skel').style.display='none'
-  document.getElementById('tt-outer').innerHTML=`<div style="text-align:center;padding:60px 20px;position:relative;z-index:10;"><span style="font-size:40px;">⚠️</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">${msg}</p></div>`
+  document.getElementById('tt-outer').innerHTML=`<div style="text-align:center;padding:60px 20px;position:relative;z-index:10;"><span style="font-size:40px;">âš ï¸</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">${msg}</p></div>`
 }
 
 function refresh(){
@@ -390,15 +383,15 @@ function refresh(){
   fetchData().finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600))
 }
 
-// ── Init ─────────────────────────────────────────────
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 teremSzam=getTerem()
 if(!teremSzam){
-  showErr('Nincs terem megadva · URL: /terem/204/nap')
+  showErr('Nincs terem megadva Â· URL: /terem/204/nap')
 }else{
   document.getElementById('terem-cim').textContent=teremSzam
-  document.getElementById('nav-cim').textContent=teremSzam+' · Napirend'
+  document.getElementById('nav-cim').textContent=teremSzam+' Â· Napirend'
   document.getElementById('nav-vissza').href='/terem/'+teremSzam
-  document.title='Ticky – '+teremSzam+' napirend'
+  document.title='Ticky â€“ '+teremSzam+' napirend'
   fetchData()
   setInterval(fetchData,5*60_000)
 }
@@ -408,15 +401,15 @@ $napirend_route = match_route('/terem/{szam}/nap', parse_url($_SERVER['REQUEST_U
 $napirend_room = is_array($napirend_route) ? strtoupper((string) ($napirend_route['szam'] ?? '')) : '';
 render_assistant_widget([
   'title' => 'Napirend AI',
-  'eyebrow' => 'Heti nézet',
+  'eyebrow' => 'Heti nÃ©zet',
   'context' => 'napirend',
   'context_data' => ['room' => $napirend_room],
   'empty_state' => $napirend_room !== ''
-    ? 'Itt a ' . $napirend_room . '. terem heti nézetéhez kérdezhetsz. Például: mi van most itt, vagy mikor lesz a következő óra.'
-    : 'Kérdezhetsz az aktuális napirendről vagy más szabad termekről.',
+    ? 'Itt a ' . $napirend_room . '. terem heti nÃ©zetÃ©hez kÃ©rdezhetsz. PÃ©ldÃ¡ul: mi van most itt, vagy mikor lesz a kÃ¶vetkezÅ‘ Ã³ra.'
+    : 'KÃ©rdezhetsz az aktuÃ¡lis napirendrÅ‘l vagy mÃ¡s szabad termekrÅ‘l.',
   'placeholder' => $napirend_room !== ''
-    ? 'Írj egy kérdést a ' . $napirend_room . '. terem napirendjéről...'
-    : 'Írj egy kérdést a napirendről...',
+    ? 'Ãrj egy kÃ©rdÃ©st a ' . $napirend_room . '. terem napirendjÃ©rÅ‘l...'
+    : 'Ãrj egy kÃ©rdÃ©st a napirendrÅ‘l...',
 ]);
 ?>
 </body>

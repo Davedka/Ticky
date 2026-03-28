@@ -4,14 +4,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 ?>
 <!DOCTYPE html>
 <html lang="hu">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ticky – Terem</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<?php render_app_head('Ticky - Terem'); ?>
 <style>
   body {
     font-family:'DM Sans',sans-serif; color:white; min-height:100vh;
@@ -73,11 +66,11 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
     <div class="px-7 pt-6 pb-5 flex items-center justify-between gap-3" style="border-bottom:1px solid rgba(255,255,255,.08);">
       <div>
         <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.3);">Terem</p>
-        <h1 id="terem-szam" style="font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;">–</h1>
+        <h1 id="terem-szam" style="font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;">â€“</h1>
       </div>
       <div id="status-pill" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);">
         <span id="status-dot" class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:rgba(255,255,255,.3);display:inline-block;"></span>
-        <span id="status-text">Betöltés…</span>
+        <span id="status-text">BetÃ¶ltÃ©sâ€¦</span>
       </div>
     </div>
 
@@ -91,10 +84,10 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 
     <div class="px-7 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:15px;font-weight:700;">Ticky</a>
-      <span class="text-xs" style="color:rgba(255,255,255,.28);" id="footer-ido">–</span>
+      <span class="text-xs" style="color:rgba(255,255,255,.28);" id="footer-ido">â€“</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
         <svg id="ri" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        Frissít
+        FrissÃ­t
       </button>
     </div>
   </div>
@@ -102,8 +95,8 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 
 <div class="tt-title">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-    <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);">Heti órarend</p>
-    <a id="napirend-link" href="#" style="font-size:12px;color:#f0c76b;font-weight:500;">Teljes nézet →</a>
+    <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);">Heti Ã³rarend</p>
+    <a id="napirend-link" href="#" style="font-size:12px;color:#f0c76b;font-weight:500;">Teljes nÃ©zet â†’</a>
   </div>
   <div id="tt-skel" style="display:flex;gap:6px;">
     <div class="skel" style="width:38px;height:500px;border-radius:8px;flex-shrink:0;"></div>
@@ -121,7 +114,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 
 <div class="footer">
   <span style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.15);font-size:12px;font-weight:700;">Ticky</span>
-  <span style="font-size:11px;color:rgba(255,255,255,.2);" id="footer-ido2">–</span>
+  <span style="font-size:11px;color:rgba(255,255,255,.2);" id="footer-ido2">â€“</span>
 </div>
 
 <?php render_time_sync_bootstrap(); ?>
@@ -169,30 +162,30 @@ function setAllapot(a) {
 }
 
 function kovHtml(k) {
-  if (!k) return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.25);">Következő óra</p><p class="text-sm" style="color:rgba(255,255,255,.35);">Ma már nincs több óra</p></div>`
-  return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.25);">Következő óra</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} · ${k.osztaly} · ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}–${k.vegzes}</span></div></div>`
+  if (!k) return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.25);">KÃ¶vetkezÅ‘ Ã³ra</p><p class="text-sm" style="color:rgba(255,255,255,.35);">Ma mÃ¡r nincs tÃ¶bb Ã³ra</p></div>`
+  return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.25);">KÃ¶vetkezÅ‘ Ã³ra</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} Â· ${k.osztaly} Â· ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}â€“${k.vegzes}</span></div></div>`
 }
 
 function renderStatus(data) {
   setAllapot(data.allapot)
   const el = document.getElementById('content')
   if (data.allapot === 'szabad') {
-    el.innerHTML = `<div class="text-center py-3"><span class="text-5xl block mb-3">✅</span><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#4ade80;" class="mb-1">Szabad terem</p><p class="text-sm" style="color:rgba(255,255,255,.4);">Nincs aktív foglalás</p></div>${kovHtml(data.kovetkezo)}`
+    el.innerHTML = `<div class="text-center py-3"><span class="text-5xl block mb-3">âœ…</span><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#4ade80;" class="mb-1">Szabad terem</p><p class="text-sm" style="color:rgba(255,255,255,.4);">Nincs aktÃ­v foglalÃ¡s</p></div>${kovHtml(data.kovetkezo)}`
   } else {
     const a = data.aktualis
     const pct = calcPct(a.kezdes, a.vegzes)
     el.innerHTML = `<div class="flex flex-col gap-4">
-      <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.2;">${a.tanar_nev || a.tanar}</p></div>
+      <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">TanÃ¡r</p><p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.2;">${a.tanar_nev || a.tanar}</p></div>
       <div class="grid grid-cols-2 gap-3">
-        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div>
-        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div>
+        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">OsztÃ¡ly</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div>
+        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">TantÃ¡rgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div>
       </div>
       <div>
         <div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.08);">
           <div class="h-full rounded-full prog-bar" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div>
         </div>
         <div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.35);">
-          <span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">még ${a.perc_maradt} perc</span><span>${a.vegzes}</span>
+          <span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">mÃ©g ${a.perc_maradt} perc</span><span>${a.vegzes}</span>
         </div>
       </div>
     </div>${kovHtml(data.kovetkezo)}`
@@ -243,9 +236,9 @@ function buildTT() {
       const ak = isMa && isAktiv(o.kezdes, o.vegzes)
       const mu = isMa && isMult(o.vegzes)
       const p = ak ? calcPct(o.kezdes, o.vegzes) : 0
-      col += `<div class="ora-blk${ak ? ' aktiv' : mu ? ' mult' : ''}" style="top:${top}px;height:${h}px;" title="${o.tanar_nev || o.tanar} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
+      col += `<div class="ora-blk${ak ? ' aktiv' : mu ? ' mult' : ''}" style="top:${top}px;height:${h}px;" title="${o.tanar_nev || o.tanar} Â· ${o.osztaly} Â· ${o.tantargy} Â· ${o.kezdes}â€“${o.vegzes}">
         <div class="ob-tanar">${o.tanar_nev || o.tanar}</div>
-        ${h > 32 ? `<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>` : ''}
+        ${h > 32 ? `<div class="ob-meta">${o.osztaly} Â· ${o.tantargy}</div>` : ''}
         ${ak ? `<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>` : ''}
       </div>`
     })
@@ -300,11 +293,11 @@ function refresh() {
 teremSzam = getTerem()
 if (!teremSzam) {
   document.getElementById('terem-szam').textContent = '?'
-  document.getElementById('content').innerHTML = `<div class="text-center py-6"><span class="text-4xl block mb-3">🔍</span><p style="color:rgba(255,255,255,.6);">Nincs terem megadva</p><p class="text-sm mt-1" style="color:rgba(255,255,255,.35);">URL: /terem/204</p></div>`
+  document.getElementById('content').innerHTML = `<div class="text-center py-6"><span class="text-4xl block mb-3">ðŸ”</span><p style="color:rgba(255,255,255,.6);">Nincs terem megadva</p><p class="text-sm mt-1" style="color:rgba(255,255,255,.35);">URL: /terem/204</p></div>`
 } else {
   document.getElementById('terem-szam').textContent = teremSzam
   document.getElementById('napirend-link').href = '/terem/' + teremSzam + '/nap'
-  document.title = 'Ticky – ' + teremSzam
+  document.title = 'Ticky â€“ ' + teremSzam
   fetchStatus()
   fetchTimetable()
   setInterval(fetchStatus, REFRESH_MS)
@@ -317,11 +310,11 @@ if (!teremSzam) {
   'context' => 'terem',
   'context_data' => ['room' => $current_room],
   'empty_state' => $current_room !== ''
-    ? 'Itt a ' . $current_room . '. teremhez kapcsolódóan kérdezhetsz. Például: mi van most itt, vagy mi lesz a következő óra.'
-    : 'Kérdezhetsz az aktuális terem állapotáról vagy más szabad termekről.',
+    ? 'Itt a ' . $current_room . '. teremhez kapcsolÃ³dÃ³an kÃ©rdezhetsz. PÃ©ldÃ¡ul: mi van most itt, vagy mi lesz a kÃ¶vetkezÅ‘ Ã³ra.'
+    : 'KÃ©rdezhetsz az aktuÃ¡lis terem Ã¡llapotÃ¡rÃ³l vagy mÃ¡s szabad termekrÅ‘l.',
   'placeholder' => $current_room !== ''
-    ? 'Írj egy kérdést a ' . $current_room . '. teremről...'
-    : 'Írj egy kérdést a teremről...',
+    ? 'Ãrj egy kÃ©rdÃ©st a ' . $current_room . '. teremrÅ‘l...'
+    : 'Ãrj egy kÃ©rdÃ©st a teremrÅ‘l...',
 ]); ?>
 </body>
 </html>

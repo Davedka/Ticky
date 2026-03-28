@@ -1,18 +1,17 @@
 <?php
-// api/tanarok.php
-// GET /api/tanarok – összes tanár listája
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/domain.php';
 
 handle_cors();
 
-$tanarok = sb_get('tanarok', [
-    'select' => 'rovid_nev,nev',
-    'order'  => 'rovid_nev.asc',
-]);
+$teachers = array_map(static fn(array $teacher): array => [
+    'rovid_nev' => $teacher['rovid_nev'] ?? '',
+    'nev' => $teacher['nev'] ?? null,
+], ticky_get_teacher_directory());
 
 json_response([
-    'tanarok' => $tanarok,
-    'count'   => count($tanarok),
+    'tanarok' => $teachers,
+    'count' => count($teachers),
 ]);

@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="hu">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ticky – Asszisztens</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<?php render_app_head('Ticky - Asszisztens'); ?>
 <style>
   body {
     font-family:'DM Sans',sans-serif;
@@ -112,21 +105,21 @@
       <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
       Ticky
     </a>
-    <span style="color:rgba(255,255,255,.2);">·</span>
+    <span style="color:rgba(255,255,255,.2);">Â·</span>
     <span class="text-sm truncate" style="color:rgba(255,255,255,.45);">Asszisztens</span>
   </div>
   <div class="flex items-center gap-2">
     <a href="/termek" class="px-3 py-2 rounded-lg text-xs font-medium" style="color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);">Termek</a>
-    <a href="/tanar" class="px-3 py-2 rounded-lg text-xs font-medium" style="color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);">Tanár</a>
+    <a href="/tanar" class="px-3 py-2 rounded-lg text-xs font-medium" style="color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);">TanÃ¡r</a>
   </div>
 </nav>
 
 <main class="ai-layout">
   <aside class="ai-note glass fade-up">
-    <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.32);">Új funkció</p>
+    <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.32);">Ãšj funkciÃ³</p>
     <h1 style="font-family:'Playfair Display',serif;font-size:40px;line-height:1.02;font-weight:700;color:white;margin-top:10px;">Ticky Asszisztens</h1>
     <p class="text-sm mt-4" style="color:rgba(255,255,255,.62);line-height:1.7;">
-      Ez az első verzió nem találgat, hanem a jelenlegi terem- és órarend-adatokból dolgozik. Így gyors, visszafogott és a mostani UI-hoz illő marad.
+      Ez az elsÅ‘ verziÃ³ nem talÃ¡lgat, hanem a jelenlegi terem- Ã©s Ã³rarend-adatokbÃ³l dolgozik. Ãgy gyors, visszafogott Ã©s a mostani UI-hoz illÅ‘ marad.
     </p>
 
     <div class="ai-note-list">
@@ -136,18 +129,18 @@
       </div>
       <div class="ai-note-item">
         <span class="ai-note-dot"></span>
-        <span>Lekéri, mi történik egy adott teremben, és mi jön utána.</span>
+        <span>LekÃ©ri, mi tÃ¶rtÃ©nik egy adott teremben, Ã©s mi jÃ¶n utÃ¡na.</span>
       </div>
       <div class="ai-note-item">
         <span class="ai-note-dot"></span>
-        <span>Gyorsan át tud dobni a megfelelő oldalra, ha inkább a dedikált nézet kell.</span>
+        <span>Gyorsan Ã¡t tud dobni a megfelelÅ‘ oldalra, ha inkÃ¡bb a dedikÃ¡lt nÃ©zet kell.</span>
       </div>
     </div>
 
     <div class="ai-note-chips">
       <button class="ai-chip" type="button" onclick="seedPrompt('Melyik termek szabadok most?')">Szabad termek</button>
       <button class="ai-chip" type="button" onclick="seedPrompt('Melyik termek foglaltak most?')">Foglalt termek</button>
-      <button class="ai-chip" type="button" onclick="seedPrompt('Nyisd meg a tanárkeresőt')">Tanár kereső</button>
+      <button class="ai-chip" type="button" onclick="seedPrompt('Nyisd meg a tanÃ¡rkeresÅ‘t')">TanÃ¡r keresÅ‘</button>
       <button class="ai-chip" type="button" onclick="seedPrompt('Mi van most a 204-es teremben?')">Adott terem</button>
     </div>
   </aside>
@@ -156,11 +149,11 @@
     <div class="ai-head">
       <div>
         <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">AI asszisztens</p>
-        <h2 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1.05;margin-top:8px;">Kérdezz rá a Ticky adataira</h2>
+        <h2 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1.05;margin-top:8px;">KÃ©rdezz rÃ¡ a Ticky adataira</h2>
       </div>
       <div class="ai-status">
         <span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" style="background:#4ade80;display:inline-block;"></span>
-        Élő adatokból válaszol
+        Ã‰lÅ‘ adatokbÃ³l vÃ¡laszol
       </div>
     </div>
 
@@ -170,8 +163,8 @@
     </div>
     <div class="ai-foot">
       <form id="ai-form" class="ai-form">
-        <textarea id="ai-input" class="ai-input" rows="1" placeholder="Például: Melyik termek szabadok most?"></textarea>
-        <button id="ai-send" class="ai-send" type="submit">Küldés</button>
+        <textarea id="ai-input" class="ai-input" rows="1" placeholder="PÃ©ldÃ¡ul: Melyik termek szabadok most?"></textarea>
+        <button id="ai-send" class="ai-send" type="submit">KÃ¼ldÃ©s</button>
       </form>
     </div>
   </section>
@@ -182,7 +175,7 @@ const defaultSuggestions = [
   'Melyik termek szabadok most?',
   'Melyik termek foglaltak most?',
   'Mi van most a 204-es teremben?',
-  'Nyisd meg a tanárkeresőt'
+  'Nyisd meg a tanÃ¡rkeresÅ‘t'
 ]
 
 const messagesEl = document.getElementById('ai-messages')
@@ -236,7 +229,7 @@ function appendLoading() {
   wrap.innerHTML = `
     <div class="ai-bubble">
       <div class="ai-kicker">Ticky Assist</div>
-      <div class="ai-loading"><span></span><span></span><span></span> Válasz készül</div>
+      <div class="ai-loading"><span></span><span></span><span></span> VÃ¡lasz kÃ©szÃ¼l</div>
     </div>
   `
   messagesEl.appendChild(wrap)
@@ -267,7 +260,7 @@ function appendAssistantMessage(payload) {
   const actionHtml = actions.length ? `
     <div class="ai-actions">
       ${actions.map((action, index) => `
-        <a class="ai-pill ${index === 0 ? 'primary' : ''}" href="${esc(action.href || '#')}">${esc(action.label || 'Megnyitás')}</a>
+        <a class="ai-pill ${index === 0 ? 'primary' : ''}" href="${esc(action.href || '#')}">${esc(action.label || 'MegnyitÃ¡s')}</a>
       `).join('')}
     </div>
   ` : ''
@@ -277,7 +270,7 @@ function appendAssistantMessage(payload) {
   wrap.innerHTML = `
     <div class="ai-bubble">
       <div class="ai-kicker">Ticky Assist</div>
-      <div class="ai-text">${esc(payload.reply || 'Nem sikerült választ adnom erre.')}</div>
+      <div class="ai-text">${esc(payload.reply || 'Nem sikerÃ¼lt vÃ¡laszt adnom erre.')}</div>
       ${cardHtml}
       ${actionHtml}
     </div>
@@ -310,7 +303,7 @@ async function submitPrompt(text) {
   } catch (error) {
     removeLoading()
     appendAssistantMessage({
-      reply: 'Most nem sikerült elérnem az asszisztenst. Próbáld meg újra egy pillanat múlva.',
+      reply: 'Most nem sikerÃ¼lt elÃ©rnem az asszisztenst. PrÃ³bÃ¡ld meg Ãºjra egy pillanat mÃºlva.',
       suggestions: defaultSuggestions
     })
   } finally {
@@ -344,10 +337,10 @@ suggestEl.addEventListener('click', event => {
 })
 
 appendAssistantMessage({
-  reply: 'Itt vagyok. Kérdezhetsz szabad vagy foglalt termekről, egy konkrét terem aktuális állapotáról, vagy kérhetsz gyors ugrást a megfelelő oldalra.',
+  reply: 'Itt vagyok. KÃ©rdezhetsz szabad vagy foglalt termekrÅ‘l, egy konkrÃ©t terem aktuÃ¡lis Ã¡llapotÃ¡rÃ³l, vagy kÃ©rhetsz gyors ugrÃ¡st a megfelelÅ‘ oldalra.',
   actions: [
-    { label: 'Összes terem', href: '/termek' },
-    { label: 'Tanár kereső', href: '/tanar' }
+    { label: 'Ã–sszes terem', href: '/termek' },
+    { label: 'TanÃ¡r keresÅ‘', href: '/tanar' }
   ],
   suggestions: defaultSuggestions
 })
