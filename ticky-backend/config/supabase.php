@@ -8,49 +8,6 @@ define('TZ',                   getenv('TIMEZONE')             ?: 'Europe/Budapes
 
 date_default_timezone_set(TZ);
 
-function sb_request(
-    string $method,
-    string $path,
-    array $query = [],
-    mixed $body = null,
-    string $key = 'anon',
-    array $extra_headers = []
-): string|false {
-    $apiKey = $key === 'service' ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
-    $url = SUPABASE_URL . $path;
-
-    if (!empty($query)) {
-        $url .= '?' . http_build_query($query);
-    }
-
-    $headers = [
-        'apikey: ' . $apiKey,
-        'Authorization: Bearer ' . $apiKey,
-        'Content-Type: application/json',
-    ];
-
-    if (strtoupper($method) === 'GET') {
-        $headers[] = 'Accept: application/json';
-    }
-
-    foreach ($extra_headers as $header) {
-        $headers[] = $header;
-    }
-
-    $options = [
-        'method' => strtoupper($method),
-        'header' => implode("\r\n", $headers),
-        'timeout' => 5,
-    ];
-
-    if ($body !== null) {
-        $options['content'] = json_encode($body);
-    }
-
-    $ctx = stream_context_create(['http' => $options]);
-    return @file_get_contents($url, false, $ctx);
-}
-
 /**
  * Supabase REST API hívás
  *
@@ -60,7 +17,27 @@ function sb_request(
  * @return array             dekódolt JSON tömb
  */
 function sb_get(string $table, array $params = [], string $key = 'anon'): array {
-    $raw = sb_request('GET', '/rest/v1/' . $table, $params, null, $key);
+    $apiKey = $key === 'service' ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
+    $url    = SUPABASE_URL . '/rest/v1/' . $table;
+
+    if ($params) {
+        $url .= '?' . http_build_query($params);
+    }
+
+    $ctx = stream_context_create([
+        'http' => [
+            'method'  => 'GET',
+            'header'  => implode("\r\n", [
+                'apikey: '        . $apiKey,
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+                'Accept: application/json',
+            ]),
+            'timeout' => 5,
+        ],
+    ]);
+
+    $raw = @file_get_contents($url, false, $ctx);
     if ($raw === false) {
         return [];
     }
@@ -72,23 +49,22 @@ function sb_get(string $table, array $params = [], string $key = 'anon'): array 
  * Supabase RPC hívás (tárolt eljárás)
  */
 function sb_rpc(string $fn, array $body = [], string $key = 'anon'): mixed {
-    $raw = sb_request('POST', '/rest/v1/rpc/' . $fn, [], $body, $key);
+    $apiKey = $key === 'service' ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
+    $url    = SUPABASE_URL . '/rest/v1/rpc/' . $fn;
+
+    $ctx = stream_context_create([
+        'http' => [
+            'method'  => 'POST',
+            'header'  => implode("\r\n", [
+                'apikey: '        . $apiKey,
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ]),
+            'content' => json_encode($body),
+            'timeout' => 5,
+        ],
+    ]);
+
+    $raw = @file_get_contents($url, false, $ctx);
     return $raw !== false ? json_decode($raw, true) : null;
-}
-
-function sb_patch(string $table, array $filters, array $data, string $key = 'service'): bool {
-    if (empty($filters)) {
-        return false;
-    }
-
-    $raw = sb_request(
-        'PATCH',
-        '/rest/v1/' . $table,
-        $filters,
-        $data,
-        $key,
-        ['Prefer: return=minimal']
-    );
-
-    return $raw !== false;
 }

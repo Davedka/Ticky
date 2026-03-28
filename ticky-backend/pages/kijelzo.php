@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="hu">
-<?php render_app_head('Ticky - Folyosoi kijelzo', [
-  'tailwind' => false,
-  'dm_mono' => true,
-  'viewport' => 'width=device-width, initial-scale=1.0, maximum-scale=1.0',
-]); ?>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ticky – Folyosói kijelző</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
+<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:       #04090f;
@@ -28,7 +30,7 @@
     user-select:none;
   }
 
-  /* HÃ¡ttÃ©r rÃ©tegek */
+  /* Háttér rétegek */
   body::before {
     content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
@@ -37,7 +39,7 @@
       radial-gradient(ellipse 40% 40% at 50% 50%,   rgba(7,29,58,.7) 0%, transparent 60%);
   }
 
-  /* Finom rÃ¡cs textÃºra */
+  /* Finom rács textúra */
   body::after {
     content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
     background-image:
@@ -46,7 +48,7 @@
     background-size:48px 48px;
   }
 
-  /* Scanline overlay â€“ igazi kijelzÅ‘ hangulat */
+  /* Scanline overlay – igazi kijelző hangulat */
   .scanlines {
     position:fixed; inset:0; z-index:1; pointer-events:none;
     background:repeating-linear-gradient(
@@ -58,14 +60,14 @@
     );
   }
 
-  /* Arany vonal tetejÃ©n */
+  /* Arany vonal tetején */
   .top-line {
     position:fixed; top:0; left:0; right:0; height:2px; z-index:100;
     background:linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--gold-l) 50%, var(--gold) 70%, transparent 100%);
     box-shadow: 0 0 20px rgba(200,151,42,.4);
   }
 
-  /* â”€â”€ TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── TOPBAR ─────────────────────────────── */
   .topbar {
     position:relative; z-index:50;
     height:64px; padding:0 28px;
@@ -101,7 +103,7 @@
     display:flex; align-items:center; gap:16px;
   }
 
-  /* Ã‰lÅ‘ Ã³ra */
+  /* Élő óra */
   .live-clock {
     font-family:'DM Mono',monospace; font-size:28px; font-weight:500;
     color:white; letter-spacing:.05em;
@@ -132,7 +134,7 @@
   }
   .fs-btn:hover { background:rgba(255,255,255,.12); color:white; }
 
-  /* â”€â”€ STATUS BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── STATUS BAR ─────────────────────────── */
   .statusbar {
     position:relative; z-index:50;
     height:36px; padding:0 28px;
@@ -152,10 +154,10 @@
   .sb-refresh-dot { width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0; }
   .sb-refresh-dot.loading { background:var(--gold); animation:pd .8s infinite; }
 
-  /* â”€â”€ MAIN GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── MAIN GRID ──────────────────────────── */
   .main {
     position:relative; z-index:10;
-    /* teljes kÃ©pernyÅ‘ mÃ­nusz topbar + statusbar */
+    /* teljes képernyő mínusz topbar + statusbar */
     height:calc(100vh - 100px);
     padding:16px 20px;
     overflow:hidden;
@@ -163,7 +165,7 @@
 
   .rooms-grid {
     display:grid;
-    /* Auto-fill: TV-n nagy kÃ¡rtyÃ¡k, tableten kisebb */
+    /* Auto-fill: TV-n nagy kártyák, tableten kisebb */
     grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
     gap:10px;
     height:100%;
@@ -173,7 +175,7 @@
   }
   .rooms-grid::-webkit-scrollbar { display:none; }
 
-  /* â”€â”€ TEREM KÃRTYÃK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── TEREM KÁRTYÁK ──────────────────────── */
   .room-card {
     border-radius:14px; padding:14px 16px;
     border:1px solid rgba(255,255,255,.07);
@@ -205,13 +207,13 @@
     box-shadow:0 0 32px rgba(232,51,74,.12), inset 0 0 24px rgba(232,51,74,.06);
   }
 
-  /* Foglalt hÃ¡ttÃ©r glow szegÃ©ly */
+  /* Foglalt háttér glow szegély */
   .room-card.foglalt::before {
     content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none;
     background:linear-gradient(135deg, rgba(232,51,74,.06) 0%, transparent 60%);
   }
 
-  /* KÃ¡rtya animÃ¡ciÃ³ megjelenÃ©skor */
+  /* Kártya animáció megjelenéskor */
   .room-card.card-in {
     animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;
   }
@@ -220,7 +222,7 @@
     to   { opacity:1; transform:none; }
   }
 
-  /* StÃ¡tusz vÃ¡ltozÃ¡s flash */
+  /* Státusz változás flash */
   .room-card.flash {
     animation:flash .6s ease;
   }
@@ -229,7 +231,7 @@
     50%      { filter:brightness(1.5); }
   }
 
-  /* KÃ¡rtya teteje: terem szÃ¡m + stÃ¡tusz pill */
+  /* Kártya teteje: terem szám + státusz pill */
   .card-top {
     display:flex; align-items:flex-start; justify-content:space-between; gap:6px;
   }
@@ -255,7 +257,7 @@
   .pill-dot.szabad { background:var(--green); }
   .pill-dot.foglalt { background:#ff6b82; }
 
-  /* KÃ¡rtya alja: foglalt adatok */
+  /* Kártya alja: foglalt adatok */
   .card-body { flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:4px; margin-top:8px; }
 
   .card-tanar {
@@ -286,7 +288,7 @@
   }
   .card-time .remaining { color:#ff6b82; font-weight:500; }
 
-  /* Szabad kÃ¡rtya */
+  /* Szabad kártya */
   .card-free-txt {
     font-size:12px; color:rgba(0,200,150,.6); font-weight:500; margin-top:8px;
   }
@@ -302,7 +304,7 @@
   }
   @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-  /* â”€â”€ EMPTY STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── EMPTY STATE ────────────────────────── */
   .empty-state {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     height:100%; gap:12px; opacity:.5;
@@ -310,7 +312,7 @@
   .empty-state span { font-size:48px; }
   .empty-state p { font-size:16px; color:rgba(255,255,255,.6); }
 
-  /* â”€â”€ SZÃœNET BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── SZÜNET BANNER ──────────────────────── */
   .szunet-banner {
     display:none; position:fixed; bottom:40px; left:50%;
     transform:translateX(-50%);
@@ -324,7 +326,7 @@
   }
   @keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
-  /* â”€â”€ FULLSCREEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── FULLSCREEN ─────────────────────────── */
   :fullscreen body { background:#04090f; }
   :-webkit-full-screen body { background:#04090f; }
 
@@ -348,30 +350,30 @@
   <div class="tb-brand">
     <div class="brand-dot"></div>
     <a href="/" style="color:white;text-decoration:none;">Ticky</a>
-    <span style="color:rgba(255,255,255,.2);font-weight:400;font-size:16px;">Â·</span>
-    <span style="color:rgba(255,255,255,.45);font-size:15px;font-weight:400;font-family:'DM Sans',sans-serif;">FolyosÃ³i kijelzÅ‘</span>
+    <span style="color:rgba(255,255,255,.2);font-weight:400;font-size:16px;">·</span>
+    <span style="color:rgba(255,255,255,.45);font-size:15px;font-weight:400;font-family:'DM Sans',sans-serif;">Folyosói kijelző</span>
   </div>
 
   <div class="tb-center">
-    <div class="tb-datum" id="tb-datum">â€“</div>
-    <div class="tb-nap" id="tb-nap">â€“</div>
+    <div class="tb-datum" id="tb-datum">–</div>
+    <div class="tb-nap" id="tb-nap">–</div>
   </div>
 
   <div class="tb-right">
-    <!-- Ã‰lÅ‘ Ã³ra -->
+    <!-- Élő óra -->
     <div class="live-clock" id="clock">
-      <span id="clock-hm">â€“â€“:â€“â€“</span><span class="clock-sec">:<span id="clock-s">00</span></span>
+      <span id="clock-hm">––:––</span><span class="clock-sec">:<span id="clock-s">00</span></span>
     </div>
 
     <!-- Filter -->
     <div class="filter-grp">
-      <button class="fbtn active" id="fb-mind" onclick="setFilter('mind')">Ã–sszes</button>
+      <button class="fbtn active" id="fb-mind" onclick="setFilter('mind')">Összes</button>
       <button class="fbtn" id="fb-foglalt" onclick="setFilter('foglalt')">Foglalt</button>
       <button class="fbtn" id="fb-szabad" onclick="setFilter('szabad')">Szabad</button>
     </div>
 
     <!-- Fullscreen -->
-    <button class="fs-btn" onclick="toggleFS()" title="Teljes kÃ©pernyÅ‘">
+    <button class="fs-btn" onclick="toggleFS()" title="Teljes képernyő">
       <svg id="fs-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
       </svg>
@@ -384,23 +386,23 @@
   <div style="display:flex;align-items:center;gap:16px;">
     <div class="sb-stat">
       <div class="sb-dot" style="background:white;opacity:.3;"></div>
-      Ã–sszes: <span class="sb-num" id="cnt-osszes">â€“</span>
+      Összes: <span class="sb-num" id="cnt-osszes">–</span>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-stat" style="color:rgba(255,107,130,.7);">
       <div class="sb-dot" style="background:#ff6b82;box-shadow:0 0 6px #ff6b82;"></div>
-      Foglalt: <span class="sb-num" id="cnt-foglalt">â€“</span>
+      Foglalt: <span class="sb-num" id="cnt-foglalt">–</span>
     </div>
     <div class="sb-divider"></div>
     <div class="sb-stat" style="color:rgba(0,200,150,.7);">
       <div class="sb-dot" style="background:#00c896;box-shadow:0 0 6px #00c896;"></div>
-      Szabad: <span class="sb-num" id="cnt-szabad">â€“</span>
+      Szabad: <span class="sb-num" id="cnt-szabad">–</span>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div class="sb-refresh-dot" id="refresh-dot"></div>
-    <span class="sb-update">FrissÃ­tve: <span id="last-update">â€“</span></span>
-    <a href="/" style="font-size:11px;color:rgba(255,255,255,.2);text-decoration:none;margin-left:8px;">â† FÅ‘oldal</a>
+    <span class="sb-update">Frissítve: <span id="last-update">–</span></span>
+    <a href="/" style="font-size:11px;color:rgba(255,255,255,.2);text-decoration:none;margin-left:8px;">← Főoldal</a>
   </div>
 </div>
 
@@ -429,12 +431,12 @@
 <?php render_time_sync_bootstrap(); ?>
 <script>
 const { formatHMS, nowMinutes, nowParts, weekdayIndex } = window.TickyTime
-// â”€â”€ Konfig â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Konfig ──────────────────────────────────────────
 const REFRESH_SEC = 30
-const NAP_NEVEK   = ['VasÃ¡rnap','HÃ©tfÅ‘','Kedd','Szerda','CsÃ¼tÃ¶rtÃ¶k','PÃ©ntek','Szombat']
-const HONAP_NEVEK = ['januÃ¡r','februÃ¡r','mÃ¡rcius','Ã¡prilis','mÃ¡jus','jÃºnius','jÃºlius','augusztus','szeptember','oktÃ³ber','november','december']
+const NAP_NEVEK   = ['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat']
+const HONAP_NEVEK = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december']
 
-// Iskolai Ã³ra idÅ‘pontok
+// Iskolai óra időpontok
 const ORA_IDOK = [
   {kezdes:'07:30',vegzes:'08:10'},
   {kezdes:'08:20',vegzes:'09:05'},
@@ -453,7 +455,7 @@ let progTimer     = null
 let progStart     = null
 let prevStates    = {}
 
-// â”€â”€ Ã“ra â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Óra ─────────────────────────────────────────────
 function updateClock() {
   const p   = nowParts()
   const hm  = formatHMS().slice(0,5)
@@ -469,7 +471,7 @@ function updateDate() {
     `${p.year}. ${HONAP_NEVEK[p.month-1]} ${p.day}.`
 }
 
-// â”€â”€ SzÃ¼net detektor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Szünet detektor ──────────────────────────────────
 function isSzunet() {
   const c=nowMinutes()
   const isOra = ORA_IDOK.some(o=>{
@@ -481,14 +483,14 @@ function isSzunet() {
   return iskolaIdoben&&!isOra
 }
 
-// â”€â”€ SegÃ©dfÃ¼ggvÃ©nyek â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Segédfüggvények ──────────────────────────────────
 function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
 function calcPct(k,v){
   const c=nowMinutes()
   return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100)))
 }
 
-// â”€â”€ Fetch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fetch ────────────────────────────────────────────
 async function fetchRooms() {
   const dot = document.getElementById('refresh-dot')
   dot.classList.add('loading')
@@ -507,7 +509,7 @@ async function fetchRooms() {
   dot.classList.remove('loading')
 }
 
-// â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Render ───────────────────────────────────────────
 function setFilter(f) {
   curFilter = f
   ;['mind','foglalt','szabad'].forEach(k=>{
@@ -532,11 +534,11 @@ function renderGrid() {
   const grid = document.getElementById('grid')
 
   if(!rooms.length) {
-    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><span>ðŸ”</span><p>Nincs talÃ¡lat</p></div>`
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><span>🔍</span><p>Nincs találat</p></div>`
     return
   }
 
-  // Diff alapÃº frissÃ­tÃ©s â€“ csak vÃ¡ltozott kÃ¡rtyÃ¡kat flash-eli
+  // Diff alapú frissítés – csak változott kártyákat flash-eli
   const newHTML = rooms.map((r,i)=>{
     const isFoglalt = r.allapot==='foglalt'
     const a = r.aktualis
@@ -550,11 +552,11 @@ function renderGrid() {
       bodyHTML = `
         <div class="card-body">
           <div class="card-tanar">${a.tanar}</div>
-          <div class="card-meta">${a.osztaly} Â· ${a.tantargy}</div>
+          <div class="card-meta">${a.osztaly} · ${a.tantargy}</div>
           <div class="card-prog"><div class="card-prog-fill" style="width:${pct}%;"></div></div>
           <div class="card-time">
             <span>${a.kezdes}</span>
-            <span class="remaining">${percMaradt > 0 ? percMaradt+'p' : 'vÃ©ge'}</span>
+            <span class="remaining">${percMaradt > 0 ? percMaradt+'p' : 'vége'}</span>
             <span>${a.vegzes}</span>
           </div>
         </div>`
@@ -577,11 +579,11 @@ function renderGrid() {
 
   grid.innerHTML = newHTML
 
-  // Prev states frissÃ­tÃ©se
+  // Prev states frissítése
   allRooms.forEach(r => { prevStates[r.terem_szam] = r.allapot })
 }
 
-// â”€â”€ Auto-refresh progress bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Auto-refresh progress bar ────────────────────────
 function startProgressBar() {
   if(progTimer) clearInterval(progTimer)
   progStart = Date.now()
@@ -601,7 +603,7 @@ function startProgressBar() {
   },500)
 }
 
-// â”€â”€ Fullscreen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fullscreen ───────────────────────────────────────
 function toggleFS() {
   if(!document.fullscreenElement) {
     document.documentElement.requestFullscreen?.()
@@ -612,13 +614,13 @@ function toggleFS() {
   }
 }
 
-// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Init ─────────────────────────────────────────────
 updateClock()
 updateDate()
 setInterval(updateClock, 1000)
 setInterval(updateDate, 60_000)
 
-// ElsÅ‘ betÃ¶ltÃ©s
+// Első betöltés
 fetchRooms().then(()=>{ startProgressBar() })
 
 // Auto-refresh
@@ -626,10 +628,10 @@ refreshTimer = setInterval(()=>{
   fetchRooms().then(()=>{ startProgressBar() })
 }, REFRESH_SEC * 1000)
 
-// PercenkÃ©nt az idÅ‘k frissÃ­tÃ©se (perc maradt stb.)
+// Percenként az idők frissítése (perc maradt stb.)
 setInterval(renderGrid, 60_000)
 
-// BillentyÅ± shortcut: F = fullscreen, R = refresh
+// Billentyű shortcut: F = fullscreen, R = refresh
 document.addEventListener('keydown', e=>{
   if(e.key==='f'||e.key==='F') toggleFS()
   if(e.key==='r'||e.key==='R') { fetchRooms(); startProgressBar(); }

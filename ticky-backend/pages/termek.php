@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="hu">
-<?php render_app_head('Ticky - Termek'); ?>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticky – Termek</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
+<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   body { font-family:'DM Sans',sans-serif; background-color:#060f1e; background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(26,74,138,.55) 0%, transparent 60%), radial-gradient(ellipse 50% 45% at 85% 85%, rgba(200,151,42,.18) 0%, transparent 55%); min-height:100vh; }
   body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px); background-size:40px 40px; }
@@ -38,19 +45,19 @@
       <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
       Ticky
     </a>
-    <span style="color:rgba(255,255,255,.2);">Â·</span>
-    <span class="text-sm" style="color:rgba(255,255,255,.45);">Ã–sszes terem</span>
+    <span style="color:rgba(255,255,255,.2);">·</span>
+    <span class="text-sm" style="color:rgba(255,255,255,.45);">Összes terem</span>
   </div>
   <button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
     <svg id="refresh-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-    <span id="footer-ido">â€“</span>
+    <span id="footer-ido">–</span>
   </button>
 </nav>
 
 <div id="weekend-info" class="hidden relative z-10 max-w-5xl mx-auto px-4 pt-4">
   <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm" style="background:rgba(200,151,42,.10);border:1px solid rgba(200,151,42,.25);color:#f0c76b;">
-    <span>ðŸŒ™</span>
-    <span>HÃ©tvÃ©ge â€“ az Ã³rarendek hÃ©tfÅ‘n frissÃ¼lnek. A termek listÃ¡ja elÃ©rhetÅ‘, de foglaltsÃ¡g nem jelenik meg.</span>
+    <span>🌙</span>
+    <span>Hétvége – az órarendek hétfőn frissülnek. A termek listája elérhető, de foglaltság nem jelenik meg.</span>
   </div>
 </div>
 
@@ -58,20 +65,20 @@
   <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
     <div class="flex items-center gap-2 flex-wrap">
       <button class="filter-btn active" id="btn-mind" onclick="setFilter('mind')">
-        Ã–sszes <span id="cnt-mind" style="font-family:'Playfair Display',serif;font-weight:700;font-size:14px;">â€“</span>
+        Összes <span id="cnt-mind" style="font-family:'Playfair Display',serif;font-weight:700;font-size:14px;">–</span>
       </button>
       <button class="filter-btn" id="btn-szabad" onclick="setFilter('szabad')">
         <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#4ade80;display:inline-block;"></span>
-        Szabad <span id="cnt-szabad" style="font-family:'Playfair Display',serif;font-weight:700;font-size:14px;">â€“</span>
+        Szabad <span id="cnt-szabad" style="font-family:'Playfair Display',serif;font-weight:700;font-size:14px;">–</span>
       </button>
       <button class="filter-btn" id="btn-foglalt" onclick="setFilter('foglalt')">
         <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#ff6b82;display:inline-block;"></span>
-        Foglalt <span id="cnt-foglalt" style="font-family:'Playfair Display',serif;font-weight:700;font-size:14px;">â€“</span>
+        Foglalt <span id="cnt-foglalt" style="font-family:'Playfair Display',serif;font-weight:700;font-size:14px;">–</span>
       </button>
     </div>
     <div class="relative w-full sm:w-48">
       <svg class="absolute left-3 top-1/2 -translate-y-1/2" style="color:rgba(255,255,255,.3);" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="Teremâ€¦" oninput="filterRooms()">
+      <input type="search" id="search-input" placeholder="Terem…" oninput="filterRooms()">
     </div>
   </div>
 </div>
@@ -84,7 +91,7 @@
     <div class="skeleton h-32 rounded-2xl"></div><div class="skeleton h-32 rounded-2xl"></div>
   </div>
   <div id="rooms-grid" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
-  <div id="empty-state" class="hidden text-center py-20"><span class="text-5xl block mb-3">ðŸ”</span><p class="font-semibold" style="color:rgba(255,255,255,.7);">Nincs talÃ¡lat</p></div>
+  <div id="empty-state" class="hidden text-center py-20"><span class="text-5xl block mb-3">🔍</span><p class="font-semibold" style="color:rgba(255,255,255,.7);">Nincs találat</p></div>
 </main>
 
 <div id="modal-overlay" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style="background:rgba(6,15,30,.7);backdrop-filter:blur(8px);" onclick="handleOverlayClick(event)">
@@ -115,7 +122,7 @@ async function fetchRooms() {
     renderGrid()
     document.getElementById('footer-ido').textContent = formatHM()
   } catch (e) {
-    showError('Nem sikerÃ¼lt csatlakozni')
+    showError('Nem sikerült csatlakozni')
   }
 }
 
@@ -166,11 +173,11 @@ function renderGrid() {
     const sz = r.allapot === 'szabad'
     let body = ''
     if (sz) {
-      body = `<p class="text-xs mt-2" style="color:rgba(255,255,255,.3);">Nincs Ã³ra</p>`
+      body = `<p class="text-xs mt-2" style="color:rgba(255,255,255,.3);">Nincs óra</p>`
     } else {
       const a = r.aktualis
       const pct = calcPct(a.kezdes, a.vegzes)
-      body = `<p class="text-xs font-medium mt-2 truncate" style="color:rgba(255,255,255,.7);">${a.tanar} Â· ${a.osztaly}</p><p class="text-xs truncate" style="color:rgba(255,255,255,.35);">${a.tantargy} Â· ${a.kezdes}â€“${a.vegzes}</p><div class="mt-2 h-1 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div>`
+      body = `<p class="text-xs font-medium mt-2 truncate" style="color:rgba(255,255,255,.7);">${a.tanar} · ${a.osztaly}</p><p class="text-xs truncate" style="color:rgba(255,255,255,.35);">${a.tantargy} · ${a.kezdes}–${a.vegzes}</p><div class="mt-2 h-1 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div>`
     }
     const pillBg = sz ? 'rgba(26,138,74,.2)' : 'rgba(200,16,46,.2)'
     const pillColor = sz ? '#4ade80' : '#ff6b82'
@@ -201,7 +208,7 @@ async function openModal(szam) {
     const data = await fetch(`/api/terem/${szam}`).then(r => r.json())
     renderModal(data)
   } catch (e) {
-    content.innerHTML = `<div class="px-6 py-8 text-center"><p style="color:rgba(255,255,255,.4);">Hiba a betÃ¶ltÃ©snÃ©l</p></div>`
+    content.innerHTML = `<div class="px-6 py-8 text-center"><p style="color:rgba(255,255,255,.4);">Hiba a betöltésnél</p></div>`
   }
 }
 
@@ -210,20 +217,20 @@ function renderModal(data) {
   const sz = data.allapot === 'szabad'
   let main = ''
   if (sz) {
-    main = `<div class="text-center py-3"><span class="text-4xl block mb-2">âœ…</span><p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#4ade80;">Szabad terem</p><p class="text-sm mt-1" style="color:rgba(255,255,255,.4);">Nincs aktÃ­v foglalÃ¡s</p></div>`
+    main = `<div class="text-center py-3"><span class="text-4xl block mb-2">✅</span><p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#4ade80;">Szabad terem</p><p class="text-sm mt-1" style="color:rgba(255,255,255,.4);">Nincs aktív foglalás</p></div>`
   } else {
     const a = data.aktualis
     const pct = calcPct(a.kezdes, a.vegzes)
-    main = `<div class="flex flex-col gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">TanÃ¡r</p><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${a.tanar_nev || a.tanar}</p></div><div class="grid grid-cols-2 gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">OsztÃ¡ly</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">TantÃ¡rgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div></div><div><div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div><div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.4);"><span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">mÃ©g ${a.perc_maradt} perc</span><span>${a.vegzes}</span></div></div></div>`
+    main = `<div class="flex flex-col gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${a.tanar_nev || a.tanar}</p></div><div class="grid grid-cols-2 gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div></div><div><div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div><div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.4);"><span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">még ${a.perc_maradt} perc</span><span>${a.vegzes}</span></div></div></div>`
   }
   let kov = ''
   if (data.kovetkezo) {
     const k = data.kovetkezo
-    kov = `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.3);">KÃ¶vetkezÅ‘</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} Â· ${k.osztaly} Â· ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}â€“${k.vegzes}</span></div></div>`
+    kov = `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.3);">Következő</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} · ${k.osztaly} · ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}–${k.vegzes}</span></div></div>`
   }
   const pillBg = sz ? 'rgba(26,138,74,.2)' : 'rgba(200,16,46,.2)'
   const pillColor = sz ? '#4ade80' : '#ff6b82'
-  c.innerHTML = `<div class="px-6 pt-6 pb-2"><div class="flex items-start justify-between mb-5"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Terem</p><h2 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:white;line-height:1;">${data.terem}</h2></div><div class="flex items-center gap-2 mt-1"><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background:${pillBg};border:1px solid ${pillColor}55;color:${pillColor};"><span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" style="background:${pillColor};display:inline-block;"></span>${sz ? 'SZABAD' : 'FOGLALT'}</div><button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>${main}${kov}</div><div class="px-6 py-4 flex items-center justify-between" style="border-top:1px solid rgba(255,255,255,.08);"><a href="/terem/${data.terem}" class="text-sm font-medium" style="color:#f0c76b;">Napirend nÃ©zet â†’</a><span style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.2);font-size:13px;font-weight:700;">Ticky</span></div>`
+  c.innerHTML = `<div class="px-6 pt-6 pb-2"><div class="flex items-start justify-between mb-5"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Terem</p><h2 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:white;line-height:1;">${data.terem}</h2></div><div class="flex items-center gap-2 mt-1"><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background:${pillBg};border:1px solid ${pillColor}55;color:${pillColor};"><span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" style="background:${pillColor};display:inline-block;"></span>${sz ? 'SZABAD' : 'FOGLALT'}</div><button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>${main}${kov}</div><div class="px-6 py-4 flex items-center justify-between" style="border-top:1px solid rgba(255,255,255,.08);"><a href="/terem/${data.terem}" class="text-sm font-medium" style="color:#f0c76b;">Napirend nézet →</a><span style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.2);font-size:13px;font-weight:700;">Ticky</span></div>`
 }
 
 function closeModal() { document.getElementById('modal-overlay').classList.add('hidden') }
@@ -231,7 +238,7 @@ function handleOverlayClick(e) { if (e.target === document.getElementById('modal
 
 function showError(msg) {
   document.getElementById('skeleton-grid').classList.add('hidden')
-  document.getElementById('rooms-grid').innerHTML = `<div class="col-span-4 text-center py-16"><span class="text-4xl block mb-3">âš ï¸</span><p style="color:rgba(255,255,255,.5);">${msg}</p></div>`
+  document.getElementById('rooms-grid').innerHTML = `<div class="col-span-4 text-center py-16"><span class="text-4xl block mb-3">⚠️</span><p style="color:rgba(255,255,255,.5);">${msg}</p></div>`
   document.getElementById('rooms-grid').classList.remove('hidden')
 }
 
@@ -248,8 +255,8 @@ setInterval(fetchRooms, 60_000)
   'title' => 'Terem AI',
   'eyebrow' => 'Termek oldal',
   'context' => 'termek',
-  'empty_state' => 'KÃ©rdezhetsz szabad vagy foglalt termekrÅ‘l, illetve egy konkrÃ©t terem aktuÃ¡lis Ã¡llapotÃ¡rÃ³l.',
-  'placeholder' => 'Ãrj pÃ©ldÃ¡ul egy teremszÃ¡mot vagy kÃ©rdezz a szabad termekrÅ‘l...',
+  'empty_state' => 'Kérdezhetsz szabad vagy foglalt termekről, illetve egy konkrét terem aktuális állapotáról.',
+  'placeholder' => 'Írj például egy teremszámot vagy kérdezz a szabad termekről...',
 ]); ?>
 </body>
 </html>

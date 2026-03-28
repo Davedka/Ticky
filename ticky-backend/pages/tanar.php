@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="hu">
-<?php render_app_head('Ticky - Tanar kereso'); ?>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticky – Tanár kereső</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
+<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   html { scroll-behavior:smooth; }
   body {
@@ -58,35 +65,35 @@
   <div class="glass rounded-2xl overflow-hidden">
     <div class="px-6 pt-6 pb-5" style="border-bottom:1px solid rgba(255,255,255,.08);">
       <div class="flex items-center justify-between gap-3 mb-3">
-        <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">TanÃ¡r keresÅ‘</p>
+        <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Tanár kereső</p>
         <div id="status-pill" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);">
           <span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" id="sd" style="background:rgba(255,255,255,.3);display:inline-block;"></span>
-          <span id="st">â€“</span>
+          <span id="st">–</span>
         </div>
       </div>
       <select id="sel" class="custom-select" onchange="onSelect()">
-        <option value="">â€” VÃ¡lassz tanÃ¡rt â€”</option>
+        <option value="">— Válassz tanárt —</option>
       </select>
     </div>
 
     <div class="px-6 py-5" id="aktblock" style="border-bottom:1px solid rgba(255,255,255,.08);">
       <div class="text-center py-3">
-        <span style="font-size:36px;" class="block mb-2">ðŸ‘†</span>
-        <p class="text-sm" style="color:rgba(255,255,255,.4);">VÃ¡lassz tanÃ¡rt a legÃ¶rdÃ¼lÅ‘ menÃ¼bÅ‘l</p>
+        <span style="font-size:36px;" class="block mb-2">👆</span>
+        <p class="text-sm" style="color:rgba(255,255,255,.4);">Válassz tanárt a legördülő menüből</p>
       </div>
     </div>
 
     <div class="px-6 py-5">
       <p class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:rgba(255,255,255,.28);">Mai napirend</p>
-      <div id="lista"><p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kivÃ¡lasztva tanÃ¡r</p></div>
+      <div id="lista"><p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kiválasztva tanár</p></div>
     </div>
 
     <div class="px-6 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:14px;font-weight:700;">Ticky</a>
-      <span class="text-xs" style="color:rgba(255,255,255,.28);" id="ido">â€“</span>
+      <span class="text-xs" style="color:rgba(255,255,255,.28);" id="ido">–</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
         <svg id="ri" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        FrissÃ­t
+        Frissít
       </button>
     </div>
   </div>
@@ -113,7 +120,7 @@ async function loadTanarok() {
     ;(d.tanarok || []).forEach(t => {
       const o = document.createElement('option')
       o.value = t.rovid_nev
-      o.textContent = t.nev ? `${t.rovid_nev} â€“ ${t.nev}` : t.rovid_nev
+      o.textContent = t.nev ? `${t.rovid_nev} – ${t.nev}` : t.rovid_nev
       sel.appendChild(o)
     })
     const url = getUrlKod()
@@ -130,8 +137,8 @@ function onSelect() {
 }
 
 function reset() {
-  document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:36px;" class="block mb-2">ðŸ‘†</span><p class="text-sm" style="color:rgba(255,255,255,.4);">VÃ¡lassz tanÃ¡rt a legÃ¶rdÃ¼lÅ‘ menÃ¼bÅ‘l</p></div>`
-  document.getElementById('lista').innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kivÃ¡lasztva tanÃ¡r</p>`
+  document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:36px;" class="block mb-2">👆</span><p class="text-sm" style="color:rgba(255,255,255,.4);">Válassz tanárt a legördülő menüből</p></div>`
+  document.getElementById('lista').innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kiválasztva tanár</p>`
   setAllapot('idle')
 }
 
@@ -142,7 +149,7 @@ function setAllapot(a) {
   if (a === 'tant') {
     document.body.className = 'flex flex-col items-center justify-start p-4 pb-16 tant'
     pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(200,16,46,.25);color:#ff6b82;border:1px solid rgba(200,16,46,.4);flex-shrink:0;'
-    dot.style.background = '#ff6b82'; txt.textContent = 'TANÃT'
+    dot.style.background = '#ff6b82'; txt.textContent = 'TANÍT'
   } else if (a === 'szabad') {
     document.body.className = 'flex flex-col items-center justify-start p-4 pb-16 szabad'
     pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(26,138,74,.25);color:#4ade80;border:1px solid rgba(26,138,74,.4);flex-shrink:0;'
@@ -150,7 +157,7 @@ function setAllapot(a) {
   } else {
     document.body.className = 'flex flex-col items-center justify-start p-4 pb-16'
     pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);flex-shrink:0;'
-    dot.style.background = 'rgba(255,255,255,.3)'; txt.textContent = 'â€“'
+    dot.style.background = 'rgba(255,255,255,.3)'; txt.textContent = '–'
   }
 }
 
@@ -169,7 +176,7 @@ async function loadData() {
     const d = await fetch(`/api/tanar/${encodeURIComponent(curKod)}/orarend`).then(r => r.json())
 
     if (d.error) {
-      document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">âš ï¸</span><p class="text-sm" style="color:rgba(255,255,255,.4);">${d.error}</p></div>`
+      document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">${d.error}</p></div>`
       setAllapot('idle')
       return
     }
@@ -184,12 +191,12 @@ async function loadData() {
 
     if (d.tanar_nev) {
       const opt = document.querySelector(`#sel option[value="${curKod}"]`)
-      if (opt && !opt.textContent.includes('â€“')) {
-        opt.textContent = `${curKod} â€“ ${d.tanar_nev}`
+      if (opt && !opt.textContent.includes('–')) {
+        opt.textContent = `${curKod} – ${d.tanar_nev}`
       }
     }
   } catch (e) {
-    document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">âš ï¸</span><p class="text-sm" style="color:rgba(255,255,255,.4);">BetÃ¶ltÃ©si hiba</p></div>`
+    document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">Betöltési hiba</p></div>`
     setAllapot('idle')
   }
 
@@ -217,17 +224,17 @@ function renderAkt(a, k) {
         <div>
           <div class="flex items-center gap-2 mb-1">
             <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Most itt van</p>
-            ${a.is_csoport ? '<span class="csoport-badge">CsoportbontÃ¡s</span>' : ''}
+            ${a.is_csoport ? '<span class="csoport-badge">Csoportbontás</span>' : ''}
           </div>
           <p style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:white;line-height:1.1;">${esc(a.terem)}. terem</p>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">OsztÃ¡ly</p>
+            <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p>
             <p style="font-family:'Playfair Display',serif;font-size:${a.is_csoport ? '14px' : '18px'};font-weight:700;color:white;line-height:1.3;">${esc(a.osztaly)}</p>
           </div>
           <div>
-            <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">TantÃ¡rgy</p>
+            <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p>
             <p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.tantargy)}</p>
           </div>
         </div>
@@ -246,23 +253,23 @@ function renderAkt(a, k) {
   } else if (k) {
     el.innerHTML = `
       <div class="flex items-center gap-4 py-1 aktiv-card">
-        <span style="font-size:28px;">â˜•</span>
+        <span style="font-size:28px;">☕</span>
         <div>
           <p class="font-semibold" style="color:rgba(255,255,255,.8);">Jelenleg szabad</p>
           <p class="text-sm mt-0.5" style="color:rgba(255,255,255,.4);">
-            KÃ¶vetkezÅ‘: <strong style="color:rgba(255,255,255,.7);">${esc(k.terem)}. terem</strong>
-            Â· ${esc(k.kezdes)}â€“${esc(k.vegzes)}
-            ${k.is_csoport ? '&nbsp;<span class="csoport-badge">CsoportbontÃ¡s</span>' : ''}
+            Következő: <strong style="color:rgba(255,255,255,.7);">${esc(k.terem)}. terem</strong>
+            · ${esc(k.kezdes)}–${esc(k.vegzes)}
+            ${k.is_csoport ? '&nbsp;<span class="csoport-badge">Csoportbontás</span>' : ''}
           </p>
         </div>
       </div>`
   } else {
     el.innerHTML = `
       <div class="flex items-center gap-4 py-1 aktiv-card">
-        <span style="font-size:28px;">âœ…</span>
+        <span style="font-size:28px;">✅</span>
         <div>
           <p class="font-semibold" style="color:#4ade80;">Szabad</p>
-          <p class="text-sm mt-0.5" style="color:rgba(255,255,255,.4);">Ma mÃ¡r nincs tÃ¶bb Ã³ra</p>
+          <p class="text-sm mt-0.5" style="color:rgba(255,255,255,.4);">Ma már nincs több óra</p>
         </div>
       </div>`
   }
@@ -272,7 +279,7 @@ function renderLista(orak) {
   const el = document.getElementById('lista')
 
   if (!orak.length) {
-    el.innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.35);">Nincs mai Ã³ra</p>`
+    el.innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.35);">Nincs mai óra</p>`
     return
   }
 
@@ -296,11 +303,11 @@ function renderLista(orak) {
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-sm font-medium" style="color:${mu ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.8)'};">${esc(o.terem)}. terem</span>
-            ${o.is_csoport ? '<span class="csoport-badge">CsoportbontÃ¡s</span>' : ''}
-            <span class="text-xs" style="color:rgba(255,255,255,.35);">${esc(o.osztaly)} Â· ${esc(o.tantargy)}</span>
+            ${o.is_csoport ? '<span class="csoport-badge">Csoportbontás</span>' : ''}
+            <span class="text-xs" style="color:rgba(255,255,255,.35);">${esc(o.osztaly)} · ${esc(o.tantargy)}</span>
           </div>
           ${csoportReszlet}
-          <p class="text-xs" style="color:rgba(255,255,255,.28);">${esc(o.kezdes)} â€“ ${esc(o.vegzes)}</p>
+          <p class="text-xs" style="color:rgba(255,255,255,.28);">${esc(o.kezdes)} – ${esc(o.vegzes)}</p>
         </div>
         ${ak ? `<span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#ff6b82;display:inline-block;"></span>` : ''}
       </div>`
@@ -323,11 +330,11 @@ loadTanarok()
 setInterval(() => { if (curKod) loadData() }, REFRESH)
 </script>
 <?php render_assistant_widget([
-  'title' => 'TanÃ¡r AI',
-  'eyebrow' => 'TanÃ¡r oldal',
+  'title' => 'Tanár AI',
+  'eyebrow' => 'Tanár oldal',
   'context' => 'tanar',
-  'empty_state' => 'Itt tanÃ¡rmonogram alapjÃ¡n is kÃ©rdezhetsz. PÃ©ldÃ¡ul: hol van most XY, vagy egyszerÅ±en csak Ã­rd be a monogramot.',
-  'placeholder' => 'Ãrj be egy tanÃ¡r monogramot vagy kÃ©rdezz rÃ¡, hol van most...',
+  'empty_state' => 'Itt tanármonogram alapján is kérdezhetsz. Például: hol van most XY, vagy egyszerűen csak írd be a monogramot.',
+  'placeholder' => 'Írj be egy tanár monogramot vagy kérdezz rá, hol van most...',
 ]); ?>
 </body>
 </html>

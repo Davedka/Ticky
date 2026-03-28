@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="hu">
-<?php render_app_head('Ticky - QR Generator', [
-  'scripts' => ['https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'],
-]); ?>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticky – QR Generátor</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
+<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* â”€â”€ Screen stÃ­lus â”€â”€ */
+  /* ── Screen stílus ── */
   body {
     font-family:'DM Sans',sans-serif;
     background-color:#060f1e;
@@ -31,7 +37,7 @@
   .fade-in { animation:fadeIn .4s cubic-bezier(.22,1,.36,1) both; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
-  /* QR kÃ¡rtya â€“ screen nÃ©zet */
+  /* QR kártya – screen nézet */
   .qr-card {
     background:rgba(255,255,255,.05);
     border:1px solid rgba(255,255,255,.10);
@@ -47,13 +53,13 @@
   .qr-card .check svg { opacity:0; transition:opacity .15s; }
   .qr-card.selected .check svg { opacity:1; }
 
-  /* QR div (fehÃ©r hÃ¡ttÃ©r kell a QR-hoz) */
+  /* QR div (fehér háttér kell a QR-hoz) */
   .qr-wrap { background:white; border-radius:10px; padding:8px; display:flex; align-items:center; justify-content:center; }
   .qr-wrap canvas, .qr-wrap img { display:block !important; }
 
   a { text-decoration:none; }
 
-  /* â”€â”€ NYOMTATÃS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── NYOMTATÁS ────────────────────────────── */
   @media print {
     * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
     body { background:white !important; background-image:none !important; color:black !important; }
@@ -67,7 +73,7 @@
       padding:8mm;
     }
 
-    /* Csak a kijelÃ¶lt kÃ¡rtyÃ¡k, vagy Ã¶sszes ha nincs kijelÃ¶lve */
+    /* Csak a kijelölt kártyák, vagy összes ha nincs kijelölve */
     .qr-card { display:none !important; }
     .qr-card.print-me {
       display:flex !important;
@@ -116,33 +122,33 @@
       <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;animation:pulseDot 2s infinite;"></span>
       Ticky
     </a>
-    <span style="color:rgba(255,255,255,.2);">Â·</span>
-    <span class="text-sm" style="color:rgba(255,255,255,.45);">QR GenerÃ¡tor</span>
+    <span style="color:rgba(255,255,255,.2);">·</span>
+    <span class="text-sm" style="color:rgba(255,255,255,.45);">QR Generátor</span>
   </div>
   <div class="flex items-center gap-2">
-    <a href="/termek" class="nav-btn">â† Termek</a>
+    <a href="/termek" class="nav-btn">← Termek</a>
   </div>
 </nav>
 
-<!-- FejlÃ©c + akciÃ³k -->
+<!-- Fejléc + akciók -->
 <div class="relative z-10 max-w-5xl mx-auto px-5 pt-7 pb-4 screen-only">
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
     <div>
-      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:white;letter-spacing:-.5px;">QR KÃ³dok</h1>
-      <p class="text-sm mt-1" style="color:rgba(255,255,255,.4);">Kattints egy teremre a kijelÃ¶lÃ©shez, aztÃ¡n nyomtasd ki</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:white;letter-spacing:-.5px;">QR Kódok</h1>
+      <p class="text-sm mt-1" style="color:rgba(255,255,255,.4);">Kattints egy teremre a kijelöléshez, aztán nyomtasd ki</p>
     </div>
     <div class="flex items-center gap-2 flex-wrap">
-      <button class="nav-btn" id="btn-select-all" onclick="selectAll()">Ã–sszes kijelÃ¶lÃ©se</button>
-      <button class="nav-btn" id="btn-clear" onclick="clearSelection()" style="display:none;">KijelÃ¶lÃ©s tÃ¶rlÃ©se</button>
+      <button class="nav-btn" id="btn-select-all" onclick="selectAll()">Összes kijelölése</button>
+      <button class="nav-btn" id="btn-clear" onclick="clearSelection()" style="display:none;">Kijelölés törlése</button>
       <button class="gold-btn" onclick="printSelected()" id="btn-print">
-        <span id="print-label">ðŸ–¨ï¸ Ã–sszes nyomtatÃ¡sa</span>
+        <span id="print-label">🖨️ Összes nyomtatása</span>
       </button>
     </div>
   </div>
 
-  <!-- KijelÃ¶lt szÃ¡m -->
+  <!-- Kijelölt szám -->
   <div id="selection-info" class="mt-3 text-sm" style="color:rgba(255,255,255,.4);display:none;">
-    <span id="selected-count">0</span> terem kijelÃ¶lve
+    <span id="selected-count">0</span> terem kijelölve
   </div>
 </div>
 
@@ -166,7 +172,7 @@ const BASE_URL = window.location.origin  // pl. https://ticky-6r32.onrender.com
 let selectedRooms = new Set()
 let allRooms = []
 
-// â”€â”€â”€ BetÃ¶ltÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Betöltés ────────────────────────────────────────
 async function loadRooms() {
   try {
     const data = await fetch('/api/termek').then(r => r.json())
@@ -175,17 +181,17 @@ async function loadRooms() {
   } catch(e) {
     document.getElementById('qr-grid').innerHTML = `
       <div class="col-span-full text-center py-16 screen-only">
-        <span class="text-4xl block mb-3">âš ï¸</span>
-        <p style="color:rgba(255,255,255,.5);">Nem sikerÃ¼lt betÃ¶lteni a termeket</p>
+        <span class="text-4xl block mb-3">⚠️</span>
+        <p style="color:rgba(255,255,255,.5);">Nem sikerült betölteni a termeket</p>
       </div>`
   }
 }
 
-// â”€â”€â”€ KÃ¡rtyÃ¡k renderelÃ©se â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Kártyák renderelése ─────────────────────────────
 function renderCards() {
   const grid = document.getElementById('qr-grid')
 
-  // Skeleton eltÃ¡volÃ­tÃ¡sa
+  // Skeleton eltávolítása
   grid.innerHTML = ''
 
   allRooms.forEach((szam, i) => {
@@ -214,7 +220,7 @@ function renderCards() {
 
     grid.appendChild(card)
 
-    // QR generÃ¡lÃ¡s
+    // QR generálás
     new QRCode(document.getElementById(`qr-${szam}`), {
       text:          url,
       width:         128,
@@ -228,7 +234,7 @@ function renderCards() {
   updateUI()
 }
 
-// â”€â”€â”€ KijelÃ¶lÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Kijelölés ───────────────────────────────────────
 function toggleSelect(szam) {
   if (selectedRooms.has(szam)) {
     selectedRooms.delete(szam)
@@ -269,23 +275,23 @@ function updateUI() {
   if (n > 0) {
     info.style.display = 'block'
     cnt.textContent = n
-    label.textContent = `ðŸ–¨ï¸ ${n} terem nyomtatÃ¡sa`
+    label.textContent = `🖨️ ${n} terem nyomtatása`
     btnClear.style.display = 'inline-flex'
-    btnSelectAll.textContent = n === total ? 'Ã–sszes kijelÃ¶lve âœ“' : 'Ã–sszes kijelÃ¶lÃ©se'
+    btnSelectAll.textContent = n === total ? 'Összes kijelölve ✓' : 'Összes kijelölése'
   } else {
     info.style.display = 'none'
-    label.textContent = 'ðŸ–¨ï¸ Ã–sszes nyomtatÃ¡sa'
+    label.textContent = '🖨️ Összes nyomtatása'
     btnClear.style.display = 'none'
-    btnSelectAll.textContent = 'Ã–sszes kijelÃ¶lÃ©se'
+    btnSelectAll.textContent = 'Összes kijelölése'
   }
 }
 
-// â”€â”€â”€ NyomtatÃ¡s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Nyomtatás ───────────────────────────────────────
 function printSelected() {
-  // Ha nincs kijelÃ¶lve semmi â†’ nyomtat mindent
+  // Ha nincs kijelölve semmi → nyomtat mindent
   const toPrint = selectedRooms.size > 0 ? selectedRooms : new Set(allRooms)
 
-  // Minden kÃ¡rtyÃ¡n beÃ¡llÃ­tjuk a print-me osztÃ¡lyt
+  // Minden kártyán beállítjuk a print-me osztályt
   allRooms.forEach(szam => {
     const card = document.getElementById(`card-${szam}`)
     if (!card) return
@@ -296,16 +302,16 @@ function printSelected() {
     }
   })
 
-  // Print pÃ¡rbeszÃ©dablak
+  // Print párbeszédablak
   window.print()
 
-  // print-me osztÃ¡lyok eltÃ¡volÃ­tÃ¡sa (cleanup)
+  // print-me osztályok eltávolítása (cleanup)
   allRooms.forEach(szam => {
     document.getElementById(`card-${szam}`)?.classList.remove('print-me')
   })
 }
 
-// â”€â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Init ────────────────────────────────────────────
 loadRooms()
 </script>
 </body>
