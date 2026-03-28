@@ -403,16 +403,21 @@ if(!teremSzam){
   setInterval(fetchData,5*60_000)
 }
 </script>
-<?php render_assistant_widget([
+<?php
+$napirend_route = match_route('/terem/{szam}/nap', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '');
+$napirend_room = is_array($napirend_route) ? strtoupper((string) ($napirend_route['szam'] ?? '')) : '';
+render_assistant_widget([
   'title' => 'Napirend AI',
   'eyebrow' => 'Heti nézet',
-  'intro' => 'Meg tudom nézni egy terem mai állapotát, ajánlok szabad termeket, vagy továbblépek a megfelelő nézetre.',
-  'prompts' => [
-    'Melyik termek szabadok most?',
-    'Mi van most a 204-es teremben?',
-    'Melyik termek foglaltak most?',
-    'Nyisd meg a tanárkeresőt',
-  ],
-]); ?>
+  'context' => 'napirend',
+  'context_data' => ['room' => $napirend_room],
+  'empty_state' => $napirend_room !== ''
+    ? 'Itt a ' . $napirend_room . '. terem heti nézetéhez kérdezhetsz. Például: mi van most itt, vagy mikor lesz a következő óra.'
+    : 'Kérdezhetsz az aktuális napirendről vagy más szabad termekről.',
+  'placeholder' => $napirend_room !== ''
+    ? 'Írj egy kérdést a ' . $napirend_room . '. terem napirendjéről...'
+    : 'Írj egy kérdést a napirendről...',
+]);
+?>
 </body>
 </html>

@@ -38,6 +38,12 @@ function assistant_normalize(string $text): string {
     ]);
 }
 
+function assistant_context_key(string $context): string {
+    $context = assistant_normalize($context);
+    $allowed = ['general', 'home', 'termek', 'tanar', 'terem', 'napirend'];
+    return in_array($context, $allowed, true) ? $context : 'general';
+}
+
 function assistant_has_any(string $text, array $needles): bool {
     foreach ($needles as $needle) {
         if ($needle !== '' && str_contains($text, $needle)) {
@@ -49,20 +55,20 @@ function assistant_has_any(string $text, array $needles): bool {
 }
 
 function assistant_extract_room(string $text): ?string {
-    if (preg_match('/(?<!\d)(\d{2,4}[A-Za-z]?)(?!\d)/', $text, $matches)) {
+    if (preg_match('/(?<!\d)(\d{1,4}[A-Za-z]?)(?!\d)/', $text, $matches)) {
         return strtoupper($matches[1]);
     }
 
     return null;
 }
 
-function assistant_suggestions(): array {
-    return [
-        'Melyik termek szabadok most?',
-        'Melyik termek foglaltak most?',
-        'Mi van most a 204-es teremben?',
-        'Nyisd meg a tanárkeresőt',
-    ];
+function assistant_context_room_code(array $context_data): ?string {
+    $room = trim((string) ($context_data['room'] ?? ''));
+    if ($room === '') {
+        return null;
+    }
+
+    return strtoupper($room);
 }
 
 function assistant_day_name(int $day): string {
@@ -124,8 +130,8 @@ function assistant_enrich_lessons(array $lessons): array {
     }
 
     $teacher_map = assistant_get_teachers_by_ids(array_column($lessons, 'tanar_id'));
-
     $result = [];
+
     foreach ($lessons as $lesson) {
         $teacher = $teacher_map[$lesson['tanar_id']] ?? null;
         $result[] = [
@@ -244,45 +250,90 @@ function assistant_get_rooms_snapshot(): array {
     return $snapshot;
 }
 
-function assistant_help(): never {
-    assistant_response(
-        'Segítek a Tickyben eligazodni. Meg tudom nézni, melyik termek szabadok vagy foglaltak most, mi történik egy adott teremben, és gyorsan át tudlak dobni a megfelelő oldalra.',
-        [
-            [
-                'eyebrow' => 'Példa',
-                'title' => 'Melyik termek szabadok most?',
-                'meta' => 'Gyors lista a jelenleg üres termekről.',
-            ],
-            [
-                'eyebrow' => 'Példa',
-                'title' => 'Mi van most a 204-es teremben?',
-                'meta' => 'Megnézem az aktuális és a következő órát.',
-            ],
-        ],
-        [
-            ['label' => 'Összes terem', 'href' => '/termek'],
-            ['label' => 'Tanár kereső', 'href' => '/tanar'],
-        ],
-        assistant_suggestions()
-    );
+function assistant_help(string $context, array $context_data = []): never {
+    $room = assistant_context_room_code($context_data);
+
+    switch ($context) {
+        case 'home':
+            assistant_response(
+                'Itt a főoldalhoz segítek. Kérdezhetsz termekről, konkrét teremállapotról vagy arról, melyik nézetet érdemes megnyitni.',
+                [],
+                [
+                    ['label' => 'Összes terem', 'href' => '/termek'],
+                    ['label' => 'Tanár kereső', 'href' => '/tanar'],
+                ]
+            );
+
+        case 'termek':
+            assistant_response(
+                'Itt a termek oldalához segítek. Kérdezhetsz szabad vagy foglalt termekről, illetve egy konkrét terem állapotáról.',
+                [],
+                [
+                    ['label' => 'Összes terem', 'href' => '/termek'],
+                ]
+            );
+
+        case 'tanar':
+            assistant_response(
+                'Itt a tanár oldalához segítek. Tudok szabad termet keresni, konkrét teremállapotot mondani, vagy megnyitni a tanár keresőt.',
+                [],
+                [
+                    ['label' => 'Tanár kereső', 'href' => '/tanar'],
+                    ['label' => 'Összes terem', 'href' => '/termek'],
+                ]
+            );
+
+        case 'terem':
+            $reply = $room !== null
+                ? 'Itt a ' . $room . '. teremhez segítek. Kérdezhetsz arról, mi van most itt, mi lesz később, vagy van-e másik szabad terem.'
+                : 'Itt a terem oldalához segítek. Kérdezhetsz az aktuális terem állapotáról vagy szabad másik termekről.';
+            $actions = [];
+            if ($room !== null) {
+                $actions[] = ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room)];
+                $actions[] = ['label' => 'Napirend nézet', 'href' => '/terem/' . rawurlencode($room) . '/nap'];
+            }
+            assistant_response($reply, [], $actions);
+
+        case 'napirend':
+            $reply = $room !== null
+                ? 'Itt a ' . $room . '. terem napirendjéhez segítek. Kérdezhetsz a mai állapotról, a következő óráról vagy más szabad termekről.'
+                : 'Itt a napirend oldalhoz segítek. Kérdezhetsz egy terem mai állapotáról vagy szabad termekről.';
+            $actions = [];
+            if ($room !== null) {
+                $actions[] = ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room)];
+                $actions[] = ['label' => 'Napirend nézet', 'href' => '/terem/' . rawurlencode($room) . '/nap'];
+            }
+            assistant_response($reply, [], $actions);
+
+        default:
+            assistant_response(
+                'Segítek eligazodni a Tickyben. Meg tudom nézni, melyik termek szabadok vagy foglaltak most, és mi történik egy adott teremben.',
+                [],
+                [
+                    ['label' => 'Összes terem', 'href' => '/termek'],
+                    ['label' => 'Tanár kereső', 'href' => '/tanar'],
+                ]
+            );
+    }
 }
 
 $body = json_decode(file_get_contents('php://input') ?: '', true);
 $message = trim((string) ($body['message'] ?? ''));
 $normalized = assistant_normalize($message);
+$context = assistant_context_key((string) ($body['context'] ?? 'general'));
+$context_data = is_array($body['contextData'] ?? null) ? $body['contextData'] : [];
 
 if ($message === '' || assistant_has_any($normalized, ['help', 'segit', 'mit tudsz', 'szia', 'hello'])) {
-    assistant_help();
+    assistant_help($context, $context_data);
 }
 
-if (assistant_has_any($normalized, ['tanar', 'tanar kereso', 'tanar kereso'])) {
+if (assistant_has_any($normalized, ['tanar', 'tanar kereso'])) {
     assistant_response(
         'Tanár alapján a Tanár kereső oldalon tudsz biztosan keresni. Ott valós listából választhatsz, így nem kell fejből tudnod a neveket.',
         [],
         [
             ['label' => 'Tanár kereső megnyitása', 'href' => '/tanar'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
@@ -292,8 +343,7 @@ if (assistant_has_any($normalized, ['qr'])) {
         [],
         [
             ['label' => 'QR oldal', 'href' => '/qr'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
@@ -303,8 +353,7 @@ if (assistant_has_any($normalized, ['kijelzo'])) {
         [],
         [
             ['label' => 'Kijelző oldal', 'href' => '/kijelzo'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
@@ -314,34 +363,42 @@ if (assistant_has_any($normalized, ['admin'])) {
         [],
         [
             ['label' => 'Admin oldal', 'href' => '/admin'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
 $room_code = assistant_extract_room($message);
+$context_room = assistant_context_room_code($context_data);
+if (
+    $room_code === null
+    && $context_room !== null
+    && in_array($context, ['terem', 'napirend'], true)
+    && assistant_has_any($normalized, ['itt', 'ebben', 'ebbe', 'most', 'kovetkezo', 'mi van', 'mi lesz', 'napirend', 'orarend', 'terem'])
+) {
+    $room_code = $context_room;
+}
+
 if ($room_code !== null) {
-    $context = assistant_get_room_context($room_code);
-    if ($context === null) {
+    $room_context = assistant_get_room_context($room_code);
+    if ($room_context === null) {
         assistant_response(
             'Nem találtam ilyen termet: ' . $room_code . '.',
             [],
             [
                 ['label' => 'Összes terem', 'href' => '/termek'],
-            ],
-            assistant_suggestions()
+            ]
         );
     }
 
-    $room = $context['room'];
-    $day = $context['day'];
-    $current = $context['current'];
-    $next = $context['next'];
-    $lessons = $context['lessons'];
+    $room = $room_context['room'];
+    $day = $room_context['day'];
+    $current = $room_context['current'];
+    $next = $room_context['next'];
+    $lessons = $room_context['lessons'];
 
     if (
         assistant_has_any($normalized, ['napirend', 'orarend', 'ma', 'mi lesz'])
-        || assistant_has_any($normalized, ['mutasd']) && assistant_has_any($normalized, ['terem'])
+        || (assistant_has_any($normalized, ['mutasd']) && assistant_has_any($normalized, ['terem', 'itt']))
     ) {
         if ($day === 0) {
             assistant_response(
@@ -349,8 +406,7 @@ if ($room_code !== null) {
                 [],
                 [
                     ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room['terem_szam'])],
-                ],
-                assistant_suggestions()
+                ]
             );
         }
 
@@ -360,8 +416,7 @@ if ($room_code !== null) {
                 [],
                 [
                     ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room['terem_szam'])],
-                ],
-                assistant_suggestions()
+                ]
             );
         }
 
@@ -381,8 +436,7 @@ if ($room_code !== null) {
             [
                 ['label' => 'Napirend nézet', 'href' => '/terem/' . rawurlencode($room['terem_szam']) . '/nap'],
                 ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room['terem_szam'])],
-            ],
-            assistant_suggestions()
+            ]
         );
     }
 
@@ -392,8 +446,7 @@ if ($room_code !== null) {
             [],
             [
                 ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room['terem_szam'])],
-            ],
-            assistant_suggestions()
+            ]
         );
     }
 
@@ -420,13 +473,13 @@ if ($room_code !== null) {
             [
                 ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room['terem_szam'])],
                 ['label' => 'Napirend nézet', 'href' => '/terem/' . rawurlencode($room['terem_szam']) . '/nap'],
-            ],
-            assistant_suggestions()
+            ]
         );
     }
 
     $reply = 'A ' . $room['terem_szam'] . ' terem most szabad.';
     $cards = [];
+
     if ($next !== null) {
         $cards[] = [
             'eyebrow' => 'Következő óra',
@@ -444,8 +497,7 @@ if ($room_code !== null) {
         [
             ['label' => 'Terem oldal', 'href' => '/terem/' . rawurlencode($room['terem_szam'])],
             ['label' => 'Napirend nézet', 'href' => '/terem/' . rawurlencode($room['terem_szam']) . '/nap'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
@@ -459,8 +511,7 @@ if (assistant_has_any($normalized, ['szabad']) && assistant_has_any($normalized,
             [],
             [
                 ['label' => 'Összes terem', 'href' => '/termek'],
-            ],
-            assistant_suggestions()
+            ]
         );
     }
 
@@ -478,8 +529,7 @@ if (assistant_has_any($normalized, ['szabad']) && assistant_has_any($normalized,
         $cards,
         [
             ['label' => 'Összes terem', 'href' => '/termek'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
@@ -493,8 +543,7 @@ if (assistant_has_any($normalized, ['foglalt']) && assistant_has_any($normalized
             [],
             [
                 ['label' => 'Összes terem', 'href' => '/termek'],
-            ],
-            assistant_suggestions()
+            ]
         );
     }
 
@@ -514,8 +563,7 @@ if (assistant_has_any($normalized, ['foglalt']) && assistant_has_any($normalized
         $cards,
         [
             ['label' => 'Összes terem', 'href' => '/termek'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
@@ -541,9 +589,8 @@ if (assistant_has_any($normalized, ['most']) || assistant_has_any($normalized, [
         [
             ['label' => 'Összes terem', 'href' => '/termek'],
             ['label' => 'Tanár kereső', 'href' => '/tanar'],
-        ],
-        assistant_suggestions()
+        ]
     );
 }
 
-assistant_help();
+assistant_help($context, $context_data);

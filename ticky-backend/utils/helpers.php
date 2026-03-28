@@ -1,9 +1,6 @@
 <?php
-// utils/helpers.php – Közös segédfüggvények
+// utils/helpers.php - Közös segédfüggvények
 
-/**
- * JSON válasz küldése és kilépés
- */
 function json_response(mixed $data, int $status = 200): never {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
@@ -14,33 +11,19 @@ function json_response(mixed $data, int $status = 200): never {
     exit;
 }
 
-/**
- * Hiba JSON válasz
- */
 function json_error(string $message, int $status = 400): never {
     json_response(['error' => $message], $status);
 }
 
-/**
- * Mai nap sorszáma (1=Hétfő ... 5=Péntek, 0=hétvége)
- * Supabase-ben het_napja: 1–5
- * PHP date('N'): 1=Hétfő ... 7=Vasárnap
- */
 function mai_nap(): int {
-    $n = (int) date('N'); // 1=Mon, 7=Sun
-    return $n <= 5 ? $n : 0;  // hétvégén 0
+    $n = (int) date('N');
+    return $n <= 5 ? $n : 0;
 }
 
-/**
- * Aktuális idő 'HH:MM' formátumban (Budapest timezone)
- */
 function aktualis_ido(): string {
     return date('H:i');
 }
 
-/**
- * Idő összehasonlítás: $ido >= $start AND $ido <= $end ?
- */
 function render_time_sync_bootstrap(): void {
     $server_epoch_ms = (int) round(microtime(true) * 1000);
     $timezone = TZ;
@@ -141,34 +124,42 @@ function render_assistant_widget(array $options = []): void {
     $widget_id = $options['id'] ?? 'ticky-assistant-widget';
     $title = $options['title'] ?? 'AI asszisztens';
     $eyebrow = $options['eyebrow'] ?? 'Ticky Assist';
-    $intro = $options['intro'] ?? 'Kérdezhetsz szabad termekről, foglaltságról, vagy egy konkrét terem állapotáról.';
-    $prompts = $options['prompts'] ?? [
-        'Melyik termek szabadok most?',
-        'Melyik termek foglaltak most?',
-        'Mi van most a 204-es teremben?',
-        'Nyisd meg a tanárkeresőt',
-    ];
+    $empty_state = $options['empty_state'] ?? 'Írj egy kérdést az aktuális oldalhoz kapcsolódóan.';
+    $placeholder = $options['placeholder'] ?? 'Írd be a kérdésed...';
+    $context = $options['context'] ?? 'general';
+    $submit_label = $options['submit_label'] ?? 'Küldés';
+    $context_data = is_array($options['context_data'] ?? null) ? $options['context_data'] : [];
 
     $config = [
         'widgetId' => $widget_id,
         'title' => $title,
         'eyebrow' => $eyebrow,
-        'intro' => $intro,
-        'prompts' => array_values($prompts),
+        'emptyState' => $empty_state,
+        'placeholder' => $placeholder,
+        'context' => $context,
+        'contextData' => $context_data,
+        'submitLabel' => $submit_label,
     ];
     ?>
 <style>
   .ta-shell, .ta-shell * { box-sizing:border-box; }
-  .ta-shell { position:fixed; right:22px; top:50%; transform:translateY(-50%); z-index:160; font-family:'DM Sans',sans-serif; color:white; }
+  .ta-shell {
+    position:fixed; right:18px; bottom:18px; z-index:160; display:flex; flex-direction:column;
+    align-items:flex-end; gap:10px; font-family:'DM Sans',sans-serif; color:white;
+  }
   .ta-launcher {
     display:flex; align-items:center; gap:10px; border:none; cursor:pointer; width:auto; margin-top:0;
-    padding:13px 14px; border-radius:18px; color:white;
-    background:linear-gradient(160deg, rgba(200,151,42,.22), rgba(11,46,89,.88));
+    padding:12px 14px; border-radius:18px; color:white;
+    background:linear-gradient(160deg, rgba(200,151,42,.22), rgba(11,46,89,.92));
     border:1px solid rgba(255,255,255,.12); box-shadow:0 18px 45px rgba(6,15,30,.35);
     backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
     transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
-  .ta-launcher:hover { transform:translateX(-2px); border-color:rgba(240,199,107,.4); box-shadow:0 22px 55px rgba(6,15,30,.45); }
+  .ta-launcher:hover {
+    transform:translateY(-2px);
+    border-color:rgba(240,199,107,.42);
+    box-shadow:0 22px 55px rgba(6,15,30,.42);
+  }
   .ta-launcher-badge {
     width:38px; height:38px; border-radius:14px; display:grid; place-items:center; flex-shrink:0;
     background:linear-gradient(145deg, rgba(240,199,107,.22), rgba(255,255,255,.06));
@@ -177,28 +168,32 @@ function render_assistant_widget(array $options = []): void {
   .ta-launcher-copy { display:flex; flex-direction:column; align-items:flex-start; text-align:left; }
   .ta-launcher-kicker { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.45); font-weight:700; }
   .ta-launcher-title { font-size:13px; color:white; font-weight:600; line-height:1.2; }
-  .ta-backdrop {
-    position:fixed; inset:0; background:rgba(6,15,30,.45); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-    opacity:0; pointer-events:none; transition:opacity .22s ease; z-index:158;
-  }
-  .ta-shell.open .ta-backdrop { opacity:1; pointer-events:auto; }
   .ta-panel {
-    position:fixed; top:20px; right:20px; bottom:20px; width:min(400px, calc(100vw - 20px)); z-index:159;
-    display:flex; flex-direction:column; overflow:hidden; border-radius:26px;
-    background:rgba(10,24,44,.82); border:1px solid rgba(255,255,255,.10);
-    box-shadow:0 30px 70px rgba(6,15,30,.55); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-    transform:translateX(calc(100% + 36px)); transition:transform .24s cubic-bezier(.22,1,.36,1);
+    width:min(380px, calc(100vw - 28px)); max-height:min(72vh, 620px); display:flex; flex-direction:column;
+    overflow:hidden; border-radius:24px; background:rgba(10,24,44,.88); border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 30px 70px rgba(6,15,30,.50); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+    opacity:0; pointer-events:none; transform:translateY(12px) scale(.98); transform-origin:bottom right;
+    transition:opacity .18s ease, transform .18s ease;
   }
-  .ta-shell.open .ta-panel { transform:translateX(0); }
-  .ta-panel-head { padding:18px 18px 16px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .ta-shell.open .ta-panel { opacity:1; pointer-events:auto; transform:translateY(0) scale(1); }
+  .ta-panel-head {
+    padding:16px 16px 14px; border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+  }
   .ta-panel-kicker { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.35); font-weight:700; }
-  .ta-panel-title { font-family:'Playfair Display',serif; font-size:25px; line-height:1.08; color:white; margin-top:6px; }
+  .ta-panel-title { font-family:'Playfair Display',serif; font-size:24px; line-height:1.08; color:white; margin-top:6px; }
   .ta-panel-close {
     width:36px; height:36px; border:none; cursor:pointer; margin-top:0; border-radius:12px;
     background:rgba(255,255,255,.06); color:rgba(255,255,255,.55); display:grid; place-items:center;
   }
   .ta-panel-close:hover { background:rgba(255,255,255,.10); color:white; }
-  .ta-messages { flex:1; overflow:auto; padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .ta-messages {
+    flex:1; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:12px; min-height:160px;
+  }
+  .ta-empty {
+    padding:14px 15px; border-radius:18px; border:1px dashed rgba(255,255,255,.12);
+    background:rgba(255,255,255,.03); color:rgba(255,255,255,.58); font-size:12px; line-height:1.6;
+  }
   .ta-msg { display:flex; }
   .ta-msg.user { justify-content:flex-end; }
   .ta-bubble {
@@ -215,7 +210,7 @@ function render_assistant_widget(array $options = []): void {
   .ta-card-title { font-family:'Playfair Display',serif; font-size:17px; line-height:1.12; color:white; }
   .ta-card-meta { margin-top:4px; font-size:12px; color:rgba(255,255,255,.68); }
   .ta-card-detail { margin-top:4px; font-size:11px; color:rgba(255,255,255,.45); }
-  .ta-actions, .ta-prompt-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .ta-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
   .ta-pill {
     display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:8px 12px; width:auto; margin-top:0;
     border:1px solid rgba(255,255,255,.11); background:rgba(255,255,255,.05); color:rgba(255,255,255,.82);
@@ -223,7 +218,7 @@ function render_assistant_widget(array $options = []): void {
   }
   .ta-pill:hover { transform:translateY(-1px); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:white; }
   .ta-pill.primary { background:rgba(200,151,42,.14); border-color:rgba(200,151,42,.26); color:#f0c76b; }
-  .ta-panel-foot { padding:16px 18px 18px; border-top:1px solid rgba(255,255,255,.08); }
+  .ta-panel-foot { padding:14px 16px 16px; border-top:1px solid rgba(255,255,255,.08); }
   .ta-composer { display:flex; flex-direction:column; gap:10px; }
   .ta-input {
     width:100%; resize:none; min-height:52px; max-height:136px; border-radius:18px; border:1px solid rgba(255,255,255,.10);
@@ -231,9 +226,11 @@ function render_assistant_widget(array $options = []): void {
   }
   .ta-input::placeholder { color:rgba(255,255,255,.30); }
   .ta-input:focus { border-color:rgba(200,151,42,.35); box-shadow:0 0 0 4px rgba(200,151,42,.08); }
+  .ta-foot-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .ta-foot-copy { font-size:11px; color:rgba(255,255,255,.34); line-height:1.5; }
   .ta-submit {
-    display:inline-flex; align-items:center; justify-content:center; height:48px; width:auto; margin-top:0; cursor:pointer;
-    border:none; border-radius:15px; font-size:13px; font-weight:700; color:#06101d;
+    display:inline-flex; align-items:center; justify-content:center; height:44px; width:auto; margin-top:0; cursor:pointer;
+    border:none; border-radius:14px; padding:0 18px; font-size:13px; font-weight:700; color:#06101d;
     background:linear-gradient(135deg, #f0c76b, #c8972a);
   }
   .ta-submit:disabled { opacity:.55; cursor:not-allowed; }
@@ -243,21 +240,13 @@ function render_assistant_widget(array $options = []): void {
   .ta-loading span:nth-child(3) { animation-delay:.3s; }
   @keyframes taPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.75)} }
   @media (max-width: 900px) {
-    .ta-shell { right:16px; top:auto; bottom:18px; transform:none; }
+    .ta-shell { right:12px; bottom:12px; }
     .ta-launcher-copy { display:none; }
     .ta-launcher { border-radius:16px; padding:12px; }
-    .ta-panel { top:auto; right:12px; bottom:12px; left:12px; width:auto; max-height:min(82vh, 720px); }
+    .ta-panel { width:min(380px, calc(100vw - 24px)); max-height:min(68vh, 560px); }
   }
 </style>
 <div id="<?= htmlspecialchars($widget_id, ENT_QUOTES, 'UTF-8') ?>" class="ta-shell">
-  <button class="ta-launcher" type="button" data-ta-open>
-    <span class="ta-launcher-badge">AI</span>
-    <span class="ta-launcher-copy">
-      <span class="ta-launcher-kicker"><?= htmlspecialchars($eyebrow, ENT_QUOTES, 'UTF-8') ?></span>
-      <span class="ta-launcher-title"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></span>
-    </span>
-  </button>
-  <div class="ta-backdrop" data-ta-close></div>
   <aside class="ta-panel" aria-hidden="true">
     <div class="ta-panel-head">
       <div>
@@ -268,15 +257,26 @@ function render_assistant_widget(array $options = []): void {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="ta-messages" data-ta-messages></div>
+    <div class="ta-messages" data-ta-messages>
+      <div class="ta-empty" data-ta-empty><?= htmlspecialchars($empty_state, ENT_QUOTES, 'UTF-8') ?></div>
+    </div>
     <div class="ta-panel-foot">
-      <div class="ta-prompt-list" data-ta-prompts></div>
       <form class="ta-composer" data-ta-form>
-        <textarea class="ta-input" rows="1" data-ta-input placeholder="Kérdezz például a szabad termekről..."></textarea>
-        <button class="ta-submit" type="submit" data-ta-submit>Küldés</button>
+        <textarea class="ta-input" rows="1" data-ta-input placeholder="<?= htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8') ?>"></textarea>
+        <div class="ta-foot-row">
+          <span class="ta-foot-copy">Az aktuális oldalhoz igazodva válaszol.</span>
+          <button class="ta-submit" type="submit" data-ta-submit><?= htmlspecialchars($submit_label, ENT_QUOTES, 'UTF-8') ?></button>
+        </div>
       </form>
     </div>
   </aside>
+  <button class="ta-launcher" type="button" data-ta-open>
+    <span class="ta-launcher-badge">AI</span>
+    <span class="ta-launcher-copy">
+      <span class="ta-launcher-kicker"><?= htmlspecialchars($eyebrow, ENT_QUOTES, 'UTF-8') ?></span>
+      <span class="ta-launcher-title"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></span>
+    </span>
+  </button>
 </div>
 <script>
 (() => {
@@ -286,10 +286,10 @@ function render_assistant_widget(array $options = []): void {
   root.dataset.bound = '1';
 
   const openButton = root.querySelector('[data-ta-open]');
-  const closeButtons = root.querySelectorAll('[data-ta-close]');
+  const closeButton = root.querySelector('[data-ta-close]');
   const panel = root.querySelector('.ta-panel');
   const messagesEl = root.querySelector('[data-ta-messages]');
-  const promptsEl = root.querySelector('[data-ta-prompts]');
+  const emptyEl = root.querySelector('[data-ta-empty]');
   const formEl = root.querySelector('[data-ta-form]');
   const inputEl = root.querySelector('[data-ta-input]');
   const submitEl = root.querySelector('[data-ta-submit]');
@@ -308,9 +308,17 @@ function render_assistant_widget(array $options = []): void {
     inputEl.style.height = Math.min(inputEl.scrollHeight, 136) + 'px';
   }
 
+  function syncEmpty() {
+    const hasMessages = messagesEl.querySelector('.ta-msg') !== null;
+    if (emptyEl) {
+      emptyEl.style.display = hasMessages ? 'none' : 'block';
+    }
+  }
+
   function openPanel() {
     root.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
+    window.setTimeout(() => inputEl.focus(), 60);
   }
 
   function closePanel() {
@@ -320,13 +328,6 @@ function render_assistant_widget(array $options = []): void {
 
   function scrollToBottom() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function setPrompts(items) {
-    const prompts = Array.isArray(items) && items.length ? items : config.prompts;
-    promptsEl.innerHTML = prompts.map(prompt =>
-      `<button class="ta-pill" type="button" data-ta-prompt="${esc(prompt)}">${esc(prompt)}</button>`
-    ).join('');
   }
 
   function appendUser(text) {
@@ -339,6 +340,7 @@ function render_assistant_widget(array $options = []): void {
       </div>
     `;
     messagesEl.appendChild(row);
+    syncEmpty();
     scrollToBottom();
   }
 
@@ -353,6 +355,7 @@ function render_assistant_widget(array $options = []): void {
       </div>
     `;
     messagesEl.appendChild(row);
+    syncEmpty();
     scrollToBottom();
   }
 
@@ -394,7 +397,7 @@ function render_assistant_widget(array $options = []): void {
       </div>
     `;
     messagesEl.appendChild(row);
-    setPrompts(payload.suggestions);
+    syncEmpty();
     scrollToBottom();
   }
 
@@ -413,7 +416,11 @@ function render_assistant_widget(array $options = []): void {
       const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({
+          message,
+          context: config.context,
+          contextData: config.contextData,
+        })
       });
       const payload = await response.json();
       removeLoading();
@@ -421,16 +428,21 @@ function render_assistant_widget(array $options = []): void {
     } catch (error) {
       removeLoading();
       appendAssistant({
-        reply: 'Most nem sikerült elérnem az asszisztenst. Próbáld meg újra egy pillanat múlva.',
-        suggestions: config.prompts
+        reply: 'Most nem sikerült elérnem az asszisztenst. Próbáld meg újra egy pillanat múlva.'
       });
     } finally {
       submitEl.disabled = false;
     }
   }
 
-  openButton?.addEventListener('click', openPanel);
-  closeButtons.forEach(button => button.addEventListener('click', closePanel));
+  openButton?.addEventListener('click', () => {
+    if (root.classList.contains('open')) {
+      closePanel();
+      return;
+    }
+    openPanel();
+  });
+  closeButton?.addEventListener('click', closePanel);
 
   formEl?.addEventListener('submit', event => {
     event.preventDefault();
@@ -445,26 +457,22 @@ function render_assistant_widget(array $options = []): void {
     }
   });
 
-  promptsEl?.addEventListener('click', event => {
-    const target = event.target.closest('[data-ta-prompt]');
-    if (!target) return;
-    submitPrompt(target.getAttribute('data-ta-prompt') || '');
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && root.classList.contains('open')) {
+      closePanel();
+    }
   });
 
   window.openTickyAssistant = prompt => {
     openPanel();
     if (typeof prompt === 'string' && prompt.trim()) {
-      submitPrompt(prompt.trim());
-      return;
+      inputEl.value = prompt.trim();
+      autoGrow();
     }
     inputEl.focus();
   };
 
-  appendAssistant({
-    reply: config.intro,
-    suggestions: config.prompts
-  });
-  setPrompts(config.prompts);
+  syncEmpty();
   autoGrow();
 })();
 </script>
@@ -475,10 +483,6 @@ function ido_kozott(string $ido, string $start, string $end): bool {
     return $ido >= $start && $ido <= $end;
 }
 
-/**
- * URL routing: egyszerű minta illesztés
- * Példa: match_route('/api/terem/{szam}', $uri) → ['szam' => '204'] vagy false
- */
 function match_route(string $pattern, string $uri): array|false {
     $regex = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $pattern);
     $regex = '#^' . $regex . '$#';
@@ -488,9 +492,6 @@ function match_route(string $pattern, string $uri): array|false {
     return false;
 }
 
-/**
- * CORS preflight kezelés
- */
 function handle_cors(): void {
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         header('Access-Control-Allow-Origin: *');
