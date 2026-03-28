@@ -333,8 +333,8 @@ setInterval(() => { if (curKod) loadData() }, REFRESH)
   'title' => 'Tanár AI',
   'eyebrow' => 'Tanár oldal',
   'context' => 'tanar',
-  'empty_state' => 'Itt tanárkereséshez, szabad termekhez vagy egy konkrét terem gyors ellenőrzéséhez kérdezhetsz.',
-  'placeholder' => 'Írj egy kérdést a tanár oldalhoz kapcsolódva...',
+  'empty_state' => 'Itt tanármonogram alapján is kérdezhetsz. Például: hol van most XY, vagy egyszerűen csak írd be a monogramot.',
+  'placeholder' => 'Írj be egy tanár monogramot vagy kérdezz rá, hol van most...',
 ]); ?>
 </body>
 </html>
