@@ -81,10 +81,48 @@
 
   /* Footer */
   .footer { position:relative;z-index:10;max-width:580px;margin:12px auto 40px;padding:0 16px;display:flex;align-items:center;justify-content:space-between; }
+  .mini-chip {
+    display:inline-flex; align-items:center; gap:8px; width:auto; margin-top:0; cursor:pointer;
+    padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.05); color:rgba(255,255,255,.78); font-size:12px; font-weight:600;
+    transition:all .15s ease;
+  }
+  .mini-chip:hover { background:rgba(255,255,255,.09); color:white; }
+  .mini-chip.primary { background:rgba(200,151,42,.14); border-color:rgba(200,151,42,.28); color:#f0c76b; }
 </style>
 </head>
 <body>
 <div class="top-line"></div>
+
+<nav style="background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between">
+  <div class="flex items-center gap-3 min-w-0">
+    <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;" class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
+      Ticky
+    </a>
+    <span style="color:rgba(255,255,255,.2);">·</span>
+    <span class="text-sm truncate" style="color:rgba(255,255,255,.45);">Terem állapot</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <a href="/termek" class="mini-chip">Termek</a>
+    <button type="button" class="mini-chip primary" onclick="window.openTickyAssistant?.('Mi van most a 204-es teremben?')">AI assist</button>
+  </div>
+</nav>
+
+<section class="relative z-10 max-w-5xl mx-auto px-4 pt-6">
+  <div class="glass rounded-2xl px-5 py-5 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    <div class="max-w-2xl">
+      <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Valós idejű teremnézet</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:34px;line-height:1.06;font-weight:700;color:white;margin-top:8px;">Aktuális teremállapot és heti ritmus</h1>
+      <p class="text-sm mt-3" style="color:rgba(255,255,255,.58);line-height:1.7;">Itt egyszerre látod a pillanatnyi foglaltságot, a következő órát és a heti mintázatot.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" class="mini-chip primary" onclick="window.openTickyAssistant?.('Mi van most a 204-es teremben?')">Kérdezd az AI-t</button>
+      <a href="/termek" class="mini-chip">Összes terem</a>
+      <a href="/assistant" class="mini-chip">Teljes asszisztens</a>
+    </div>
+  </div>
+</section>
 
 <div class="relative z-10 max-w-sm mx-auto px-4 pt-8 slide-up">
 
@@ -345,5 +383,16 @@ if(!teremSzam){
   setInterval(fetchTimetable, 5*60_000)
 }
 </script>
+<?php render_assistant_widget([
+  'title' => 'Terem AI',
+  'eyebrow' => 'Terem oldal',
+  'intro' => 'Megnézem neked az adott terem állapotát, a következő órát, vagy ajánlok szabad termeket.',
+  'prompts' => [
+    'Mi van most a 204-es teremben?',
+    'Melyik termek szabadok most?',
+    'Melyik termek foglaltak most?',
+    'Nyisd meg a tanárkeresőt',
+  ],
+]); ?>
 </body>
 </html>

@@ -33,7 +33,19 @@
   input[type=search]:focus { outline:none; border-color:rgba(200,151,42,.4); }
   input[type=search]::-webkit-search-cancel-button { display:none; }
   @keyframes modalIn { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:none} }
+  .hero-shell { border-radius:28px; overflow:hidden; }
+  .hero-metric { padding:18px 20px; background:rgba(255,255,255,.03); border-top:1px solid rgba(255,255,255,.06); }
+  .hero-metric + .hero-metric { border-left:1px solid rgba(255,255,255,.06); }
+  .hero-label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:rgba(255,255,255,.28); }
+  .hero-value { font-family:'Playfair Display',serif; font-size:30px; line-height:1; font-weight:700; color:white; }
+  .hero-copy { color:rgba(255,255,255,.55); font-size:13px; line-height:1.6; }
+  .hero-chip { display:inline-flex; align-items:center; gap:8px; width:auto; margin-top:0; cursor:pointer; border-radius:999px; padding:9px 13px; font-size:12px; font-weight:600; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.06); color:rgba(255,255,255,.78); transition:all .15s ease; }
+  .hero-chip:hover { background:rgba(255,255,255,.10); color:white; }
+  .hero-chip.primary { background:rgba(200,151,42,.14); border-color:rgba(200,151,42,.28); color:#f0c76b; }
   a { text-decoration:none; }
+  @media (max-width: 900px) {
+    .hero-metric + .hero-metric { border-left:none; border-top:1px solid rgba(255,255,255,.06); }
+  }
 </style>
 </head>
 <body>
@@ -62,6 +74,40 @@
     <span>Hétvége – az órarendek hétfőn frissülnek. A termek listája elérhető, de foglaltság nem jelenik meg.</span>
   </div>
 </div>
+
+<section class="relative z-10 max-w-5xl mx-auto px-4 pt-5">
+  <div class="glass hero-shell">
+    <div class="px-6 py-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+      <div class="max-w-2xl">
+        <p class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:rgba(255,255,255,.3);">Térkép helyett élő állapot</p>
+        <h1 style="font-family:'Playfair Display',serif;font-size:44px;line-height:1.02;font-weight:700;color:white;">Gyors teremáttekintés egy helyen</h1>
+        <p class="hero-copy mt-3">Szűrj a szabad vagy foglalt termekre, nézd meg az aktuális órát, és ha kell, kérdezd meg az AI asszisztenst közvetlenül oldalról.</p>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button class="hero-chip primary" type="button" onclick="window.openTickyAssistant?.('Melyik termek szabadok most?')">Kérdezd az AI-t</button>
+          <a class="hero-chip" href="/assistant">Teljes asszisztens oldal</a>
+          <a class="hero-chip" href="/tanar">Tanár kereső</a>
+        </div>
+      </div>
+      <div class="w-full lg:w-auto grid sm:grid-cols-3 gap-3">
+        <div class="hero-metric rounded-2xl">
+          <div class="hero-label">Összes terem</div>
+          <div id="hero-cnt-mind" class="hero-value mt-2">–</div>
+          <div class="hero-copy mt-2">Valós idejű lista és részletes teremnézet.</div>
+        </div>
+        <div class="hero-metric rounded-2xl">
+          <div class="hero-label">Szabad most</div>
+          <div id="hero-cnt-szabad" class="hero-value mt-2" style="color:#4ade80;">–</div>
+          <div class="hero-copy mt-2">Egy kattintással szűrhető, akár gyors óracsere előtt is.</div>
+        </div>
+        <div class="hero-metric rounded-2xl">
+          <div class="hero-label">Foglalt most</div>
+          <div id="hero-cnt-foglalt" class="hero-value mt-2" style="color:#ff6b82;">–</div>
+          <div class="hero-copy mt-2">Azonnal látszik a tanár, osztály és a folyamatban lévő óra.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- Filter bar -->
 <div class="relative z-10 max-w-5xl mx-auto px-4 pt-5 pb-3">
@@ -135,6 +181,9 @@ function updateCounts() {
   document.getElementById('cnt-mind').textContent=allRooms.length
   document.getElementById('cnt-szabad').textContent=sz
   document.getElementById('cnt-foglalt').textContent=fo
+  document.getElementById('hero-cnt-mind').textContent=allRooms.length
+  document.getElementById('hero-cnt-szabad').textContent=sz
+  document.getElementById('hero-cnt-foglalt').textContent=fo
 }
 
 function setFilter(f) {
@@ -236,5 +285,16 @@ function refresh() {
 fetchRooms()
 setInterval(fetchRooms, 60_000)
 </script>
+<?php render_assistant_widget([
+  'title' => 'Terem AI',
+  'eyebrow' => 'Termek oldal',
+  'intro' => 'Itt gyorsan segítek szabad vagy foglalt termeket keresni, illetve egy konkrét terem állapotát megnézni.',
+  'prompts' => [
+    'Melyik termek szabadok most?',
+    'Melyik termek foglaltak most?',
+    'Mi van most a 204-es teremben?',
+    'Nyisd meg a tanárkeresőt',
+  ],
+]); ?>
 </body>
 </html>

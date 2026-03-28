@@ -65,13 +65,42 @@
   .lista-in { animation:listaIn .3s cubic-bezier(.22,1,.36,1) both; }
   @keyframes listaIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 
+  .layout-grid { display:grid; gap:18px; grid-template-columns:minmax(0,420px) minmax(0,1fr); align-items:start; }
+  .info-panel { border-radius:24px; padding:24px; }
+  .info-chip {
+    display:inline-flex; align-items:center; gap:8px; width:auto; margin-top:0; cursor:pointer;
+    padding:9px 13px; border-radius:999px; border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.05); color:rgba(255,255,255,.78); font-size:12px; font-weight:600;
+    transition:all .15s ease;
+  }
+  .info-chip:hover { background:rgba(255,255,255,.09); color:white; }
+  .info-chip.primary { background:rgba(200,151,42,.14); border-color:rgba(200,151,42,.28); color:#f0c76b; }
   a { text-decoration:none; }
+  @media (max-width:980px) {
+    .layout-grid { grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body class="flex flex-col items-center justify-start p-4 pb-16">
 <div class="top-line"></div>
 
-<div class="w-full max-w-sm slide-up relative z-10 mt-6">
+<nav style="background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 w-full px-5 h-16 flex items-center justify-between">
+  <div class="flex items-center gap-3 min-w-0">
+    <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;" class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
+      Ticky
+    </a>
+    <span style="color:rgba(255,255,255,.2);">·</span>
+    <span class="text-sm truncate" style="color:rgba(255,255,255,.45);">Tanár nézet</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <a href="/termek" class="info-chip">Termek</a>
+    <button type="button" class="info-chip primary" onclick="window.openTickyAssistant?.('Nyisd meg a tanárkeresőt')">AI segítség</button>
+  </div>
+</nav>
+
+<div class="w-full max-w-5xl slide-up relative z-10 mt-6 px-1">
+  <div class="layout-grid">
   <div class="glass rounded-2xl overflow-hidden">
 
     <!-- Fejléc -->
@@ -111,6 +140,32 @@
         Frissít
       </button>
     </div>
+  </div>
+  <aside class="glass info-panel">
+    <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Gyorsabb tanárkeresés</p>
+    <h1 style="font-family:'Playfair Display',serif;font-size:40px;line-height:1.05;font-weight:700;color:white;margin-top:10px;">Tanár állapot és napi ritmus egy helyen</h1>
+    <p class="text-sm mt-4" style="color:rgba(255,255,255,.62);line-height:1.7;">
+      Válassz ki egy tanárt, és rögtön látod, hogy most tanít-e, melyik teremben van, és hogyan néz ki a teljes mai napja.
+    </p>
+    <div class="grid sm:grid-cols-2 gap-3 mt-5">
+      <div class="rounded-2xl p-4" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);">
+        <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.28);">Valós állapot</p>
+        <p class="mt-2" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:white;">Most tanít?</p>
+        <p class="text-sm mt-2" style="color:rgba(255,255,255,.5);">A fejlécből és az aktuális kártyából azonnal látszik.</p>
+      </div>
+      <div class="rounded-2xl p-4" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);">
+        <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.28);">Mai fókusz</p>
+        <p class="mt-2" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:white;">Letisztult napirend</p>
+        <p class="text-sm mt-2" style="color:rgba(255,255,255,.5);">A lista jobban kiemeli az aktuális órát és a csoportbontásokat.</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2 mt-5">
+      <button type="button" class="info-chip primary" onclick="window.openTickyAssistant?.('Melyik termek szabadok most?')">Szabad termek</button>
+      <button type="button" class="info-chip" onclick="window.openTickyAssistant?.('Nyisd meg a tanárkeresőt')">AI tanársegéd</button>
+      <a href="/assistant" class="info-chip">Teljes asszisztens</a>
+      <a href="/termek" class="info-chip">Összes terem</a>
+    </div>
+  </aside>
   </div>
 </div>
 
@@ -386,5 +441,16 @@ function refresh() {
 loadTanarok()
 setInterval(() => { if (curKod) loadData() }, REFRESH)
 </script>
+<?php render_assistant_widget([
+  'title' => 'Tanár AI',
+  'eyebrow' => 'Tanár oldal',
+  'intro' => 'Segítek szabad termet keresni, teremállapotot megnézni, vagy gyorsan a megfelelő nézetre ugrani.',
+  'prompts' => [
+    'Nyisd meg a tanárkeresőt',
+    'Melyik termek szabadok most?',
+    'Melyik termek foglaltak most?',
+    'Mi van most a 204-es teremben?',
+  ],
+]); ?>
 </body>
 </html>

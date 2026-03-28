@@ -109,6 +109,17 @@ if ($uri === '/') {
           <span class="text-xs font-medium" style="color:#4ade80;"><?= htmlspecialchars($nap_nevek[$nap]) ?> · <?= htmlspecialchars($ido) ?> · Aktív</span>
         </div>
       </div>
+      <div class="fade-up-2 glass rounded-2xl px-5 py-4 mb-4" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;">
+        <div>
+          <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.28);">Mai fókusz</p>
+          <p class="text-sm mt-1" style="color:rgba(255,255,255,.58);">Élő teremnézet, gyors tanárkeresés és beépített AI támogatás egy felületen.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" class="px-3 py-2 rounded-full text-xs font-semibold" style="background:rgba(200,151,42,.14);border:1px solid rgba(200,151,42,.28);color:#f0c76b;width:auto;margin-top:0;" onclick="window.openTickyAssistant?.('Melyik termek szabadok most?')">AI assist</button>
+          <a href="/termek" class="px-3 py-2 rounded-full text-xs font-semibold" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.7);">Élő termek</a>
+          <a href="/tanar" class="px-3 py-2 rounded-full text-xs font-semibold" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.7);">Tanár</a>
+        </div>
+      </div>
       <div class="fade-up-2 mb-3">
         <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
         <a href="/termek" class="glass card-hover block px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
@@ -152,6 +163,17 @@ if ($uri === '/') {
       <p class="fade-up-3 text-center text-xs mt-8" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
     </div>
   </div>
+  <?php render_assistant_widget([
+    'title' => 'Ticky AI',
+    'eyebrow' => 'Főoldal',
+    'intro' => 'Kérdezhetsz szabad termekről, foglaltságról, adott terem állapotáról vagy gyors navigációról.',
+    'prompts' => [
+      'Melyik termek szabadok most?',
+      'Melyik termek foglaltak most?',
+      'Mi van most a 204-es teremben?',
+      'Nyisd meg a tanárkeresőt',
+    ],
+  ]); ?>
 </body>
 </html>
     <?php
