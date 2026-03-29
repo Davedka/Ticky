@@ -697,11 +697,8 @@ if (assistant_has_any($normalized, ['kijelzo'])) {
 
 if (assistant_has_any($normalized, ['admin'])) {
     assistant_response(
-        'Az admin felületet innen tudod megnyitni.',
-        [],
-        [
-            ['label' => 'Admin oldal', 'href' => '/admin'],
-        ]
+        'A publikus asszisztens nem ad ki admin belépési pontot.',
+        []
     );
 }
 

@@ -4,9 +4,6 @@
 function json_response(mixed $data, int $status = 200): never {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     exit;
 }
@@ -22,6 +19,175 @@ function mai_nap(): int {
 
 function aktualis_ido(): string {
     return date('H:i');
+}
+
+function ticky_is_https(): bool {
+    if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+
+    if ((string) ($_SERVER['SERVER_PORT'] ?? '') === '443') {
+        return true;
+    }
+
+    $forwarded_proto = trim((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    if ($forwarded_proto !== '') {
+        $parts = explode(',', $forwarded_proto);
+        return strtolower(trim($parts[0])) === 'https';
+    }
+
+    return false;
+}
+
+function ticky_current_origin_parts(): array {
+    $forwarded_host = trim((string) ($_SERVER['HTTP_X_FORWARDED_HOST'] ?? ''));
+    $host = $forwarded_host !== '' ? $forwarded_host : trim((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    $scheme = ticky_is_https() ? 'https' : 'http';
+
+    if ($host === '') {
+        return ['scheme' => $scheme, 'host' => '', 'port' => null, 'origin' => null];
+    }
+
+    $origin = $scheme . '://' . $host;
+    return [
+        'scheme' => $scheme,
+        'host' => strtolower((string) parse_url($origin, PHP_URL_HOST)),
+        'port' => parse_url($origin, PHP_URL_PORT),
+        'origin' => $origin,
+    ];
+}
+
+function ticky_request_origin_is_same_host(): bool {
+    $current = ticky_current_origin_parts();
+    if (($current['host'] ?? '') === '') {
+        return true;
+    }
+
+    foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $header) {
+        $value = trim((string) ($_SERVER[$header] ?? ''));
+        if ($value === '') {
+            continue;
+        }
+
+        $host = strtolower((string) parse_url($value, PHP_URL_HOST));
+        if ($host === '' || $host !== $current['host']) {
+            return false;
+        }
+
+        $port = parse_url($value, PHP_URL_PORT);
+        if ($current['port'] !== null && $port !== null && (int) $port !== (int) $current['port']) {
+            return false;
+        }
+
+        return true;
+    }
+
+    return true;
+}
+
+function private_response_headers(): void {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('X-Robots-Tag: noindex, nofollow, noarchive');
+}
+
+function admin_password(): string {
+    static $password = null;
+
+    if ($password !== null) {
+        return $password;
+    }
+
+    $password = trim((string) (getenv('ADMIN_PASSWORD') ?: ($_ENV['ADMIN_PASSWORD'] ?? '')));
+    return $password;
+}
+
+function admin_is_configured(): bool {
+    return admin_password() !== '';
+}
+
+function admin_cookie_name(): string {
+    return 'ticky_admin_session';
+}
+
+function admin_cookie_options(int $expires): array {
+    return [
+        'expires' => $expires,
+        'path' => '/',
+        'secure' => ticky_is_https(),
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ];
+}
+
+function admin_user_agent_hash(): string {
+    return substr(hash('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')), 0, 24);
+}
+
+function admin_sign_token(int $expires_at): string {
+    return hash_hmac('sha256', 'ticky_admin|' . $expires_at . '|' . admin_user_agent_hash(), admin_password());
+}
+
+function admin_issue_token(?int $expires_at = null): string {
+    $expires_at ??= time() + (8 * 3600);
+    return $expires_at . '.' . admin_sign_token($expires_at);
+}
+
+function admin_set_auth_cookie(): void {
+    $expires_at = time() + (8 * 3600);
+    setcookie(admin_cookie_name(), admin_issue_token($expires_at), admin_cookie_options($expires_at));
+}
+
+function admin_clear_auth_cookie(): void {
+    setcookie(admin_cookie_name(), '', admin_cookie_options(time() - 3600));
+}
+
+function admin_is_authenticated(): bool {
+    if (!admin_is_configured()) {
+        return false;
+    }
+
+    $cookie = trim((string) ($_COOKIE[admin_cookie_name()] ?? ''));
+    if ($cookie === '' || !str_contains($cookie, '.')) {
+        return false;
+    }
+
+    [$expires_raw, $signature] = explode('.', $cookie, 2);
+    if (!ctype_digit($expires_raw) || $signature === '') {
+        return false;
+    }
+
+    $expires_at = (int) $expires_raw;
+    if ($expires_at < time()) {
+        return false;
+    }
+
+    return hash_equals(admin_sign_token($expires_at), $signature);
+}
+
+function require_admin_api_request(array $allowed_methods): void {
+    handle_cors(array_merge($allowed_methods, ['OPTIONS']), ['Content-Type', 'X-Ticky-Admin']);
+    private_response_headers();
+
+    if (!in_array($_SERVER['REQUEST_METHOD'], $allowed_methods, true)) {
+        json_error('Érvénytelen kérés', 405);
+    }
+
+    if (!admin_is_configured()) {
+        json_error('Nem található', 404);
+    }
+
+    if (!admin_is_authenticated()) {
+        json_error('Hozzáférés megtagadva', 401);
+    }
+
+    if ((string) ($_SERVER['HTTP_X_TICKY_ADMIN'] ?? '') !== '1') {
+        json_error('Érvénytelen admin kérés', 400);
+    }
+
+    if (!ticky_request_origin_is_same_host()) {
+        json_error('Tiltott origin', 403);
+    }
 }
 
 function render_time_sync_bootstrap(): void {
@@ -492,11 +658,22 @@ function match_route(string $pattern, string $uri): array|false {
     return false;
 }
 
-function handle_cors(): void {
+function handle_cors(array $methods = ['GET', 'POST', 'PATCH', 'OPTIONS'], array $headers = ['Content-Type', 'Authorization']): void {
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization');
+        if (!ticky_request_origin_is_same_host()) {
+            http_response_code(403);
+            exit;
+        }
+
+        $origin = trim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''));
+        if ($origin !== '') {
+            header('Access-Control-Allow-Origin: ' . $origin);
+            header('Vary: Origin');
+        }
+
+        header('Access-Control-Allow-Methods: ' . implode(', ', $methods));
+        header('Access-Control-Allow-Headers: ' . implode(', ', $headers));
+        header('Access-Control-Max-Age: 600');
         http_response_code(204);
         exit;
     }
