@@ -99,9 +99,15 @@ function admin_path_value(): string {
     }
 
     $raw = trim((string) (getenv('ADMIN_PATH') ?: ($_ENV['ADMIN_PATH'] ?? '')));
+    $raw = trim($raw, " \t\n\r\0\x0B\"'");
     if ($raw === '') {
         $path = '/admin';
         return $path;
+    }
+
+    if (preg_match('#^[A-Za-z][A-Za-z0-9+.-]*://#', $raw)) {
+        $parsed_path = parse_url($raw, PHP_URL_PATH);
+        $raw = is_string($parsed_path) ? $parsed_path : '';
     }
 
     $raw = preg_replace('/[?#].*$/', '', $raw) ?? '';
@@ -120,6 +126,13 @@ function admin_url(array $query = []): string {
     }
 
     return $path . '?' . http_build_query($query);
+}
+
+function admin_path_matches_request(string $uri): bool {
+    $admin_path = admin_path_value();
+    $normalized_uri = $uri === '/' ? '/' : rtrim($uri, '/');
+    $normalized_admin = $admin_path === '/' ? '/' : rtrim($admin_path, '/');
+    return $normalized_uri === $normalized_admin;
 }
 
 function admin_password(): string {

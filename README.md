@@ -138,7 +138,7 @@ ticky-backend/
 | `SUPABASE_SERVICE_KEY` | Service role key (admin ops) |
 | `TIMEZONE` | `Europe/Budapest` |
 | `ADMIN_PASSWORD` | Admin panel password |
-| `ADMIN_PATH` | Secret admin route, e.g. `ticky-panel-7f3a9b2x` |
+| `ADMIN_PATH` | Secret admin route, e.g. `ticky-panel-7f3a9b2x` or `/ticky-panel-7f3a9b2x` |
 
 > ⚠️ **Never commit these keys.** Set them via Render dashboard → Environment Variables.
 
