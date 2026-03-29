@@ -138,7 +138,6 @@ ticky-backend/
 | `SUPABASE_SERVICE_KEY` | Service role key (admin ops) |
 | `TIMEZONE` | `Europe/Budapest` |
 | `ADMIN_PASSWORD` | Admin panel password |
-| `ADMIN_ALLOWED_IPS` | Comma-separated allowlist for admin access, e.g. `84.2.3.4,84.2.3.0/24` |
 
 > ⚠️ **Never commit these keys.** Set them via Render dashboard → Environment Variables.
 
