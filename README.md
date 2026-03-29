@@ -129,7 +129,6 @@ ticky-backend/
 5. Set environment variables (see below)
 6. Deploy — takes ~1–2 minutes
 
-### Required Environment Variables
 
 | Variable | Description |
 |----------|-------------|
