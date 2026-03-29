@@ -58,6 +58,13 @@
   .qr-wrap canvas, .qr-wrap img { display:block !important; }
 
   a { text-decoration:none; }
+  #qr-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:16px; }
+  @media (max-width: 640px) {
+    body::before { background-size:28px 28px; }
+    #qr-grid { grid-template-columns:1fr; gap:12px; }
+    .qr-card { padding:16px; }
+    .gold-btn, .nav-btn { width:100%; justify-content:center; }
+  }
 
   /* ── NYOMTATÁS ────────────────────────────── */
   @media print {
@@ -116,7 +123,7 @@
 <div class="top-line"></div>
 
 <!-- Navbar -->
-<nav class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between screen-only" style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);">
+<nav class="sticky top-0 z-50 px-4 sm:px-5 py-3 sm:py-0 min-h-16 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 screen-only" style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);">
   <div class="flex items-center gap-3">
     <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;" class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;animation:pulseDot 2s infinite;"></span>
@@ -125,7 +132,7 @@
     <span style="color:rgba(255,255,255,.2);">·</span>
     <span class="text-sm" style="color:rgba(255,255,255,.45);">QR Generátor</span>
   </div>
-  <div class="flex items-center gap-2">
+  <div class="w-full sm:w-auto flex items-center gap-2">
     <a href="/termek" class="nav-btn">← Termek</a>
   </div>
 </nav>
@@ -137,7 +144,7 @@
       <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:white;letter-spacing:-.5px;">QR Kódok</h1>
       <p class="text-sm mt-1" style="color:rgba(255,255,255,.4);">Kattints egy teremre a kijelöléshez, aztán nyomtasd ki</p>
     </div>
-    <div class="flex items-center gap-2 flex-wrap">
+    <div class="flex w-full sm:w-auto flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-wrap">
       <button class="nav-btn" id="btn-select-all" onclick="selectAll()">Összes kijelölése</button>
       <button class="nav-btn" id="btn-clear" onclick="clearSelection()" style="display:none;">Kijelölés törlése</button>
       <button class="gold-btn" onclick="printSelected()" id="btn-print">

@@ -339,6 +339,25 @@
     height:100%; background:linear-gradient(90deg,var(--navy),var(--gold));
     transition:width .5s linear;
   }
+  @media (max-width: 900px) {
+    html, body { height:auto; min-height:100%; overflow:auto; }
+    .topbar, .statusbar { height:auto; padding:14px 16px; flex-direction:column; align-items:stretch; gap:12px; }
+    .tb-brand, .tb-center, .tb-right { width:100%; }
+    .tb-center { align-items:flex-start; }
+    .tb-right { flex-wrap:wrap; justify-content:space-between; gap:10px; }
+    .filter-grp { flex:1 1 100%; overflow-x:auto; }
+    .live-clock { font-size:24px; }
+    .statusbar > div:first-child { width:100%; flex-wrap:wrap; gap:10px 14px !important; }
+    .main { height:auto; min-height:calc(100vh - 180px); padding:12px; overflow:visible; }
+    .rooms-grid { height:auto; overflow:visible; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); }
+    .room-card { min-height:104px; padding:12px 14px; }
+  }
+  @media (max-width: 560px) {
+    .rooms-grid { grid-template-columns:1fr; }
+    .room-num { font-size:24px; }
+    .card-tanar { font-size:14px; }
+    .szunet-banner { width:calc(100vw - 24px); bottom:16px; padding:12px 16px; text-align:center; justify-content:center; }
+  }
 </style>
 </head>
 <body>

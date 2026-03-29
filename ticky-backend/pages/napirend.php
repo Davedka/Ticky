@@ -101,7 +101,7 @@
 
   /* ── MOBIL ── */
   .mob-section { display:none; }
-  @media (max-width:700px) {
+  @media (max-width:860px) {
     .tt-outer { display:none; }
     .mob-section { display:block; }
   }
@@ -130,6 +130,12 @@
   /* Skeleton */
   .skel { background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:8px; }
   @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  @media (max-width: 860px) {
+    body::before { background-size:28px 28px; }
+    .navbar { height:auto; padding:12px 16px; flex-direction:column; align-items:stretch; gap:10px; }
+    .page-header { padding:16px 16px 0; }
+    .terem-num { font-size:40px; }
+  }
 </style>
 </head>
 <body>
@@ -137,13 +143,13 @@
 
 <!-- Navbar -->
 <nav class="navbar">
-  <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">
+  <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
     <a href="/">Ticky</a>
     <span style="color:rgba(255,255,255,.2);font-weight:400;">·</span>
     <span id="nav-cim" style="color:rgba(255,255,255,.45);font-size:15px;font-weight:400;">Napirend</span>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
     <a id="nav-vissza" href="/termek" class="nav-btn">← QR nézet</a>
     <button onclick="refresh()" class="nav-btn" style="display:flex;align-items:center;gap:4px;padding:7px 10px;">
       <svg id="ri" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>

@@ -56,15 +56,20 @@
   .lista-in { animation:listaIn .3s cubic-bezier(.22,1,.36,1) both; }
   @keyframes listaIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
   a { text-decoration:none; }
+  @media (max-width: 640px) {
+    body::before { background-size:28px 28px; }
+    .tanar-shell { margin-top:16px; }
+    .custom-select { font-size:16px; padding:13px 40px 13px 14px; }
+  }
 </style>
 </head>
-<body class="flex flex-col items-center justify-start p-4 pb-16">
+<body class="flex flex-col items-center justify-start px-4 pt-4 sm:pt-6 pb-24">
 <div class="top-line"></div>
 
-<div class="w-full max-w-sm slide-up relative z-10 mt-6">
+<div class="tanar-shell w-full max-w-md slide-up relative z-10 mt-6">
   <div class="glass rounded-2xl overflow-hidden">
     <div class="px-6 pt-6 pb-5" style="border-bottom:1px solid rgba(255,255,255,.08);">
-      <div class="flex items-center justify-between gap-3 mb-3">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
         <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Tanár kereső</p>
         <div id="status-pill" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);">
           <span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" id="sd" style="background:rgba(255,255,255,.3);display:inline-block;"></span>
@@ -88,7 +93,7 @@
       <div id="lista"><p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kiválasztva tanár</p></div>
     </div>
 
-    <div class="px-6 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
+    <div class="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="border-top:1px solid rgba(255,255,255,.08);">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:14px;font-weight:700;">Ticky</a>
       <span class="text-xs" style="color:rgba(255,255,255,.28);" id="ido">–</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
@@ -147,15 +152,15 @@ function setAllapot(a) {
   const dot = document.getElementById('sd')
   const txt = document.getElementById('st')
   if (a === 'tant') {
-    document.body.className = 'flex flex-col items-center justify-start p-4 pb-16 tant'
+    document.body.className = 'flex flex-col items-center justify-start px-4 pt-4 sm:pt-6 pb-24 tant'
     pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(200,16,46,.25);color:#ff6b82;border:1px solid rgba(200,16,46,.4);flex-shrink:0;'
     dot.style.background = '#ff6b82'; txt.textContent = 'TANÍT'
   } else if (a === 'szabad') {
-    document.body.className = 'flex flex-col items-center justify-start p-4 pb-16 szabad'
+    document.body.className = 'flex flex-col items-center justify-start px-4 pt-4 sm:pt-6 pb-24 szabad'
     pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(26,138,74,.25);color:#4ade80;border:1px solid rgba(26,138,74,.4);flex-shrink:0;'
     dot.style.background = '#4ade80'; txt.textContent = 'SZABAD'
   } else {
-    document.body.className = 'flex flex-col items-center justify-start p-4 pb-16'
+    document.body.className = 'flex flex-col items-center justify-start px-4 pt-4 sm:pt-6 pb-24'
     pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);flex-shrink:0;'
     dot.style.background = 'rgba(255,255,255,.3)'; txt.textContent = '–'
   }
@@ -228,7 +233,7 @@ function renderAkt(a, k) {
           </div>
           <p style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:white;line-height:1.1;">${esc(a.terem)}. terem</p>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p>
             <p style="font-family:'Playfair Display',serif;font-size:${a.is_csoport ? '14px' : '18px'};font-weight:700;color:white;line-height:1.3;">${esc(a.osztaly)}</p>

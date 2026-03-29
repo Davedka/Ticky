@@ -121,7 +121,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
   .toast.ok{background:rgba(0,200,150,.2);border:1px solid rgba(0,200,150,.4);color:#00c896;}
   .toast.err{background:rgba(232,51,74,.2);border:1px solid rgba(232,51,74,.4);color:#ff6b82;}
   .toast.info{background:rgba(200,151,42,.2);border:1px solid rgba(200,151,42,.4);color:#f0c76b;}
-  @media(max-width:768px){.sidebar{display:none;}.content{padding:16px;}}
+  .edit-grid{display:grid;grid-template-columns:140px minmax(0,1fr) auto;gap:8px;align-items:center;}
+  #mai-list,#tanar-table,#terem-table{overflow-x:auto;}
+  #mai-list .data-table,#tanar-table .data-table,#terem-table .data-table{min-width:560px;}
+  @media(max-width:900px){
+    body::before{background-size:32px 32px;}
+    .navbar{height:auto;padding:12px 16px;flex-direction:column;align-items:stretch;gap:10px;}
+    .layout{flex-direction:column;min-height:auto;}
+    .sidebar{width:100%;display:flex;padding:12px 16px;gap:8px;overflow-x:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,.07);}
+    .sidebar>div{display:flex;gap:8px;}
+    .sb-btn{margin-bottom:0;white-space:nowrap;flex:0 0 auto;width:auto;}
+    .content{padding:18px 16px 96px;}
+    .card{padding:18px 16px;}
+    .card-title{flex-wrap:wrap;}
+    .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .edit-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:640px){
+    .stat-grid{grid-template-columns:1fr;}
+    .status-row{flex-wrap:wrap;gap:8px;align-items:flex-start;}
+    .toast{left:12px;right:12px;bottom:12px;}
+  }
 </style>
 </head>
 <body>
@@ -165,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
 <?php else: ?>
 <!-- ADMIN PANEL -->
 <nav class="navbar">
-  <div style="display:flex;align-items:center;gap:10px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <a href="/" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;">
       <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
       Ticky
@@ -173,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
     <span style="color:rgba(255,255,255,.2);">·</span>
     <span style="font-size:13px;color:rgba(255,255,255,.45);">Admin</span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <span style="font-size:12px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;" id="nav-time">–</span>
     <a href="<?= htmlspecialchars(admin_url(['logout' => 1]), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost btn-sm">Kilépés</a>
   </div>
@@ -231,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
       <div class="card">
         <div class="card-title">✏️ Név szerkesztése</div>
         <p style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:14px;">Kattints a listában a ✏️ gombra, vagy töltsd ki kézzel.</p>
-        <div style="display:grid;grid-template-columns:140px 1fr auto;gap:8px;align-items:center;">
+        <div class="edit-grid">
           <input type="text" id="edit-kod" class="inp inp-sm" placeholder="Kód (ÁSZJ)" style="text-transform:uppercase;font-family:'DM Mono',monospace;">
           <input type="text" id="edit-nev" class="inp inp-sm" placeholder="Teljes név (pl. Kovács János)">
           <button class="btn btn-gold btn-sm" onclick="saveTanarNev()">Mentés</button>

@@ -63,14 +63,23 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
   .now-dot { position:absolute;left:0;top:-4px;width:8px;height:8px;border-radius:50%;background:#ff6b82;box-shadow:0 0 6px #ff6b82;animation:pd 1.5s infinite; }
   .tt-title { position:relative;z-index:10;max-width:580px;margin:28px auto 0;padding:0 16px; }
   .footer { position:relative;z-index:10;max-width:580px;margin:12px auto 40px;padding:0 16px;display:flex;align-items:center;justify-content:space-between; }
+  @media (max-width: 640px) {
+    body::before { background-size:28px 28px; }
+    .tt-title, .tt-wrap, .footer { padding:0 12px; }
+    .tt-title { margin-top:22px; }
+    .tt-title-head { flex-direction:column; align-items:flex-start !important; gap:8px; }
+    .footer { margin-bottom:96px; flex-wrap:wrap; gap:10px; }
+    #terem-szam { font-size:40px !important; }
+    #status-pill { font-size:12px !important; padding:7px 12px !important; }
+  }
 </style>
 </head>
 <body>
 <div class="top-line"></div>
 
-<div class="relative z-10 max-w-sm mx-auto px-4 pt-8 slide-up">
+<div class="relative z-10 max-w-md mx-auto px-4 pt-6 sm:pt-8 slide-up">
   <div class="glass rounded-2xl overflow-hidden">
-    <div class="px-7 pt-6 pb-5 flex items-center justify-between gap-3" style="border-bottom:1px solid rgba(255,255,255,.08);">
+    <div class="px-5 sm:px-7 pt-6 pb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="border-bottom:1px solid rgba(255,255,255,.08);">
       <div>
         <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.3);">Terem</p>
         <h1 id="terem-szam" style="font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;">–</h1>
@@ -89,7 +98,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
       </div>
     </div>
 
-    <div class="px-7 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
+    <div class="px-5 sm:px-7 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="border-top:1px solid rgba(255,255,255,.08);">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:15px;font-weight:700;">Ticky</a>
       <span class="text-xs" style="color:rgba(255,255,255,.28);" id="footer-ido">–</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
@@ -101,7 +110,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 </div>
 
 <div class="tt-title">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+  <div class="tt-title-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
     <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);">Heti órarend</p>
     <a id="napirend-link" href="#" style="font-size:12px;color:#f0c76b;font-weight:500;">Teljes nézet →</a>
   </div>
@@ -196,7 +205,7 @@ function renderStatus(data) {
     const pct = calcPct(a.kezdes, a.vegzes)
     el.innerHTML = `<div class="flex flex-col gap-4">
       <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.2;">${esc(a.tanar_nev || a.tanar)}</p></div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.osztaly)}</p></div>
         <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.tantargy)}</p></div>
       </div>

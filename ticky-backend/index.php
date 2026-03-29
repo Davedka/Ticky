@@ -85,16 +85,25 @@ if ($uri === '/') {
   @keyframes fu { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .gold-line { height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a); }
   a { text-decoration:none; }
+  @media (max-width: 640px) {
+    body::before { background-size:28px 28px; }
+    .landing-nav { min-height:auto; padding:12px 16px; }
+    .landing-nav-row { width:100%; justify-content:space-between; }
+    .landing-links { width:100%; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+    .landing-links a { display:flex; align-items:center; justify-content:center; min-height:42px; }
+    .landing-shell { padding:48px 16px 104px; }
+    .landing-subgrid { grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body class="relative">
   <div class="top-line"></div>
-  <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
-    <span style="font-family:'Playfair Display',serif;color:white;font-size:20px;font-weight:700;" class="flex items-center gap-2">
+  <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="landing-nav sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-0 min-h-16 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    <span style="font-family:'Playfair Display',serif;color:white;font-size:20px;font-weight:700;" class="landing-nav-row flex items-center gap-2">
       <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 10px #c8972a;display:inline-block;"></span>
       Ticky
     </span>
-    <div class="flex items-center gap-1">
+    <div class="landing-links flex flex-wrap items-center gap-1">
       <a href="/termek" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
       <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
       <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
@@ -104,10 +113,10 @@ if ($uri === '/') {
       <?php endif; ?>
     </div>
   </nav>
-  <div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
+  <div class="landing-shell relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
     <div class="w-full max-w-md">
       <div class="fade-up text-center mb-10">
-        <h1 style="font-family:'Playfair Display',serif;font-size:72px;font-weight:700;color:white;line-height:1;letter-spacing:-2px;">Ticky</h1>
+        <h1 style="font-family:'Playfair Display',serif;font-size:clamp(52px,18vw,72px);font-weight:700;color:white;line-height:1;letter-spacing:-2px;">Ticky</h1>
         <p class="text-sm mt-3" style="color:rgba(255,255,255,.45);">Digitális terem-azonosító rendszer</p>
         <div class="flex items-center justify-center gap-2 mt-4">
           <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#4ade80;display:inline-block;"></span>
@@ -125,7 +134,7 @@ if ($uri === '/') {
           <span style="font-size:32px;">🏫</span>
         </a>
       </div>
-      <div class="fade-up-3 grid grid-cols-2 gap-3">
+      <div class="landing-subgrid fade-up-3 grid grid-cols-2 gap-3">
         <div>
           <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
           <a href="/tanar" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
