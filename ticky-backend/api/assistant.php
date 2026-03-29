@@ -628,6 +628,10 @@ function assistant_help(string $context, array $context_data = []): never {
 }
 
 $body = json_decode(file_get_contents('php://input') ?: '', true);
+if (!is_array($body)) {
+    $body = [];
+}
+
 $message = trim((string) ($body['message'] ?? ''));
 $normalized = assistant_normalize($message);
 $context = assistant_context_key((string) ($body['context'] ?? 'general'));

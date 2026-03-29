@@ -205,6 +205,14 @@ function autoGrow() {
   inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + 'px'
 }
 
+function safeHref(value) {
+  const href = String(value ?? '').trim()
+  if (!href.startsWith('/') || href.startsWith('//')) {
+    return '#'
+  }
+  return href
+}
+
 function scrollToBottom() {
   messagesEl.scrollTop = messagesEl.scrollHeight
 }
@@ -267,7 +275,7 @@ function appendAssistantMessage(payload) {
   const actionHtml = actions.length ? `
     <div class="ai-actions">
       ${actions.map((action, index) => `
-        <a class="ai-pill ${index === 0 ? 'primary' : ''}" href="${esc(action.href || '#')}">${esc(action.label || 'Megnyitás')}</a>
+        <a class="ai-pill ${index === 0 ? 'primary' : ''}" href="${esc(safeHref(action.href || '#'))}">${esc(action.label || 'Megnyitás')}</a>
       `).join('')}
     </div>
   ` : ''

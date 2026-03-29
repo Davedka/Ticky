@@ -11,6 +11,13 @@ private_response_headers();
 $authed = admin_is_authenticated();
 $no_pw_set = !admin_is_configured();
 
+if (isset($_GET['forget'])) {
+    admin_clear_auth_cookie();
+    admin_clear_visibility_cookie();
+    header('Location: /');
+    exit;
+}
+
 // Kijelentkezés
 if (isset($_GET['logout'])) {
     admin_clear_auth_cookie();
@@ -24,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
     $input = trim($_POST['pw']);
     if ($admin_pw !== '' && hash_equals($admin_pw, $input)) {
         admin_set_auth_cookie();
+        admin_set_visibility_cookie();
         header('Location: /admin');
         exit;
     } else {
@@ -345,6 +353,24 @@ function emeletLabel(emelet) {
   return emelet+'. emelet'
 }
 
+function esc(value) {
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;')
+}
+
+function roomToken(value) {
+  return encodeURIComponent(String(value ?? ''))
+}
+
+function editTanarFromButton(button) {
+  if (!button) return
+  editTanar(button.dataset.kod || '', button.dataset.nev || '')
+}
+
 // ── DASHBOARD ────────────────────────────────────────
 async function loadDashboard() {
   const ic=document.getElementById('dash-ri'); ic?.classList.add('spinning')
@@ -372,7 +398,7 @@ async function loadDashboard() {
       ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">🌙 Hétvége</div>`
       :!fo2.length
         ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">✅ Jelenleg nincs foglalt terem</div>`
-        :`<table class="data-table"><thead><tr><th>Terem</th><th>Tanár</th><th>Osztály</th><th>Tantárgy</th><th>Időpont</th></tr></thead><tbody>${fo2.map(t=>`<tr><td><a href="/terem/${t.terem_szam}" target="_blank" style="color:#f0c76b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;">${t.terem_szam}</a></td><td>${t.aktualis?.tanar||'–'}</td><td>${t.aktualis?.osztaly||'–'}</td><td>${t.aktualis?.tantargy||'–'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.4);">${t.aktualis?.kezdes||''}–${t.aktualis?.vegzes||''}</td></tr>`).join('')}</tbody></table>`
+        :`<table class="data-table"><thead><tr><th>Terem</th><th>Tanár</th><th>Osztály</th><th>Tantárgy</th><th>Időpont</th></tr></thead><tbody>${fo2.map(t=>`<tr><td><a href="/terem/${roomToken(t.terem_szam)}" target="_blank" style="color:#f0c76b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;">${esc(t.terem_szam)}</a></td><td>${esc(t.aktualis?.tanar||'–')}</td><td>${esc(t.aktualis?.osztaly||'–')}</td><td>${esc(t.aktualis?.tantargy||'–')}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.4);">${esc(t.aktualis?.kezdes||'')}–${esc(t.aktualis?.vegzes||'')}</td></tr>`).join('')}</tbody></table>`
   } catch(e){toast('Betöltési hiba','err')}
   ic?.classList.remove('spinning')
 }
@@ -394,9 +420,9 @@ function filterTanarok() {
 function renderTanarok(list) {
   if(!list.length){document.getElementById('tanar-table').innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">Nincs találat</div>`;return}
   document.getElementById('tanar-table').innerHTML=`<table class="data-table"><thead><tr><th>Kód</th><th>Teljes név</th><th></th></tr></thead><tbody>${list.map(t=>`<tr>
-    <td><span class="tag tag-blue">${t.rovid_nev}</span></td>
-    <td style="color:${t.nev?'rgba(255,255,255,.85)':'rgba(255,255,255,.25)'};">${t.nev||'– nincs megadva –'}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="editTanar('${t.rovid_nev}','${(t.nev||'').replace(/'/g,"\\'")}')">✏️</button></td>
+    <td><span class="tag tag-blue">${esc(t.rovid_nev)}</span></td>
+    <td style="color:${t.nev?'rgba(255,255,255,.85)':'rgba(255,255,255,.25)'};">${esc(t.nev||'– nincs megadva –')}</td>
+    <td><button class="btn btn-ghost btn-sm" data-kod="${esc(t.rovid_nev)}" data-nev="${esc(t.nev||'')}" onclick="editTanarFromButton(this)">✏️</button></td>
   </tr>`).join('')}</tbody></table>`
 }
 function editTanar(kod,nev) {
@@ -442,31 +468,33 @@ function renderTermek(list) {
       <thead><tr><th>Terem</th><th>Épület / Szárny</th><th>Emelet (DB)</th><th>Linkek</th></tr></thead>
       <tbody>${list.map(t=>{
         const det=detectEpulet(t.terem_szam)
+        const roomEsc = esc(t.terem_szam)
+        const roomEncoded = roomToken(t.terem_szam)
         const tagStyle=det.tag==='tag-orange'?'background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);':''
         return `<tr>
-          <td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">${t.terem_szam}</td>
+          <td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">${roomEsc}</td>
           <td>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span class="tag ${det.tag!=='tag-orange'?det.tag:''}" style="${tagStyle}">${det.emoji} ${det.epulet}</span>
-              <span style="font-size:11px;color:rgba(255,255,255,.3);">${emeletLabel(det.emelet)}</span>
+              <span class="tag ${det.tag!=='tag-orange'?det.tag:''}" style="${tagStyle}">${esc(det.emoji)} ${esc(det.epulet)}</span>
+              <span style="font-size:11px;color:rgba(255,255,255,.3);">${esc(emeletLabel(det.emelet))}</span>
             </div>
           </td>
           <td>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" min="0" max="5"
-                value="${t.emelet!==null&&t.emelet!==undefined?t.emelet:''}"
-                placeholder="${det.emelet!==null?det.emelet:'–'}"
+                value="${esc(t.emelet!==null&&t.emelet!==undefined?t.emelet:'')}"
+                placeholder="${esc(det.emelet!==null?det.emelet:'–')}"
                 class="inp inp-sm" style="width:72px;"
-                onblur="saveEmelet('${t.terem_szam}',this.value)"
+                onblur="saveEmelet(decodeURIComponent('${roomEncoded}'),this.value)"
                 onkeydown="if(event.key==='Enter')this.blur()"
                 title="0=Földszint, 1=1.em stb. – üres = auto">
               <span style="font-size:10px;color:rgba(255,255,255,.28);">em.</span>
-              ${t.emelet===null?`<span title="Auto-detektált érték: ${det.emelet!==null?emeletLabel(det.emelet):'?'}" style="font-size:10px;color:rgba(200,151,42,.6);cursor:help;">auto</span>`:''}
+              ${t.emelet===null?`<span title="Auto-detektált érték: ${esc(det.emelet!==null?emeletLabel(det.emelet):'?')}" style="font-size:10px;color:rgba(200,151,42,.6);cursor:help;">auto</span>`:''}
             </div>
           </td>
           <td style="display:flex;gap:6px;">
-            <a href="/terem/${t.terem_szam}" target="_blank" class="btn btn-ghost btn-sm">🚪</a>
-            <a href="/terem/${t.terem_szam}/nap" target="_blank" class="btn btn-ghost btn-sm">📅</a>
+            <a href="/terem/${roomEncoded}" target="_blank" class="btn btn-ghost btn-sm">🚪</a>
+            <a href="/terem/${roomEncoded}/nap" target="_blank" class="btn btn-ghost btn-sm">📅</a>
           </td>
         </tr>`
       }).join('')}

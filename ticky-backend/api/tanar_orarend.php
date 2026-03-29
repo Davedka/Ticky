@@ -48,6 +48,10 @@ if ($params === false || empty($params['kod'])) {
 }
 
 $kod = strtoupper(urldecode($params['kod']));
+if (!preg_match('/^[\p{L}\p{N}._-]{1,32}$/u', $kod)) {
+    json_error('Érvénytelen tanár kód', 400);
+}
+
 $nap = mai_nap(); // 1=Hétfő … 5=Péntek
 
 // ── Hétvége kezelés ─────────────────────────────────────

@@ -14,13 +14,38 @@ if ($params === false) {
 
 $terem_szam = strtoupper(trim(urldecode((string) $params['szam'])));
 $body = json_decode(file_get_contents('php://input') ?: '', true);
+if (!is_array($body)) {
+    json_error('Ervenytelen JSON', 400);
+}
+
+if (!preg_match('/^[\p{L}\p{N}._-]{1,32}$/u', $terem_szam)) {
+    json_error('Ervenytelen terem azonosito', 400);
+}
 
 $update = [];
-if (isset($body['emelet'])) {
-    $update['emelet'] = is_numeric($body['emelet']) ? (int) $body['emelet'] : null;
+if (array_key_exists('emelet', $body)) {
+    if ($body['emelet'] === null || $body['emelet'] === '') {
+        $update['emelet'] = null;
+    } else {
+        $emelet = filter_var(
+            $body['emelet'],
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 0, 'max_range' => 5]]
+        );
+        if ($emelet === false) {
+            json_error('Ervenytelen emelet', 400);
+        }
+
+        $update['emelet'] = $emelet;
+    }
 }
-if (isset($body['aktiv'])) {
-    $update['aktiv'] = (bool) $body['aktiv'];
+if (array_key_exists('aktiv', $body)) {
+    $aktiv = filter_var($body['aktiv'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+    if ($aktiv === null) {
+        json_error('Ervenytelen aktiv ertek', 400);
+    }
+
+    $update['aktiv'] = $aktiv;
 }
 
 if (empty($update)) {

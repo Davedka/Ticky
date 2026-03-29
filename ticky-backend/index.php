@@ -7,44 +7,47 @@ require_once __DIR__ . '/utils/helpers.php';
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Serve existing static assets like /favicon.png or /favicon.ico before routing everything through PHP.
+// Serve only whitelisted static assets before routing everything else through PHP.
 $requested_file = realpath(__DIR__ . rawurldecode($uri));
+$static_mime_types = [
+    'ico' => 'image/x-icon',
+    'svg' => 'image/svg+xml',
+    'png' => 'image/png',
+    'jpg' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
+    'gif' => 'image/gif',
+    'css' => 'text/css; charset=utf-8',
+    'js' => 'application/javascript; charset=utf-8',
+    'json' => 'application/json; charset=utf-8',
+    'txt' => 'text/plain; charset=utf-8',
+    'woff' => 'font/woff',
+    'woff2' => 'font/woff2',
+];
 if (
     $uri !== '/'
     && $requested_file !== false
     && is_file($requested_file)
     && str_starts_with($requested_file, __DIR__ . DIRECTORY_SEPARATOR)
 ) {
-    if (PHP_SAPI === 'cli-server') {
-        return false;
-    }
-
-    $mime_types = [
-        'ico'  => 'image/x-icon',
-        'svg'  => 'image/svg+xml',
-        'png'  => 'image/png',
-        'jpg'  => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'webp' => 'image/webp',
-        'gif'  => 'image/gif',
-        'css'  => 'text/css; charset=utf-8',
-        'js'   => 'application/javascript; charset=utf-8',
-        'json' => 'application/json; charset=utf-8',
-        'txt'  => 'text/plain; charset=utf-8',
-    ];
     $extension = strtolower(pathinfo($requested_file, PATHINFO_EXTENSION));
-    if (isset($mime_types[$extension])) {
-        header('Content-Type: ' . $mime_types[$extension]);
+    if (isset($static_mime_types[$extension])) {
+        header('Content-Type: ' . $static_mime_types[$extension]);
+        header('Content-Length: ' . filesize($requested_file));
+        header('Cache-Control: public, max-age=3600');
+        readfile($requested_file);
+        exit;
     }
-    header('Content-Length: ' . filesize($requested_file));
-    readfile($requested_file);
-    exit;
 }
 
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Cross-Origin-Resource-Policy: same-origin');
+header('Cross-Origin-Opener-Policy: same-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header('Content-Security-Policy: default-src \'self\'; script-src \'self\' \'unsafe-inline\' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com data:; img-src \'self\' data:; connect-src \'self\'; frame-ancestors \'self\'; form-action \'self\'; base-uri \'self\'; object-src \'none\'');
 header_remove('X-Powered-By');
 
 handle_cors();
@@ -96,6 +99,9 @@ if ($uri === '/') {
       <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
       <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
       <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
+      <?php if (admin_can_see_ui()): ?>
+      <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">Admin</a>
+      <?php endif; ?>
     </div>
   </nav>
   <div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">

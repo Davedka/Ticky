@@ -201,6 +201,19 @@ let hetData   = null
 let curMob    = maiNap()
 let nowTimer  = null
 
+function esc(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;')
+}
+
+function roomPath(value){
+  return encodeURIComponent(String(value ?? ''))
+}
+
 function getTerem() {
   const p=location.pathname.split('/').filter(Boolean)
   return (p[0]==='terem'&&p[2]==='nap') ? p[1].toUpperCase() : null
@@ -216,7 +229,7 @@ function nowM() { return nowMinutes() }
 // ── Fetch ────────────────────────────────────────────
 async function fetchData() {
   try {
-    const d=await fetch(`/api/napirend/${teremSzam}?nap=heten`).then(r=>r.json())
+    const d=await fetch(`/api/napirend/${roomPath(teremSzam)}?nap=heten`).then(r=>r.json())
     if(d.error){showErr(d.error);return}
     hetData={}
     ;(d.het||[]).forEach(nd=>{hetData[nd.nap]=nd.orak||[]})
@@ -232,9 +245,9 @@ function buildSummary() {
   const akt=orak.find(o=>isAktiv(o.kezdes,o.vegzes))
   const kov=orak.find(o=>!isMult(o.vegzes)&&!isAktiv(o.kezdes,o.vegzes))
   let h=`<span class="sum-pill">📚 ${orak.length} óra ma</span>`
-  h+=`<span class="sum-pill">🕐 ${orak[0].kezdes} – ${orak[orak.length-1].vegzes}</span>`
-  if(akt) h+=`<span class="sum-pill gold">⚡ ${akt.ora_sorszam}. óra · ${100-pct(akt.kezdes,akt.vegzes)}% van hátra</span>`
-  else if(kov) h+=`<span class="sum-pill green">⏭ Következő: ${kov.kezdes}</span>`
+  h+=`<span class="sum-pill">🕐 ${esc(orak[0].kezdes)} – ${esc(orak[orak.length-1].vegzes)}</span>`
+  if(akt) h+=`<span class="sum-pill gold">⚡ ${esc(akt.ora_sorszam)}. óra · ${100-pct(akt.kezdes,akt.vegzes)}% van hátra</span>`
+  else if(kov) h+=`<span class="sum-pill green">⏭ Következő: ${esc(kov.kezdes)}</span>`
   else h+=`<span class="sum-pill">✅ Mára vége</span>`
   el.innerHTML=h
 }
@@ -299,13 +312,13 @@ function buildTT() {
       const mu=isMa&&isMult(o.vegzes)
       const p=ak?pct(o.kezdes,o.vegzes):0
       const cl=ak?'aktiv':mu?'mult':''
-      const nm=o.tanar_nev||o.tanar
+      const nm=esc(o.tanar_nev||o.tanar)
 
       col+=`<div class="ora-blk ${cl}" style="top:${top}px;height:${h}px;"
-        title="${nm} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
+        title="${nm} · ${esc(o.osztaly)} · ${esc(o.tantargy)} · ${esc(o.kezdes)}–${esc(o.vegzes)}">
         <div class="ob-tanar">${nm}</div>
-        ${h>38?`<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>`:''}
-        ${h>56?`<div class="ob-meta">${o.kezdes}–${o.vegzes}</div>`:''}
+        ${h>38?`<div class="ob-meta">${esc(o.osztaly)} · ${esc(o.tantargy)}</div>`:''}
+        ${h>56?`<div class="ob-meta">${esc(o.kezdes)}–${esc(o.vegzes)}</div>`:''}
         ${ak?`<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>`:''}
       </div>`
     })
@@ -348,11 +361,11 @@ function buildMobList() {
     const mu=isMa&&isMult(o.vegzes)
     const p=ak?pct(o.kezdes,o.vegzes):0
     h+=`<div class="mob-row${ak?' aktiv':mu?' mult':''}">
-      <div class="mob-num">${o.ora_sorszam||i+1}</div>
+      <div class="mob-num">${esc(o.ora_sorszam||i+1)}</div>
       <div class="mob-body">
-        <div class="mob-ido">${o.kezdes} – ${o.vegzes}</div>
-        <div class="mob-tanar">${o.tanar_nev||o.tanar}</div>
-        <div class="mob-meta">${o.osztaly} · ${o.tantargy}</div>
+        <div class="mob-ido">${esc(o.kezdes)} – ${esc(o.vegzes)}</div>
+        <div class="mob-tanar">${esc(o.tanar_nev||o.tanar)}</div>
+        <div class="mob-meta">${esc(o.osztaly)} · ${esc(o.tantargy)}</div>
       </div>
       <div class="mob-prog"><div class="mob-prog-fill" style="height:${p}%;"></div></div>
     </div>`
@@ -379,7 +392,7 @@ function build(){
 
 function showErr(msg){
   document.getElementById('tt-skel').style.display='none'
-  document.getElementById('tt-outer').innerHTML=`<div style="text-align:center;padding:60px 20px;position:relative;z-index:10;"><span style="font-size:40px;">⚠️</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">${msg}</p></div>`
+  document.getElementById('tt-outer').innerHTML=`<div style="text-align:center;padding:60px 20px;position:relative;z-index:10;"><span style="font-size:40px;">⚠️</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">${esc(msg)}</p></div>`
 }
 
 function refresh(){
@@ -397,7 +410,7 @@ if(!teremSzam){
 }else{
   document.getElementById('terem-cim').textContent=teremSzam
   document.getElementById('nav-cim').textContent=teremSzam+' · Napirend'
-  document.getElementById('nav-vissza').href='/terem/'+teremSzam
+  document.getElementById('nav-vissza').href='/terem/'+roomPath(teremSzam)
   document.title='Ticky – '+teremSzam+' napirend'
   fetchData()
   setInterval(fetchData,5*60_000)

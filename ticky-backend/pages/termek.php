@@ -105,6 +105,19 @@
 const { formatHM, nowMinutes } = window.TickyTime
 let allRooms = [], curFilter = 'mind', curSearch = ''
 
+function esc(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function roomToken(value) {
+  return encodeURIComponent(String(value ?? ''))
+}
+
 async function fetchRooms() {
   try {
     const d = await fetch('/api/termek?allapot=1').then(r => r.json())
@@ -171,23 +184,26 @@ function renderGrid() {
   grid.classList.remove('hidden')
   grid.innerHTML = rooms.map((r, i) => {
     const sz = r.allapot === 'szabad'
+    const roomCode = String(r.terem_szam ?? '')
+    const roomEsc = esc(roomCode)
+    const roomEncoded = roomToken(roomCode)
     let body = ''
     if (sz) {
       body = `<p class="text-xs mt-2" style="color:rgba(255,255,255,.3);">Nincs óra</p>`
     } else {
       const a = r.aktualis
       const pct = calcPct(a.kezdes, a.vegzes)
-      body = `<p class="text-xs font-medium mt-2 truncate" style="color:rgba(255,255,255,.7);">${a.tanar} · ${a.osztaly}</p><p class="text-xs truncate" style="color:rgba(255,255,255,.35);">${a.tantargy} · ${a.kezdes}–${a.vegzes}</p><div class="mt-2 h-1 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div>`
+      body = `<p class="text-xs font-medium mt-2 truncate" style="color:rgba(255,255,255,.7);">${esc(a.tanar)} · ${esc(a.osztaly)}</p><p class="text-xs truncate" style="color:rgba(255,255,255,.35);">${esc(a.tantargy)} · ${esc(a.kezdes)}–${esc(a.vegzes)}</p><div class="mt-2 h-1 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div>`
     }
     const pillBg = sz ? 'rgba(26,138,74,.2)' : 'rgba(200,16,46,.2)'
     const pillColor = sz ? '#4ade80' : '#ff6b82'
     const dotBg = sz ? '#4ade80' : '#ff6b82'
     const pillTxt = sz ? 'SZABAD' : 'FOGLALT'
-    return `<div class="room-card glass card-in rounded-2xl p-4" style="animation-delay:${i * 25}ms;" onclick="openModal('${r.terem_szam}')">
+    return `<div class="room-card glass card-in rounded-2xl p-4" style="animation-delay:${i * 25}ms;" onclick="openModal(decodeURIComponent('${roomEncoded}'))">
       <div class="flex items-start justify-between gap-1">
         <div>
           <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Terem</p>
-          <h2 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.1;">${r.terem_szam}</h2>
+          <h2 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.1;">${roomEsc}</h2>
         </div>
         <div class="flex items-center gap-1 px-2 py-1 rounded-full flex-shrink-0" style="background:${pillBg};border:1px solid ${pillColor}33;font-size:9px;font-weight:700;color:${pillColor};letter-spacing:.05em;">
           <span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" style="background:${dotBg};display:inline-block;"></span>
@@ -202,10 +218,11 @@ function renderGrid() {
 async function openModal(szam) {
   const overlay = document.getElementById('modal-overlay')
   const content = document.getElementById('modal-content')
+  const roomEsc = esc(szam)
   overlay.classList.remove('hidden')
-  content.innerHTML = `<div class="px-6 py-6"><div class="flex justify-between items-center mb-4"><div><p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Terem</p><h2 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:white;line-height:1;">${szam}</h2></div><button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div class="flex flex-col gap-2"><div class="skeleton h-5 w-2/5"></div><div class="skeleton h-7 w-4/5"></div><div class="skeleton h-4 w-1/2"></div></div></div>`
+  content.innerHTML = `<div class="px-6 py-6"><div class="flex justify-between items-center mb-4"><div><p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Terem</p><h2 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:white;line-height:1;">${roomEsc}</h2></div><button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div class="flex flex-col gap-2"><div class="skeleton h-5 w-2/5"></div><div class="skeleton h-7 w-4/5"></div><div class="skeleton h-4 w-1/2"></div></div></div>`
   try {
-    const data = await fetch(`/api/terem/${szam}`).then(r => r.json())
+    const data = await fetch(`/api/terem/${encodeURIComponent(szam)}`).then(r => r.json())
     renderModal(data)
   } catch (e) {
     content.innerHTML = `<div class="px-6 py-8 text-center"><p style="color:rgba(255,255,255,.4);">Hiba a betöltésnél</p></div>`
@@ -221,16 +238,16 @@ function renderModal(data) {
   } else {
     const a = data.aktualis
     const pct = calcPct(a.kezdes, a.vegzes)
-    main = `<div class="flex flex-col gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${a.tanar_nev || a.tanar}</p></div><div class="grid grid-cols-2 gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div></div><div><div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div><div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.4);"><span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">még ${a.perc_maradt} perc</span><span>${a.vegzes}</span></div></div></div>`
+    main = `<div class="flex flex-col gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${esc(a.tanar_nev || a.tanar)}</p></div><div class="grid grid-cols-2 gap-3"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.osztaly)}</p></div><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.35);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.tantargy)}</p></div></div><div><div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.1);"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div></div><div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.4);"><span>${esc(a.kezdes)}</span><span style="color:#ff6b82;font-weight:600;">még ${esc(a.perc_maradt)} perc</span><span>${esc(a.vegzes)}</span></div></div></div>`
   }
   let kov = ''
   if (data.kovetkezo) {
     const k = data.kovetkezo
-    kov = `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.3);">Következő</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} · ${k.osztaly} · ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}–${k.vegzes}</span></div></div>`
+    kov = `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.3);">Következő</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${esc(k.tanar)} · ${esc(k.osztaly)} · ${esc(k.tantargy)}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${esc(k.kezdes)}–${esc(k.vegzes)}</span></div></div>`
   }
   const pillBg = sz ? 'rgba(26,138,74,.2)' : 'rgba(200,16,46,.2)'
   const pillColor = sz ? '#4ade80' : '#ff6b82'
-  c.innerHTML = `<div class="px-6 pt-6 pb-2"><div class="flex items-start justify-between mb-5"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Terem</p><h2 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:white;line-height:1;">${data.terem}</h2></div><div class="flex items-center gap-2 mt-1"><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background:${pillBg};border:1px solid ${pillColor}55;color:${pillColor};"><span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" style="background:${pillColor};display:inline-block;"></span>${sz ? 'SZABAD' : 'FOGLALT'}</div><button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>${main}${kov}</div><div class="px-6 py-4 flex items-center justify-between" style="border-top:1px solid rgba(255,255,255,.08);"><a href="/terem/${data.terem}" class="text-sm font-medium" style="color:#f0c76b;">Napirend nézet →</a><span style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.2);font-size:13px;font-weight:700;">Ticky</span></div>`
+  c.innerHTML = `<div class="px-6 pt-6 pb-2"><div class="flex items-start justify-between mb-5"><div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Terem</p><h2 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:white;line-height:1;">${esc(data.terem)}</h2></div><div class="flex items-center gap-2 mt-1"><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style="background:${pillBg};border:1px solid ${pillColor}55;color:${pillColor};"><span class="w-1.5 h-1.5 rounded-full pulse flex-shrink-0" style="background:${pillColor};display:inline-block;"></span>${sz ? 'SZABAD' : 'FOGLALT'}</div><button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>${main}${kov}</div><div class="px-6 py-4 flex items-center justify-between" style="border-top:1px solid rgba(255,255,255,.08);"><a href="/terem/${roomToken(data.terem)}" class="text-sm font-medium" style="color:#f0c76b;">Napirend nézet →</a><span style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.2);font-size:13px;font-weight:700;">Ticky</span></div>`
 }
 
 function closeModal() { document.getElementById('modal-overlay').classList.add('hidden') }
@@ -238,7 +255,7 @@ function handleOverlayClick(e) { if (e.target === document.getElementById('modal
 
 function showError(msg) {
   document.getElementById('skeleton-grid').classList.add('hidden')
-  document.getElementById('rooms-grid').innerHTML = `<div class="col-span-4 text-center py-16"><span class="text-4xl block mb-3">⚠️</span><p style="color:rgba(255,255,255,.5);">${msg}</p></div>`
+  document.getElementById('rooms-grid').innerHTML = `<div class="col-span-4 text-center py-16"><span class="text-4xl block mb-3">⚠️</span><p style="color:rgba(255,255,255,.5);">${esc(msg)}</p></div>`
   document.getElementById('rooms-grid').classList.remove('hidden')
 }
 

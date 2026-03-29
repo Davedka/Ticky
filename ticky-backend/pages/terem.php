@@ -138,6 +138,19 @@ const H = TOTAL * PPM
 let teremSzam = null
 let hetData = null
 
+function esc(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function roomPath(value) {
+  return encodeURIComponent(String(value ?? ''))
+}
+
 function getTerem() {
   const p = location.pathname.split('/').filter(Boolean)
   const q = new URLSearchParams(location.search).get('terem')
@@ -170,7 +183,7 @@ function setAllapot(a) {
 
 function kovHtml(k) {
   if (!k) return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.25);">Következő óra</p><p class="text-sm" style="color:rgba(255,255,255,.35);">Ma már nincs több óra</p></div>`
-  return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.25);">Következő óra</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} · ${k.osztaly} · ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}–${k.vegzes}</span></div></div>`
+  return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.25);">Következő óra</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${esc(k.tanar)} · ${esc(k.osztaly)} · ${esc(k.tantargy)}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${esc(k.kezdes)}–${esc(k.vegzes)}</span></div></div>`
 }
 
 function renderStatus(data) {
@@ -182,17 +195,17 @@ function renderStatus(data) {
     const a = data.aktualis
     const pct = calcPct(a.kezdes, a.vegzes)
     el.innerHTML = `<div class="flex flex-col gap-4">
-      <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.2;">${a.tanar_nev || a.tanar}</p></div>
+      <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.2;">${esc(a.tanar_nev || a.tanar)}</p></div>
       <div class="grid grid-cols-2 gap-3">
-        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div>
-        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div>
+        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.osztaly)}</p></div>
+        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${esc(a.tantargy)}</p></div>
       </div>
       <div>
         <div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.08);">
           <div class="h-full rounded-full prog-bar" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div>
         </div>
         <div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.35);">
-          <span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">még ${a.perc_maradt} perc</span><span>${a.vegzes}</span>
+          <span>${esc(a.kezdes)}</span><span style="color:#ff6b82;font-weight:600;">még ${esc(a.perc_maradt)} perc</span><span>${esc(a.vegzes)}</span>
         </div>
       </div>
     </div>${kovHtml(data.kovetkezo)}`
@@ -243,9 +256,9 @@ function buildTT() {
       const ak = isMa && isAktiv(o.kezdes, o.vegzes)
       const mu = isMa && isMult(o.vegzes)
       const p = ak ? calcPct(o.kezdes, o.vegzes) : 0
-      col += `<div class="ora-blk${ak ? ' aktiv' : mu ? ' mult' : ''}" style="top:${top}px;height:${h}px;" title="${o.tanar_nev || o.tanar} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
-        <div class="ob-tanar">${o.tanar_nev || o.tanar}</div>
-        ${h > 32 ? `<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>` : ''}
+      col += `<div class="ora-blk${ak ? ' aktiv' : mu ? ' mult' : ''}" style="top:${top}px;height:${h}px;" title="${esc(o.tanar_nev || o.tanar)} · ${esc(o.osztaly)} · ${esc(o.tantargy)} · ${esc(o.kezdes)}–${esc(o.vegzes)}">
+        <div class="ob-tanar">${esc(o.tanar_nev || o.tanar)}</div>
+        ${h > 32 ? `<div class="ob-meta">${esc(o.osztaly)} · ${esc(o.tantargy)}</div>` : ''}
         ${ak ? `<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>` : ''}
       </div>`
     })
@@ -268,7 +281,7 @@ function buildTT() {
 
 async function fetchStatus() {
   try {
-    const d = await fetch(`/api/terem/${teremSzam}`).then(r => r.json())
+    const d = await fetch(`/api/terem/${roomPath(teremSzam)}`).then(r => r.json())
     if (!d.error) {
       document.getElementById('terem-szam').textContent = d.terem
       renderStatus(d)
@@ -281,7 +294,7 @@ async function fetchStatus() {
 
 async function fetchTimetable() {
   try {
-    const d = await fetch(`/api/napirend/${teremSzam}?nap=heten`).then(r => r.json())
+    const d = await fetch(`/api/napirend/${roomPath(teremSzam)}?nap=heten`).then(r => r.json())
     if (d.error) return
     hetData = {}
     ;(d.het || []).forEach(nd => { hetData[nd.nap] = nd.orak || [] })
@@ -303,7 +316,7 @@ if (!teremSzam) {
   document.getElementById('content').innerHTML = `<div class="text-center py-6"><span class="text-4xl block mb-3">🔍</span><p style="color:rgba(255,255,255,.6);">Nincs terem megadva</p><p class="text-sm mt-1" style="color:rgba(255,255,255,.35);">URL: /terem/204</p></div>`
 } else {
   document.getElementById('terem-szam').textContent = teremSzam
-  document.getElementById('napirend-link').href = '/terem/' + teremSzam + '/nap'
+  document.getElementById('napirend-link').href = '/terem/' + roomPath(teremSzam) + '/nap'
   document.title = 'Ticky – ' + teremSzam
   fetchStatus()
   fetchTimetable()

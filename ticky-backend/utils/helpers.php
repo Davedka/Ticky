@@ -120,6 +120,14 @@ function admin_cookie_options(int $expires): array {
     ];
 }
 
+function admin_visibility_cookie_name(): string {
+    return 'ticky_admin_visible';
+}
+
+function admin_visibility_cookie_options(int $expires): array {
+    return admin_cookie_options($expires);
+}
+
 function admin_user_agent_hash(): string {
     return substr(hash('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')), 0, 24);
 }
@@ -138,8 +146,26 @@ function admin_set_auth_cookie(): void {
     setcookie(admin_cookie_name(), admin_issue_token($expires_at), admin_cookie_options($expires_at));
 }
 
+function admin_issue_visibility_token(?int $expires_at = null): string {
+    $expires_at ??= time() + (30 * 24 * 3600);
+    return $expires_at . '.' . hash_hmac('sha256', 'ticky_admin_visible|' . $expires_at . '|' . admin_user_agent_hash(), admin_password());
+}
+
+function admin_set_visibility_cookie(): void {
+    $expires_at = time() + (30 * 24 * 3600);
+    setcookie(
+        admin_visibility_cookie_name(),
+        admin_issue_visibility_token($expires_at),
+        admin_visibility_cookie_options($expires_at)
+    );
+}
+
 function admin_clear_auth_cookie(): void {
     setcookie(admin_cookie_name(), '', admin_cookie_options(time() - 3600));
+}
+
+function admin_clear_visibility_cookie(): void {
+    setcookie(admin_visibility_cookie_name(), '', admin_visibility_cookie_options(time() - 3600));
 }
 
 function admin_is_authenticated(): bool {
@@ -163,6 +189,34 @@ function admin_is_authenticated(): bool {
     }
 
     return hash_equals(admin_sign_token($expires_at), $signature);
+}
+
+function admin_visibility_cookie_is_valid(): bool {
+    if (!admin_is_configured()) {
+        return false;
+    }
+
+    $cookie = trim((string) ($_COOKIE[admin_visibility_cookie_name()] ?? ''));
+    if ($cookie === '' || !str_contains($cookie, '.')) {
+        return false;
+    }
+
+    [$expires_raw, $signature] = explode('.', $cookie, 2);
+    if (!ctype_digit($expires_raw) || $signature === '') {
+        return false;
+    }
+
+    $expires_at = (int) $expires_raw;
+    if ($expires_at < time()) {
+        return false;
+    }
+
+    $expected = hash_hmac('sha256', 'ticky_admin_visible|' . $expires_at . '|' . admin_user_agent_hash(), admin_password());
+    return hash_equals($expected, $signature);
+}
+
+function admin_can_see_ui(): bool {
+    return admin_is_authenticated() || admin_visibility_cookie_is_valid();
 }
 
 function require_admin_api_request(array $allowed_methods): void {
@@ -474,6 +528,14 @@ function render_assistant_widget(array $options = []): void {
     inputEl.style.height = Math.min(inputEl.scrollHeight, 136) + 'px';
   }
 
+  function safeHref(value) {
+    const href = String(value ?? '').trim();
+    if (!href.startsWith('/') || href.startsWith('//')) {
+      return '#';
+    }
+    return href;
+  }
+
   function syncEmpty() {
     const hasMessages = messagesEl.querySelector('.ta-msg') !== null;
     if (emptyEl) {
@@ -547,7 +609,7 @@ function render_assistant_widget(array $options = []): void {
     const actionsHtml = actions.length ? `
       <div class="ta-actions">
         ${actions.map((action, index) => `
-          <a class="ta-pill ${index === 0 ? 'primary' : ''}" href="${esc(action.href || '#')}">${esc(action.label || 'Megnyitás')}</a>
+          <a class="ta-pill ${index === 0 ? 'primary' : ''}" href="${esc(safeHref(action.href || '#'))}">${esc(action.label || 'Megnyitás')}</a>
         `).join('')}
       </div>
     ` : '';
