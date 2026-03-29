@@ -3,22 +3,17 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
 // Env var olvasás
-$admin_pw = trim(getenv('ADMIN_PASSWORD') ?: '');
-if (empty($admin_pw)) $admin_pw = trim($_ENV['ADMIN_PASSWORD'] ?? '');
+$admin_pw = admin_password();
+private_response_headers();
 
 // Token generálás: HMAC-SHA256 a jelszóból
-function makeToken(string $pw): string {
-    return hash_hmac('sha256', 'ticky_admin_' . $pw, $pw);
-}
-
-$token    = makeToken($admin_pw);
-$cookie   = $_COOKIE['ticky_auth'] ?? '';
-$authed   = !empty($admin_pw) && hash_equals($token, $cookie);
-$no_pw_set = empty($admin_pw);
+// Privát, aláírt admin session
+$authed = admin_is_authenticated();
+$no_pw_set = !admin_is_configured();
 
 // Kijelentkezés
 if (isset($_GET['logout'])) {
-    setcookie('ticky_auth', '', time()-3600, '/', '', false, true);
+    admin_clear_auth_cookie();
     header('Location: /admin');
     exit;
 }
@@ -27,8 +22,8 @@ if (isset($_GET['logout'])) {
 $login_error = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
     $input = trim($_POST['pw']);
-    if ($admin_pw && $input === $admin_pw) {
-        setcookie('ticky_auth', $token, time() + 8*3600, '/', '', false, true);
+    if ($admin_pw !== '' && hash_equals($admin_pw, $input)) {
+        admin_set_auth_cookie();
         header('Location: /admin');
         exit;
     } else {
@@ -139,8 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
       <?php if ($no_pw_set): ?>
         <div style="text-align:center;padding:8px 0;">
           <span style="font-size:36px;display:block;margin-bottom:12px;">⚠️</span>
-          <p style="font-size:14px;font-weight:600;color:#f0c76b;margin-bottom:8px;">Nincs jelszó beállítva</p>
-          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Add hozzá az <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.65);">ADMIN_PASSWORD</span> env változót a Render dashboardon.</p>
+          <p style="font-size:14px;font-weight:600;color:#f0c76b;margin-bottom:8px;">Az admin felület nem elérhető</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Ez a felület jelenleg le van zárva.</p>
         </div>
       <?php else: ?>
         <form method="POST" action="/admin">
@@ -153,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
           <?php endif; ?>
           <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:12px;font-size:14px;">Belépés →</button>
         </form>
-        <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.2);">Jelszó: <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.3);">ADMIN_PASSWORD</span> env var</p>
       <?php endif; ?>
     </div>
     <p style="text-align:center;margin-top:14px;"><a href="/" style="font-size:12px;color:rgba(255,255,255,.3);">← Vissza a főoldalra</a></p>
@@ -416,7 +410,7 @@ async function saveTanarNev() {
   const nev=document.getElementById('edit-nev').value.trim()
   if(!kod){toast('Add meg a tanár kódot!','err');return}
   try {
-    const res=await fetch('/api/admin/tanar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kod,nev})})
+    const res=await fetch('/api/admin/tanar',{method:'POST',headers:{'Content-Type':'application/json','X-Ticky-Admin':'1'},body:JSON.stringify({kod,nev})})
     const d=await res.json()
     if(d.ok){
       toast(`✅ ${kod} elmentve`,'ok')
@@ -483,7 +477,7 @@ function renderTermek(list) {
 async function saveEmelet(szam,val) {
   const emelet=val===''?null:parseInt(val)
   try {
-    const res=await fetch(`/api/admin/terem/${encodeURIComponent(szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({emelet})})
+    const res=await fetch(`/api/admin/terem/${encodeURIComponent(szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Ticky-Admin':'1'},body:JSON.stringify({emelet})})
     const d=await res.json()
     if(d.ok) toast(`✅ ${szam} – ${emelet!==null?emelet+'. emelet':'auto'}`)
     else toast(d.error||'Hiba','err')
@@ -499,7 +493,7 @@ async function autoDetectAll() {
     const det=detectEpulet(t.terem_szam)
     if(det.emelet===null) continue
     try {
-      const res=await fetch(`/api/admin/terem/${encodeURIComponent(t.terem_szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({emelet:det.emelet})})
+      const res=await fetch(`/api/admin/terem/${encodeURIComponent(t.terem_szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Ticky-Admin':'1'},body:JSON.stringify({emelet:det.emelet})})
       const d=await res.json()
       d.ok?ok++:err++
     } catch(e){err++}
