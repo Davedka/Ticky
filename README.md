@@ -115,7 +115,7 @@ ticky-backend/
     ├── tanar.php          ← /tanar
     ├── kijelzo.php        ← /kijelzo
     ├── qr.php             ← /qr
-    └── admin.php          ← /admin
+    └── admin.php          ← hidden route from `ADMIN_PATH`
 ```
 
 ---
@@ -138,7 +138,7 @@ ticky-backend/
 | `SUPABASE_SERVICE_KEY` | Service role key (admin ops) |
 | `TIMEZONE` | `Europe/Budapest` |
 | `ADMIN_PASSWORD` | Admin panel password |
-| `ADMIN_ALLOWED_IPS` | Comma-separated allowlist for admin access, e.g. `84.2.3.4,84.2.3.0/24` |
+| `ADMIN_PATH` | Secret admin route, e.g. `ticky-panel-7f3a9b2x` |
 
 > ⚠️ **Never commit these keys.** Set them via Render dashboard → Environment Variables.
 
