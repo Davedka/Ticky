@@ -1,0 +1,12 @@
+{
+  "name": "ticky-importer",
+  "version": "6.0.0",
+  "type": "module",
+  "scripts": {
+    "import": "node importer.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7"
+  }
+}
