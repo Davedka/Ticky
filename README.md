@@ -184,23 +184,6 @@ The importer wipes existing data and re-uploads. Run it whenever the timetable c
 
 ---
 
-## 🤝 Contributing
 
-1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/your-username/Ticky.git`
-3. **Create a branch**: `git checkout -b feature/your-feature`
-4. **Commit**: `git commit -m "Add your feature"`
-5. **Push**: `git push origin feature/your-feature`
-6. **Open a Pull Request**
-
-Please open an **Issue** first for major changes.
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
 
 <p align="center">Built with ☕ by <a href="https://github.com/Davedka">Davedka</a></p>
