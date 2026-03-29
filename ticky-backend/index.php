@@ -210,7 +210,7 @@ if (match_route('/api/napirend/{szam}', $uri) !== false) {
 }
 
 // ─── Admin ────────────────────────────────────────────
-if ($uri === admin_path_value()) {
+if (admin_path_matches_request($uri)) {
     require __DIR__ . '/pages/admin.php'; exit;
 }
 if ($uri === '/api/admin/tanar') {
