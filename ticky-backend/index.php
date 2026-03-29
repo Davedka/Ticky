@@ -100,7 +100,7 @@ if ($uri === '/') {
       <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
       <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
       <?php if (admin_can_see_ui()): ?>
-      <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">Admin</a>
+      <a href="<?= htmlspecialchars(admin_path_value(), ENT_QUOTES, 'UTF-8') ?>" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">Admin</a>
       <?php endif; ?>
     </div>
   </nav>
@@ -161,16 +161,7 @@ if ($uri === '/') {
 
 // ─── API Ping ─────────────────────────────────────────
 if ($uri === '/api/ping') {
-    $response = ['status' => 'ok', 'time' => date('Y-m-d H:i:s')];
-    if (isset($_GET['details']) && $_GET['details'] === '1') {
-        $ip_details = ticky_client_ip_details();
-        $response['request_ip'] = $ip_details['ip'];
-        $response['request_ip_source'] = $ip_details['source'];
-        $response['request_ip_candidates'] = $ip_details['candidates'];
-        $response['admin_ip_protected'] = !empty(admin_allowed_ips());
-        $response['admin_ip_allowed'] = admin_request_ip_is_allowed();
-    }
-    json_response($response);
+    json_response(['status' => 'ok', 'time' => date('Y-m-d H:i:s')]);
 }
 
 // ─── Frontend oldalak ─────────────────────────────────
@@ -219,7 +210,7 @@ if (match_route('/api/napirend/{szam}', $uri) !== false) {
 }
 
 // ─── Admin ────────────────────────────────────────────
-if ($uri === '/admin') {
+if ($uri === admin_path_value()) {
     require __DIR__ . '/pages/admin.php'; exit;
 }
 if ($uri === '/api/admin/tanar') {

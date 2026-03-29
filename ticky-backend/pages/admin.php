@@ -5,28 +5,11 @@ require_once __DIR__ . '/../utils/helpers.php';
 // Env var olvasás
 $admin_pw = admin_password();
 private_response_headers();
-$ip_allowed = admin_request_ip_is_allowed();
 
 // Token generálás: HMAC-SHA256 a jelszóból
 // Privát, aláírt admin session
-$authed = $ip_allowed && admin_is_authenticated();
+$authed = admin_is_authenticated();
 $no_pw_set = !admin_is_configured();
-
-if (!$no_pw_set && !$ip_allowed) {
-    http_response_code(404);
-    ?>
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ticky – 404</title>
-</head>
-<body></body>
-</html>
-<?php
-    exit;
-}
 
 if (isset($_GET['forget'])) {
     admin_clear_auth_cookie();
@@ -38,7 +21,7 @@ if (isset($_GET['forget'])) {
 // Kijelentkezés
 if (isset($_GET['logout'])) {
     admin_clear_auth_cookie();
-    header('Location: /admin');
+    header('Location: ' . admin_path_value());
     exit;
 }
 
@@ -49,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
     if ($admin_pw !== '' && hash_equals($admin_pw, $input)) {
         admin_set_auth_cookie();
         admin_set_visibility_cookie();
-        header('Location: /admin');
+        header('Location: ' . admin_path_value());
         exit;
     } else {
         $login_error = true;
@@ -163,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
           <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Ez a felület jelenleg le van zárva.</p>
         </div>
       <?php else: ?>
-        <form method="POST" action="/admin">
+        <form method="POST" action="<?= htmlspecialchars(admin_path_value(), ENT_QUOTES, 'UTF-8') ?>">
           <div style="margin-bottom:16px;">
             <label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:8px;">Jelszó</label>
             <input type="password" name="pw" class="inp" placeholder="Admin jelszó…" autofocus style="<?= $login_error?'border-color:rgba(232,51,74,.5);':'' ?>">
@@ -192,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <span style="font-size:12px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;" id="nav-time">–</span>
-    <a href="/admin?logout=1" class="btn btn-ghost btn-sm">Kilépés</a>
+    <a href="<?= htmlspecialchars(admin_url(['logout' => 1]), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost btn-sm">Kilépés</a>
   </div>
 </nav>
 
