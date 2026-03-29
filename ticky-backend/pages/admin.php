@@ -5,11 +5,28 @@ require_once __DIR__ . '/../utils/helpers.php';
 // Env var olvasás
 $admin_pw = admin_password();
 private_response_headers();
+$ip_allowed = admin_request_ip_is_allowed();
 
 // Token generálás: HMAC-SHA256 a jelszóból
 // Privát, aláírt admin session
-$authed = admin_is_authenticated();
+$authed = $ip_allowed && admin_is_authenticated();
 $no_pw_set = !admin_is_configured();
+
+if (!$no_pw_set && !$ip_allowed) {
+    http_response_code(404);
+    ?>
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticky – 404</title>
+</head>
+<body></body>
+</html>
+<?php
+    exit;
+}
 
 if (isset($_GET['forget'])) {
     admin_clear_auth_cookie();

@@ -57,6 +57,32 @@ function ticky_current_origin_parts(): array {
     ];
 }
 
+function ticky_client_ip(): string {
+    $header_candidates = [
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_X_REAL_IP',
+        'REMOTE_ADDR',
+    ];
+
+    foreach ($header_candidates as $header) {
+        $value = trim((string) ($_SERVER[$header] ?? ''));
+        if ($value === '') {
+            continue;
+        }
+
+        $parts = $header === 'HTTP_X_FORWARDED_FOR' ? explode(',', $value) : [$value];
+        foreach ($parts as $part) {
+            $candidate = trim($part);
+            if ($candidate !== '' && filter_var($candidate, FILTER_VALIDATE_IP)) {
+                return $candidate;
+            }
+        }
+    }
+
+    return '';
+}
+
 function ticky_request_origin_is_same_host(): bool {
     $current = ticky_current_origin_parts();
     if (($current['host'] ?? '') === '') {
@@ -89,6 +115,86 @@ function private_response_headers(): void {
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');
     header('X-Robots-Tag: noindex, nofollow, noarchive');
+}
+
+function admin_allowed_ips(): array {
+    static $allowed = null;
+
+    if ($allowed !== null) {
+        return $allowed;
+    }
+
+    $raw = trim((string) (getenv('ADMIN_ALLOWED_IPS') ?: ($_ENV['ADMIN_ALLOWED_IPS'] ?? '')));
+    if ($raw === '') {
+        $allowed = [];
+        return $allowed;
+    }
+
+    $parts = preg_split('/[\s,;]+/', $raw) ?: [];
+    $allowed = array_values(array_filter(array_map('trim', $parts), static fn(string $value): bool => $value !== ''));
+    return $allowed;
+}
+
+function ticky_ip_matches_rule(string $ip, string $rule): bool {
+    $rule = trim($rule);
+    if ($rule === '') {
+        return false;
+    }
+
+    if (!str_contains($rule, '/')) {
+        return strcasecmp($ip, $rule) === 0;
+    }
+
+    [$subnet, $prefix_raw] = explode('/', $rule, 2);
+    if (!ctype_digit($prefix_raw)) {
+        return false;
+    }
+
+    $ip_bin = inet_pton($ip);
+    $subnet_bin = inet_pton($subnet);
+    if ($ip_bin === false || $subnet_bin === false || strlen($ip_bin) !== strlen($subnet_bin)) {
+        return false;
+    }
+
+    $prefix = (int) $prefix_raw;
+    $max_bits = strlen($ip_bin) * 8;
+    if ($prefix < 0 || $prefix > $max_bits) {
+        return false;
+    }
+
+    $full_bytes = intdiv($prefix, 8);
+    $remaining_bits = $prefix % 8;
+
+    if ($full_bytes > 0 && substr($ip_bin, 0, $full_bytes) !== substr($subnet_bin, 0, $full_bytes)) {
+        return false;
+    }
+
+    if ($remaining_bits === 0) {
+        return true;
+    }
+
+    $mask = (0xFF << (8 - $remaining_bits)) & 0xFF;
+    return (ord($ip_bin[$full_bytes]) & $mask) === (ord($subnet_bin[$full_bytes]) & $mask);
+}
+
+function admin_request_ip_is_allowed(): bool {
+    $allowed_rules = admin_allowed_ips();
+    if (empty($allowed_rules)) {
+        return true;
+    }
+
+    $client_ip = ticky_client_ip();
+    if ($client_ip === '') {
+        return false;
+    }
+
+    foreach ($allowed_rules as $rule) {
+        if (ticky_ip_matches_rule($client_ip, $rule)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function admin_password(): string {
@@ -216,7 +322,7 @@ function admin_visibility_cookie_is_valid(): bool {
 }
 
 function admin_can_see_ui(): bool {
-    return admin_is_authenticated() || admin_visibility_cookie_is_valid();
+    return admin_request_ip_is_allowed() && (admin_is_authenticated() || admin_visibility_cookie_is_valid());
 }
 
 function require_admin_api_request(array $allowed_methods): void {
@@ -228,6 +334,10 @@ function require_admin_api_request(array $allowed_methods): void {
     }
 
     if (!admin_is_configured()) {
+        json_error('Nem található', 404);
+    }
+
+    if (!admin_request_ip_is_allowed()) {
         json_error('Nem található', 404);
     }
 
