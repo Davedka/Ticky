@@ -161,7 +161,16 @@ if ($uri === '/') {
 
 // ─── API Ping ─────────────────────────────────────────
 if ($uri === '/api/ping') {
-    json_response(['status' => 'ok', 'time' => date('Y-m-d H:i:s')]);
+    $response = ['status' => 'ok', 'time' => date('Y-m-d H:i:s')];
+    if (isset($_GET['details']) && $_GET['details'] === '1') {
+        $ip_details = ticky_client_ip_details();
+        $response['request_ip'] = $ip_details['ip'];
+        $response['request_ip_source'] = $ip_details['source'];
+        $response['request_ip_candidates'] = $ip_details['candidates'];
+        $response['admin_ip_protected'] = !empty(admin_allowed_ips());
+        $response['admin_ip_allowed'] = admin_request_ip_is_allowed();
+    }
+    json_response($response);
 }
 
 // ─── Frontend oldalak ─────────────────────────────────
