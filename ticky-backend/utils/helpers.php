@@ -322,7 +322,7 @@ function admin_visibility_cookie_is_valid(): bool {
 }
 
 function admin_can_see_ui(): bool {
-    return admin_request_ip_is_allowed() && (admin_is_authenticated() || admin_visibility_cookie_is_valid());
+    return admin_is_configured() && admin_request_ip_is_allowed();
 }
 
 function require_admin_api_request(array $allowed_methods): void {
