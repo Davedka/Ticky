@@ -455,6 +455,19 @@ let progTimer     = null
 let progStart     = null
 let prevStates    = {}
 
+function esc(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function roomPath(value) {
+  return encodeURIComponent(String(value ?? ''))
+}
+
 // ── Óra ─────────────────────────────────────────────
 function updateClock() {
   const p   = nowParts()
@@ -544,6 +557,8 @@ function renderGrid() {
     const a = r.aktualis
     const prevState = prevStates[r.terem_szam]
     const changed = prevState && prevState !== r.allapot
+    const roomEsc = esc(r.terem_szam)
+    const roomUrl = '/terem/' + roomPath(r.terem_szam)
 
     let bodyHTML = ''
     if(isFoglalt && a) {
@@ -551,13 +566,13 @@ function renderGrid() {
       const percMaradt = Math.round(toMin(a.vegzes) - nowMinutes())
       bodyHTML = `
         <div class="card-body">
-          <div class="card-tanar">${a.tanar}</div>
-          <div class="card-meta">${a.osztaly} · ${a.tantargy}</div>
+          <div class="card-tanar">${esc(a.tanar)}</div>
+          <div class="card-meta">${esc(a.osztaly)} · ${esc(a.tantargy)}</div>
           <div class="card-prog"><div class="card-prog-fill" style="width:${pct}%;"></div></div>
           <div class="card-time">
-            <span>${a.kezdes}</span>
+            <span>${esc(a.kezdes)}</span>
             <span class="remaining">${percMaradt > 0 ? percMaradt+'p' : 'vége'}</span>
-            <span>${a.vegzes}</span>
+            <span>${esc(a.vegzes)}</span>
           </div>
         </div>`
     } else {
@@ -565,9 +580,9 @@ function renderGrid() {
     }
 
     const cl = `room-card ${r.allapot} card-in${changed?' flash':''}`
-    return `<div class="${cl}" style="animation-delay:${i*20}ms;" onclick="window.open('/terem/${r.terem_szam}','_blank')">
+    return `<div class="${cl}" style="animation-delay:${i*20}ms;" onclick="window.open('${roomUrl}','_blank')">
       <div class="card-top">
-        <div class="room-num">${r.terem_szam}</div>
+        <div class="room-num">${roomEsc}</div>
         <div class="status-pill ${r.allapot}">
           <div class="pill-dot ${r.allapot}"></div>
           ${isFoglalt?'FOGLALT':'SZABAD'}

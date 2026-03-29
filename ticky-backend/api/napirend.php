@@ -17,6 +17,10 @@ if ($params === false) {
 }
 
 $terem_szam = strtoupper(trim($params['szam']));
+if (!preg_match('/^[\p{L}\p{N}._-]{1,32}$/u', $terem_szam)) {
+    json_error('Érvénytelen terem szám', 400);
+}
+
 $nap_param  = $_GET['nap'] ?? null;
 
 // ─── 1. Terem lekérése ────────────────────────────────

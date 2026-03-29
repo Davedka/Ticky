@@ -176,7 +176,7 @@ async function loadData() {
     const d = await fetch(`/api/tanar/${encodeURIComponent(curKod)}/orarend`).then(r => r.json())
 
     if (d.error) {
-      document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">${d.error}</p></div>`
+      document.getElementById('aktblock').innerHTML = `<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">${esc(d.error)}</p></div>`
       setAllapot('idle')
       return
     }
@@ -190,7 +190,7 @@ async function loadData() {
     renderLista(orak)
 
     if (d.tanar_nev) {
-      const opt = document.querySelector(`#sel option[value="${curKod}"]`)
+      const opt = document.querySelector(`#sel option[value="${cssEsc(curKod)}"]`)
       if (opt && !opt.textContent.includes('–')) {
         opt.textContent = `${curKod} – ${d.tanar_nev}`
       }
@@ -318,6 +318,13 @@ function esc(s) {
   return String(s ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+}
+
+function cssEsc(value) {
+  if (window.CSS && typeof window.CSS.escape === 'function') {
+    return window.CSS.escape(String(value ?? ''))
+  }
+  return String(value ?? '').replace(/["\\#.:,[\]()]/g, '\\$&')
 }
 
 function refresh() {

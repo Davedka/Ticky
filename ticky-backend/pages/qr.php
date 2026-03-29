@@ -172,6 +172,23 @@ const BASE_URL = window.location.origin  // pl. https://ticky-6r32.onrender.com
 let selectedRooms = new Set()
 let allRooms = []
 
+function esc(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function roomPath(value) {
+  return encodeURIComponent(String(value ?? ''))
+}
+
+function roomDomId(prefix, value) {
+  return `${prefix}-${encodeURIComponent(String(value ?? ''))}`
+}
+
 // ─── Betöltés ────────────────────────────────────────
 async function loadRooms() {
   try {
@@ -195,11 +212,13 @@ function renderCards() {
   grid.innerHTML = ''
 
   allRooms.forEach((szam, i) => {
-    const url = `${BASE_URL}/terem/${szam}`
+    const url = `${BASE_URL}/terem/${roomPath(szam)}`
+    const cardId = roomDomId('card', szam)
+    const qrId = roomDomId('qr', szam)
 
     const card = document.createElement('div')
     card.className = 'qr-card fade-in'
-    card.id = `card-${szam}`
+    card.id = cardId
     card.style.animationDelay = `${i * 40}ms`
     card.onclick = () => toggleSelect(szam)
 
@@ -211,17 +230,17 @@ function renderCards() {
       </div>
       <div>
         <p class="print-label text-xs font-semibold tracking-widest uppercase text-center" style="color:rgba(255,255,255,.35);">Terem</p>
-        <p class="print-room-num" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1;text-align:center;">${szam}</p>
+        <p class="print-room-num" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1;text-align:center;">${esc(szam)}</p>
       </div>
-      <div class="qr-wrap" id="qr-${szam}"></div>
-      <p class="print-url text-xs text-center" style="color:rgba(255,255,255,.3);word-break:break-all;max-width:140px;">${url}</p>
+      <div class="qr-wrap" id="${qrId}"></div>
+      <p class="print-url text-xs text-center" style="color:rgba(255,255,255,.3);word-break:break-all;max-width:140px;">${esc(url)}</p>
       <p class="print-ticky" style="font-family:'Playfair Display',serif;font-size:11px;color:rgba(255,255,255,.2);font-weight:600;">Ticky</p>
     `
 
     grid.appendChild(card)
 
     // QR generálás
-    new QRCode(document.getElementById(`qr-${szam}`), {
+    new QRCode(document.getElementById(qrId), {
       text:          url,
       width:         128,
       height:        128,
@@ -238,10 +257,10 @@ function renderCards() {
 function toggleSelect(szam) {
   if (selectedRooms.has(szam)) {
     selectedRooms.delete(szam)
-    document.getElementById(`card-${szam}`).classList.remove('selected')
+    document.getElementById(roomDomId('card', szam)).classList.remove('selected')
   } else {
     selectedRooms.add(szam)
-    document.getElementById(`card-${szam}`).classList.add('selected')
+    document.getElementById(roomDomId('card', szam)).classList.add('selected')
   }
   updateUI()
 }
@@ -249,7 +268,7 @@ function toggleSelect(szam) {
 function selectAll() {
   allRooms.forEach(szam => {
     selectedRooms.add(szam)
-    document.getElementById(`card-${szam}`)?.classList.add('selected')
+    document.getElementById(roomDomId('card', szam))?.classList.add('selected')
   })
   updateUI()
 }
@@ -257,7 +276,7 @@ function selectAll() {
 function clearSelection() {
   allRooms.forEach(szam => {
     selectedRooms.delete(szam)
-    document.getElementById(`card-${szam}`)?.classList.remove('selected')
+    document.getElementById(roomDomId('card', szam))?.classList.remove('selected')
   })
   updateUI()
 }
@@ -307,7 +326,7 @@ function printSelected() {
 
   // print-me osztályok eltávolítása (cleanup)
   allRooms.forEach(szam => {
-    document.getElementById(`card-${szam}`)?.classList.remove('print-me')
+    document.getElementById(roomDomId('card', szam))?.classList.remove('print-me')
   })
 }
 
