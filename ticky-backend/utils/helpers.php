@@ -57,30 +57,85 @@ function ticky_current_origin_parts(): array {
     ];
 }
 
-function ticky_client_ip(): string {
-    $header_candidates = [
+function ticky_normalize_ip(string $ip): string {
+    $ip = trim($ip);
+    if ($ip === '') {
+        return '';
+    }
+
+    if (stripos($ip, '::ffff:') === 0) {
+        $mapped = substr($ip, 7);
+        if ($mapped !== false && filter_var($mapped, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return $mapped;
+        }
+    }
+
+    return $ip;
+}
+
+function ticky_ip_header_candidates(): array {
+    $headers = [
+        'HTTP_TRUE_CLIENT_IP',
         'HTTP_CF_CONNECTING_IP',
-        'HTTP_X_FORWARDED_FOR',
         'HTTP_X_REAL_IP',
+        'HTTP_X_FORWARDED_FOR',
         'REMOTE_ADDR',
     ];
 
-    foreach ($header_candidates as $header) {
+    $result = [];
+    foreach ($headers as $header) {
         $value = trim((string) ($_SERVER[$header] ?? ''));
         if ($value === '') {
             continue;
         }
 
         $parts = $header === 'HTTP_X_FORWARDED_FOR' ? explode(',', $value) : [$value];
+        $ips = [];
         foreach ($parts as $part) {
-            $candidate = trim($part);
+            $candidate = ticky_normalize_ip(trim($part));
             if ($candidate !== '' && filter_var($candidate, FILTER_VALIDATE_IP)) {
-                return $candidate;
+                $ips[] = $candidate;
             }
+        }
+
+        if (!empty($ips)) {
+            $result[$header] = array_values(array_unique($ips));
         }
     }
 
-    return '';
+    return $result;
+}
+
+function ticky_client_ip_details(): array {
+    $candidates = ticky_ip_header_candidates();
+    $priority = [
+        'HTTP_TRUE_CLIENT_IP',
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_X_REAL_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'REMOTE_ADDR',
+    ];
+
+    foreach ($priority as $header) {
+        if (!empty($candidates[$header])) {
+            return [
+                'ip' => $candidates[$header][0],
+                'source' => $header,
+                'candidates' => $candidates,
+            ];
+        }
+    }
+
+    return [
+        'ip' => '',
+        'source' => null,
+        'candidates' => $candidates,
+    ];
+}
+
+function ticky_client_ip(): string {
+    $details = ticky_client_ip_details();
+    return (string) ($details['ip'] ?? '');
 }
 
 function ticky_request_origin_is_same_host(): bool {
@@ -136,13 +191,14 @@ function admin_allowed_ips(): array {
 }
 
 function ticky_ip_matches_rule(string $ip, string $rule): bool {
+    $ip = ticky_normalize_ip($ip);
     $rule = trim($rule);
-    if ($rule === '') {
+    if ($ip === '' || $rule === '') {
         return false;
     }
 
     if (!str_contains($rule, '/')) {
-        return strcasecmp($ip, $rule) === 0;
+        return strcasecmp($ip, ticky_normalize_ip($rule)) === 0;
     }
 
     [$subnet, $prefix_raw] = explode('/', $rule, 2);
@@ -150,6 +206,7 @@ function ticky_ip_matches_rule(string $ip, string $rule): bool {
         return false;
     }
 
+    $subnet = ticky_normalize_ip($subnet);
     $ip_bin = inet_pton($ip);
     $subnet_bin = inet_pton($subnet);
     if ($ip_bin === false || $subnet_bin === false || strlen($ip_bin) !== strlen($subnet_bin)) {
