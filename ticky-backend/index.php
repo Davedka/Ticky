@@ -126,12 +126,42 @@ if ($uri === '/') {
     Ticky
   </a>
   <div class="flex items-center gap-1 flex-wrap">
-    <a href="/termek" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
-    <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
-    <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
-    <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
-    <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
-    <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(0,200,200,.85);background:rgba(0,200,200,.08);border:1px solid rgba(0,200,200,.2);border-radius:8px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;" onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.16)';this.style.borderColor='rgba(0,200,200,.4)'" onmouseout="this.style.color='rgba(0,200,200,.85)';this.style.background='rgba(0,200,200,.08)';this.style.borderColor='rgba(0,200,200,.2)'">📅 Eseménynaptár</a>
+    <!-- Fő oldalak -->
+    <a href="/termek" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
+    <a href="/tanar"  class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
+    <a href="/qr"     class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
+    <a href="/kijelzo" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
+    <a href="/admin"  class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
+
+    <!-- Elválasztó -->
+    <span style="width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 4px;display:inline-block;"></span>
+
+    <!-- Eseménynaptár -->
+    <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(0,200,200,.85);background:rgba(0,200,200,.08);border:1px solid rgba(0,200,200,.2);border-radius:8px;transition:all .2s;display:inline-flex;align-items:center;gap:5px;"
+       onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.16)';this.style.borderColor='rgba(0,200,200,.4)'"
+       onmouseout="this.style.color='rgba(0,200,200,.85)';this.style.background='rgba(0,200,200,.08)';this.style.borderColor='rgba(0,200,200,.2)'">
+      📅 Eseménynaptár
+    </a>
+
+    <!-- Support -->
+    <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(160,200,255,.8);background:rgba(100,160,255,.07);border:1px solid rgba(100,160,255,.18);border-radius:8px;transition:all .2s;display:inline-flex;align-items:center;gap:5px;"
+       onmouseover="this.style.color='white';this.style.background='rgba(100,160,255,.14)';this.style.borderColor='rgba(100,160,255,.35)'"
+       onmouseout="this.style.color='rgba(160,200,255,.8)';this.style.background='rgba(100,160,255,.07)';this.style.borderColor='rgba(100,160,255,.18)'">
+      ✉️ Support
+    </a>
+
+    <!-- Bug report – GitHub Issues -->
+    <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(255,140,140,.8);background:rgba(255,80,80,.07);border:1px solid rgba(255,80,80,.18);border-radius:8px;transition:all .2s;display:inline-flex;align-items:center;gap:5px;"
+       onmouseover="this.style.color='white';this.style.background='rgba(255,80,80,.14)';this.style.borderColor='rgba(255,80,80,.35)'"
+       onmouseout="this.style.color='rgba(255,140,140,.8)';this.style.background='rgba(255,80,80,.07)';this.style.borderColor='rgba(255,80,80,.18)'">
+      🐛 Bug
+    </a>
   </div>
 </nav>
 
@@ -148,6 +178,7 @@ if ($uri === '/') {
       </div>
     </div>
 
+    <!-- Összes terem -->
     <div class="fade-up-2 mb-3">
       <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
       <a href="/termek" class="glass card-hover block px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
@@ -160,6 +191,7 @@ if ($uri === '/') {
       </a>
     </div>
 
+    <!-- Tanár + QR -->
     <div class="fade-up-3 grid grid-cols-2 gap-3 mb-3">
       <div>
         <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
@@ -179,19 +211,28 @@ if ($uri === '/') {
       </div>
     </div>
 
-    <!-- Eseménynaptár kártya -->
-    <div class="fade-up-4 mb-3">
-      <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#007a7a,#00c8c8,#007a7a);"></div>
-      <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener"
-         class="glass card-hover block px-6 py-4 flex items-center justify-between gap-4"
-         style="border-radius:0 0 14px 14px;border-top:none;">
-        <div>
-          <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(0,200,200,.5);">Kapcsolódó oldal</p>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;">Eseménynaptár</h3>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">MSZC Gépészeti – iskolai események</p>
-        </div>
-        <span style="font-size:28px;">📅</span>
-      </a>
+    <!-- Support + Bug sor -->
+    <div class="fade-up-4 grid grid-cols-2 gap-3 mb-3">
+      <div>
+        <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#64a0ff,#1a4a8a);"></div>
+        <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support"
+           class="glass card-hover block px-5 py-4"
+           style="border-radius:0 0 14px 14px;border-top:none;">
+          <span style="font-size:24px;" class="block mb-2">✉️</span>
+          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Support</h3>
+          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">tickysupport@gmail.com</p>
+        </a>
+      </div>
+      <div>
+        <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#5a1a1a,#ff5050,#5a1a1a);"></div>
+        <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener"
+           class="glass card-hover block px-5 py-4"
+           style="border-radius:0 0 14px 14px;border-top:none;">
+          <span style="font-size:24px;" class="block mb-2">🐛</span>
+          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Bug report</h3>
+          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">GitHub Issues</p>
+        </a>
+      </div>
     </div>
 
     <p class="fade-up-4 text-center text-xs mt-6" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
@@ -259,7 +300,6 @@ async function sendAI() {
     typing.textContent = reply
     aiHistory.push({ role: 'assistant', content: reply })
 
-    // Max 20 item a historiban
     if (aiHistory.length > 20) aiHistory = aiHistory.slice(-20)
   } catch(e) {
     typing.className  = 'ai-msg bot'
