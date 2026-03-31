@@ -47,8 +47,7 @@
     <span style="color:rgba(255,255,255,.2);">·</span>
     <span class="text-sm" style="color:rgba(255,255,255,.45);">Összes terem</span>
   </div>
-  <<a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:rgba(0,200,200,.8);background:rgba(0,200,200,.07);border:1px solid rgba(0,200,200,.18);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:500;text-decoration:none;transition:all .15s;" onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.15)'" onmouseout="this.style.color='rgba(0,200,200,.8)';this.style.background='rgba(0,200,200,.07)'">📅 Naptár</a>
-    <button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
+  <<button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
     <svg id="refresh-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     <span id="footer-ido">–</span>
   </button>
