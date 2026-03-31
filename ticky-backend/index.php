@@ -4,53 +4,16 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
-
-// Serve only whitelisted static assets before routing everything else through PHP.
-$requested_file = realpath(__DIR__ . rawurldecode($uri));
-$static_mime_types = [
-    'ico' => 'image/x-icon',
-    'svg' => 'image/svg+xml',
-    'png' => 'image/png',
-    'jpg' => 'image/jpeg',
-    'jpeg' => 'image/jpeg',
-    'webp' => 'image/webp',
-    'gif' => 'image/gif',
-    'css' => 'text/css; charset=utf-8',
-    'js' => 'application/javascript; charset=utf-8',
-    'json' => 'application/json; charset=utf-8',
-    'txt' => 'text/plain; charset=utf-8',
-    'woff' => 'font/woff',
-    'woff2' => 'font/woff2',
-];
-if (
-    $uri !== '/'
-    && $requested_file !== false
-    && is_file($requested_file)
-    && str_starts_with($requested_file, __DIR__ . DIRECTORY_SEPARATOR)
-) {
-    $extension = strtolower(pathinfo($requested_file, PATHINFO_EXTENSION));
-    if (isset($static_mime_types[$extension])) {
-        header('Content-Type: ' . $static_mime_types[$extension]);
-        header('Content-Length: ' . filesize($requested_file));
-        header('Cache-Control: public, max-age=3600');
-        readfile($requested_file);
-        exit;
-    }
-}
-
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header('Cross-Origin-Resource-Policy: same-origin');
-header('Cross-Origin-Opener-Policy: same-origin');
-header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
-header('Content-Security-Policy: default-src \'self\'; script-src \'self\' \'unsafe-inline\' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com data:; img-src \'self\' data:; connect-src \'self\'; frame-ancestors \'self\'; form-action \'self\'; base-uri \'self\'; object-src \'none\'');
 header_remove('X-Powered-By');
 
 handle_cors();
+
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
 
 // ─── Gyökér → Landing ────────────────────────────────
 if ($uri === '/') {
@@ -64,8 +27,6 @@ if ($uri === '/') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -99,9 +60,8 @@ if ($uri === '/') {
       <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
       <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
       <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
-      <?php if (admin_can_see_ui()): ?>
-      <a href="<?= htmlspecialchars(admin_path_value(), ENT_QUOTES, 'UTF-8') ?>" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">Admin</a>
-      <?php endif; ?>
+      <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
+      <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(0,200,200,.85);background:rgba(0,200,200,.08);border:1px solid rgba(0,200,200,.2);border-radius:8px;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;" onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.16)';this.style.borderColor='rgba(0,200,200,.4)'" onmouseout="this.style.color='rgba(0,200,200,.85)';this.style.background='rgba(0,200,200,.08)';this.style.borderColor='rgba(0,200,200,.2)'">📅 Eseménynaptár</a>
     </div>
   </nav>
   <div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
@@ -146,13 +106,6 @@ if ($uri === '/') {
       <p class="fade-up-3 text-center text-xs mt-8" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
     </div>
   </div>
-  <?php render_assistant_widget([
-    'title' => 'Ticky AI',
-    'eyebrow' => 'Főoldal',
-    'context' => 'home',
-    'empty_state' => 'Kérdezhetsz termekről, konkrét teremállapotról vagy arról, melyik Ticky oldalt érdemes megnyitni.',
-    'placeholder' => 'Írj egy kérdést a Tickyhez kapcsolódva...',
-  ]); ?>
 </body>
 </html>
     <?php
@@ -174,9 +127,6 @@ if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
 if ($uri === '/qr') {
     require __DIR__ . '/pages/qr.php'; exit;
 }
-if ($uri === '/assistant') {
-    require __DIR__ . '/pages/assistant.php'; exit;
-}
 if ($uri === '/kijelzo') {
     require __DIR__ . '/pages/kijelzo.php'; exit;
 }
@@ -195,9 +145,6 @@ if ($uri === '/api/termek') {
 if ($uri === '/api/tanarok') {
     require __DIR__ . '/api/tanarok.php'; exit;
 }
-if ($uri === '/api/assistant') {
-    require __DIR__ . '/api/assistant.php'; exit;
-}
 // Tanár órarend – ELŐBB mint /api/terem/{szam}!
 if (match_route('/api/tanar/{kod}/orarend', $uri) !== false) {
     require __DIR__ . '/api/tanar_orarend.php'; exit;
@@ -210,7 +157,7 @@ if (match_route('/api/napirend/{szam}', $uri) !== false) {
 }
 
 // ─── Admin ────────────────────────────────────────────
-if (admin_path_matches_request($uri)) {
+if ($uri === '/admin') {
     require __DIR__ . '/pages/admin.php'; exit;
 }
 if ($uri === '/api/admin/tanar') {
@@ -220,8 +167,6 @@ if (match_route('/api/admin/terem/{szam}', $uri) !== false) {
     require __DIR__ . '/api/admin_terem.php'; exit;
 }
 
-
-
 // 404
 http_response_code(404);
-echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png?v=20260327c"><link rel="shortcut icon" href="/favicon.ico?v=20260327c"><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
+echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
