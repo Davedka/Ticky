@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Napirend</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -145,6 +143,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
     <a id="nav-vissza" href="/termek" class="nav-btn">← QR nézet</a>
+    <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:rgba(0,200,200,.8);background:rgba(0,200,200,.07);border:1px solid rgba(0,200,200,.18);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:500;text-decoration:none;transition:all .15s;" onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.15)'" onmouseout="this.style.color='rgba(0,200,200,.8)';this.style.background='rgba(0,200,200,.07)'">📅 Naptár</a>
     <button onclick="refresh()" class="nav-btn" style="display:flex;align-items:center;gap:4px;padding:7px 10px;">
       <svg id="ri" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
@@ -187,9 +186,7 @@
   <div class="mob-list" id="mob-list"></div>
 </div>
 
-<?php render_time_sync_bootstrap(); ?>
 <script>
-const { nowMinutes, schoolDayIndex } = window.TickyTime
 const NAP   = {1:'Hétfő',2:'Kedd',3:'Szerda',4:'Csütörtök',5:'Péntek'}
 const START = 7*60+30   // 450
 const END   = 14*60+30  // 870
@@ -201,35 +198,22 @@ let hetData   = null
 let curMob    = maiNap()
 let nowTimer  = null
 
-function esc(value){
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;')
-}
-
-function roomPath(value){
-  return encodeURIComponent(String(value ?? ''))
-}
-
 function getTerem() {
   const p=location.pathname.split('/').filter(Boolean)
   return (p[0]==='terem'&&p[2]==='nap') ? p[1].toUpperCase() : null
 }
-function maiNap() { return schoolDayIndex() }
+function maiNap() { const d=new Date().getDay(); return(d===0||d===6)?1:d }
 function toMin(t) { const[h,m]=t.split(':').map(Number); return h*60+m }
 function topPx(m) { return Math.max(0,(m-START)*PPM) }
-function isAktiv(k,v) { const c=nowMinutes(); return c>=toMin(k)&&c<=toMin(v) }
-function isMult(v) { return nowMinutes()>toMin(v) }
-function pct(k,v) { const c=nowMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
-function nowM() { return nowMinutes() }
+function isAktiv(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return c>=toMin(k)&&c<=toMin(v) }
+function isMult(v) { return new Date().getHours()*60+new Date().getMinutes()>toMin(v) }
+function pct(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
+function nowM() { return new Date().getHours()*60+new Date().getMinutes() }
 
 // ── Fetch ────────────────────────────────────────────
 async function fetchData() {
   try {
-    const d=await fetch(`/api/napirend/${roomPath(teremSzam)}?nap=heten`).then(r=>r.json())
+    const d=await fetch(`/api/napirend/${teremSzam}?nap=heten`).then(r=>r.json())
     if(d.error){showErr(d.error);return}
     hetData={}
     ;(d.het||[]).forEach(nd=>{hetData[nd.nap]=nd.orak||[]})
@@ -245,9 +229,9 @@ function buildSummary() {
   const akt=orak.find(o=>isAktiv(o.kezdes,o.vegzes))
   const kov=orak.find(o=>!isMult(o.vegzes)&&!isAktiv(o.kezdes,o.vegzes))
   let h=`<span class="sum-pill">📚 ${orak.length} óra ma</span>`
-  h+=`<span class="sum-pill">🕐 ${esc(orak[0].kezdes)} – ${esc(orak[orak.length-1].vegzes)}</span>`
-  if(akt) h+=`<span class="sum-pill gold">⚡ ${esc(akt.ora_sorszam)}. óra · ${100-pct(akt.kezdes,akt.vegzes)}% van hátra</span>`
-  else if(kov) h+=`<span class="sum-pill green">⏭ Következő: ${esc(kov.kezdes)}</span>`
+  h+=`<span class="sum-pill">🕐 ${orak[0].kezdes} – ${orak[orak.length-1].vegzes}</span>`
+  if(akt) h+=`<span class="sum-pill gold">⚡ ${akt.ora_sorszam}. óra · ${100-pct(akt.kezdes,akt.vegzes)}% van hátra</span>`
+  else if(kov) h+=`<span class="sum-pill green">⏭ Következő: ${kov.kezdes}</span>`
   else h+=`<span class="sum-pill">✅ Mára vége</span>`
   el.innerHTML=h
 }
@@ -312,13 +296,13 @@ function buildTT() {
       const mu=isMa&&isMult(o.vegzes)
       const p=ak?pct(o.kezdes,o.vegzes):0
       const cl=ak?'aktiv':mu?'mult':''
-      const nm=esc(o.tanar_nev||o.tanar)
+      const nm=o.tanar_nev||o.tanar
 
       col+=`<div class="ora-blk ${cl}" style="top:${top}px;height:${h}px;"
-        title="${nm} · ${esc(o.osztaly)} · ${esc(o.tantargy)} · ${esc(o.kezdes)}–${esc(o.vegzes)}">
+        title="${nm} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
         <div class="ob-tanar">${nm}</div>
-        ${h>38?`<div class="ob-meta">${esc(o.osztaly)} · ${esc(o.tantargy)}</div>`:''}
-        ${h>56?`<div class="ob-meta">${esc(o.kezdes)}–${esc(o.vegzes)}</div>`:''}
+        ${h>38?`<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>`:''}
+        ${h>56?`<div class="ob-meta">${o.kezdes}–${o.vegzes}</div>`:''}
         ${ak?`<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>`:''}
       </div>`
     })
@@ -361,11 +345,11 @@ function buildMobList() {
     const mu=isMa&&isMult(o.vegzes)
     const p=ak?pct(o.kezdes,o.vegzes):0
     h+=`<div class="mob-row${ak?' aktiv':mu?' mult':''}">
-      <div class="mob-num">${esc(o.ora_sorszam||i+1)}</div>
+      <div class="mob-num">${o.ora_sorszam||i+1}</div>
       <div class="mob-body">
-        <div class="mob-ido">${esc(o.kezdes)} – ${esc(o.vegzes)}</div>
-        <div class="mob-tanar">${esc(o.tanar_nev||o.tanar)}</div>
-        <div class="mob-meta">${esc(o.osztaly)} · ${esc(o.tantargy)}</div>
+        <div class="mob-ido">${o.kezdes} – ${o.vegzes}</div>
+        <div class="mob-tanar">${o.tanar_nev||o.tanar}</div>
+        <div class="mob-meta">${o.osztaly} · ${o.tantargy}</div>
       </div>
       <div class="mob-prog"><div class="mob-prog-fill" style="height:${p}%;"></div></div>
     </div>`
@@ -392,7 +376,7 @@ function build(){
 
 function showErr(msg){
   document.getElementById('tt-skel').style.display='none'
-  document.getElementById('tt-outer').innerHTML=`<div style="text-align:center;padding:60px 20px;position:relative;z-index:10;"><span style="font-size:40px;">⚠️</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">${esc(msg)}</p></div>`
+  document.getElementById('tt-outer').innerHTML=`<div style="text-align:center;padding:60px 20px;position:relative;z-index:10;"><span style="font-size:40px;">⚠️</span><p style="color:rgba(255,255,255,.5);margin-top:12px;">${msg}</p></div>`
 }
 
 function refresh(){
@@ -410,27 +394,11 @@ if(!teremSzam){
 }else{
   document.getElementById('terem-cim').textContent=teremSzam
   document.getElementById('nav-cim').textContent=teremSzam+' · Napirend'
-  document.getElementById('nav-vissza').href='/terem/'+roomPath(teremSzam)
+  document.getElementById('nav-vissza').href='/terem/'+teremSzam
   document.title='Ticky – '+teremSzam+' napirend'
   fetchData()
   setInterval(fetchData,5*60_000)
 }
 </script>
-<?php
-$napirend_route = match_route('/terem/{szam}/nap', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '');
-$napirend_room = is_array($napirend_route) ? strtoupper((string) ($napirend_route['szam'] ?? '')) : '';
-render_assistant_widget([
-  'title' => 'Napirend AI',
-  'eyebrow' => 'Heti nézet',
-  'context' => 'napirend',
-  'context_data' => ['room' => $napirend_room],
-  'empty_state' => $napirend_room !== ''
-    ? 'Itt a ' . $napirend_room . '. terem heti nézetéhez kérdezhetsz. Például: mi van most itt, vagy mikor lesz a következő óra.'
-    : 'Kérdezhetsz az aktuális napirendről vagy más szabad termekről.',
-  'placeholder' => $napirend_room !== ''
-    ? 'Írj egy kérdést a ' . $napirend_room . '. terem napirendjéről...'
-    : 'Írj egy kérdést a napirendről...',
-]);
-?>
 </body>
 </html>
