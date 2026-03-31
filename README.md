@@ -1,7 +1,7 @@
 # 🏫 Ticky — Real-Time Classroom Availability System
 
 [![Live](https://img.shields.io/badge/Live-ticky--6r32.onrender.com-00c896?style=for-the-badge&logo=render&logoColor=white)](https://ticky-6r32.onrender.com)
-[![License](https://img.shields.io/github/license/Davedka/Ticky?style=for-the-badge)](LICENSE)
+
 [![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 
