@@ -12,7 +12,8 @@
     font-family:'DM Sans',sans-serif; background-color:#060f1e; min-height:100vh;
     overscroll-behavior:none;
     transition:background-image .5s ease;
-    background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(26,74,138,.55) 0%, transparent 60%),
+    background-image:
+      radial-gradient(ellipse 70% 55% at 15% 10%, rgba(26,74,138,.55) 0%, transparent 60%),
       radial-gradient(ellipse 50% 45% at 85% 85%, rgba(200,151,42,.18) 0%, transparent 55%);
   }
   body.tant   { background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(200,16,46,.35) 0%, transparent 60%), radial-gradient(ellipse 50% 45% at 85% 85%, rgba(200,151,42,.15) 0%, transparent 55%); }
@@ -28,7 +29,6 @@
   @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
   @keyframes spin { to{transform:rotate(360deg)} }
   .spinning { animation:spin .6s linear; }
-
   .custom-select {
     width:100%;padding:12px 40px 12px 16px;border-radius:10px;
     border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
@@ -40,28 +40,67 @@
   }
   .custom-select:focus { outline:none;border-color:rgba(200,151,42,.5);box-shadow:0 0 0 4px rgba(200,151,42,.10); }
   .custom-select option { background:#0b2e59;color:white; }
-
-  /* Ora sorok */
   .ora-row { transition:background .15s ease;border-radius:10px; }
   .ora-row:hover { background:rgba(255,255,255,.05); }
   .ora-row.aktiv { background:rgba(200,16,46,.12);border-left:3px solid #e8334a;border-radius:0 10px 10px 0; }
   .ora-row.mult { opacity:.38; }
-
-  /* Aktuális kártya animáció */
   .aktiv-card { animation:cardIn .35s cubic-bezier(.22,1,.36,1) both; }
   @keyframes cardIn { from{opacity:0;transform:scale(.97) translateY(8px)} to{opacity:1;transform:none} }
-
-  /* Napirend lista animáció */
   .lista-in { animation:listaIn .3s cubic-bezier(.22,1,.36,1) both; }
   @keyframes listaIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
-
   a { text-decoration:none; }
 </style>
 </head>
-<body class="flex flex-col items-center justify-start p-4 pb-16">
+<body>
 <div class="top-line"></div>
 
-<div class="w-full max-w-sm slide-up relative z-10 mt-6">
+<!-- ── Navbar ─────────────────────────────────────── -->
+<nav style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);"
+     class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between">
+  <!-- Logo -->
+  <div class="flex items-center gap-3">
+    <a href="/" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;"
+       class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full pulse flex-shrink-0"
+            style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
+      Ticky
+    </a>
+    <span style="color:rgba(255,255,255,.2);">·</span>
+    <span class="text-sm" style="color:rgba(255,255,255,.45);">Tanár kereső</span>
+  </div>
+  <!-- Nav linkek -->
+  <div class="flex items-center gap-1 flex-wrap">
+    <a href="/termek"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(255,255,255,.55);transition:all .15s;"
+       onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'"
+       onmouseout="this.style.color='rgba(255,255,255,.55)';this.style.background='transparent'">Termek</a>
+    <a href="/tanar"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(200,151,42,.85);background:rgba(200,151,42,.10);border-radius:8px;transition:all .15s;"
+       onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.18)'"
+       onmouseout="this.style.color='rgba(200,151,42,.85)';this.style.background='rgba(200,151,42,.10)'">Tanár</a>
+    <a href="/kijelzo"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(255,255,255,.55);transition:all .15s;"
+       onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'"
+       onmouseout="this.style.color='rgba(255,255,255,.55)';this.style.background='transparent'">Kijelző</a>
+    <a href="/qr"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(255,255,255,.55);transition:all .15s;"
+       onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'"
+       onmouseout="this.style.color='rgba(255,255,255,.55)';this.style.background='transparent'">QR</a>
+    <a href="/admin"
+       class="text-sm font-medium px-3 py-2 rounded-md"
+       style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .15s;"
+       onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'"
+       onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
+  </div>
+</nav>
+
+<!-- ── Tartalom ────────────────────────────────────── -->
+<div class="relative z-10 flex flex-col items-center px-4 pt-8 pb-16">
+<div class="w-full max-w-sm slide-up">
   <div class="glass rounded-2xl overflow-hidden">
 
     <!-- Fejléc -->
@@ -94,21 +133,20 @@
 
     <!-- Footer -->
     <div class="px-6 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
-      <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:14px;font-weight:700;">Ticky</a>
       <span class="text-xs" style="color:rgba(255,255,255,.28);" id="ido">–</span>
-      <<button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
+      <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
         <svg id="ri" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         Frissít
       </button>
     </div>
   </div>
 </div>
+</div>
 
 <script>
 const REFRESH = 60_000
 let curKod = null
 
-// ── URL ──────────────────────────────────────────────
 function getUrlKod() {
   const p=location.pathname.split('/').filter(Boolean)
   const q=new URLSearchParams(location.search).get('tanar')
@@ -117,7 +155,6 @@ function getUrlKod() {
   return null
 }
 
-// ── Tanárlista betöltése ─────────────────────────────
 async function loadTanarok() {
   try {
     const d=await fetch('/api/tanarok').then(r=>r.json())
@@ -147,65 +184,51 @@ function reset() {
   setAllapot('idle')
 }
 
-// ── Állapot ──────────────────────────────────────────
 function setAllapot(a) {
   const pill=document.getElementById('status-pill'),dot=document.getElementById('sd'),txt=document.getElementById('st')
   if(a==='tant'){
-    document.body.className='flex flex-col items-center justify-start p-4 pb-16 tant'
+    document.body.className='tant'
     pill.style.cssText='display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(200,16,46,.25);color:#ff6b82;border:1px solid rgba(200,16,46,.4);flex-shrink:0;'
     dot.style.background='#ff6b82';txt.textContent='TANÍT'
   } else if(a==='szabad'){
-    document.body.className='flex flex-col items-center justify-start p-4 pb-16 szabad'
+    document.body.className='szabad'
     pill.style.cssText='display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(26,138,74,.25);color:#4ade80;border:1px solid rgba(26,138,74,.4);flex-shrink:0;'
     dot.style.background='#4ade80';txt.textContent='SZABAD'
   } else {
-    document.body.className='flex flex-col items-center justify-start p-4 pb-16'
+    document.body.className=''
     pill.style.cssText='display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);flex-shrink:0;'
     dot.style.background='rgba(255,255,255,.3)';txt.textContent='–'
   }
 }
 
-// ── Segédfüggvények ──────────────────────────────────
 function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
 function isAktiv(k,v){const c=new Date().getHours()*60+new Date().getMinutes();return c>=toMin(k)&&c<=toMin(v)}
 function isMult(v){return new Date().getHours()*60+new Date().getMinutes()>toMin(v)}
 function calcPct(k,v){const c=new Date().getHours()*60+new Date().getMinutes();return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100)))}
 
-// ── Adatbetöltés – GYORS, egyetlen API hívás ─────────
 async function loadData() {
   if(!curKod) return
-
-  // Azonnali skeleton
   document.getElementById('aktblock').innerHTML=`<div class="flex flex-col gap-3"><div class="skel h-4 w-2/5"></div><div class="skel h-8 w-3/5"></div><div class="skel h-4 w-full mt-1"></div></div>`
-
   try {
-    // EGYETLEN hívás – közvetlen tanár endpoint, nem 53 terem párhuzamosan!
     const d=await fetch(`/api/tanar/${encodeURIComponent(curKod)}/orarend`).then(r=>r.json())
-
     if(d.error){
       document.getElementById('aktblock').innerHTML=`<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">${d.error}</p></div>`
       setAllapot('idle'); return
     }
-
     const orak=d.orak||[]
     const akt=orak.find(o=>isAktiv(o.kezdes,o.vegzes))
     const kov=orak.find(o=>!isMult(o.vegzes)&&!isAktiv(o.kezdes,o.vegzes))
-
     setAllapot(akt?'tant':orak.length>0?'szabad':'idle')
     renderAkt(akt,kov)
     renderLista(orak)
-
-    // Teljes név megjelenítése ha van
     if(d.tanar_nev){
       const opt=document.querySelector(`#sel option[value="${curKod}"]`)
       if(opt&&!opt.textContent.includes('–')) opt.textContent=`${curKod} – ${d.tanar_nev}`
     }
-
   } catch(e){
     document.getElementById('aktblock').innerHTML=`<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">Betöltési hiba</p></div>`
     setAllapot('idle')
   }
-
   document.getElementById('ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
 }
 
@@ -275,7 +298,6 @@ function refresh() {
   loadData().finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600))
 }
 
-// ── Init ─────────────────────────────────────────────
 loadTanarok()
 setInterval(()=>{if(curKod)loadData()},REFRESH)
 </script>
