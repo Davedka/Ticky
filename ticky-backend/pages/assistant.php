@@ -306,7 +306,7 @@ async function submitPrompt(text) {
   appendLoading()
 
   try {
-    const response = await fetch('/api/assistant', {
+    const response = await fetch('/api/ai/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message })
