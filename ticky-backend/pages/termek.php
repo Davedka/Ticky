@@ -60,7 +60,7 @@
 <div class="ticky-sidebar">
   <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
   <div class="tsb-divider"></div>
-  <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="tsb-item" data-label="Support">✉️</a>
+  <a href="/support" class="tsb-item" data-label="Support">✉️</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
 </div>
 
