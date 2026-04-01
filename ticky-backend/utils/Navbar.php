@@ -1,28 +1,21 @@
 <?php
-// utils/navbar.php – Közös navbar minden Ticky oldalhoz
-// Használat: require_once __DIR__ . '/../utils/navbar.php'; ticky_navbar($aktiv);
-// vagy az index.php-ban: ticky_navbar_inline($aktiv);
+// utils/navbar.php – Közös navbar + sidebar minden Ticky oldalhoz
 
 function ticky_navbar(string $aktiv = '') {
-    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     ?>
     <nav style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;z-index:100;height:64px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;">
-
-      <!-- Logo -->
       <a href="/" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;text-decoration:none;display:flex;align-items:center;gap:8px;">
         <span style="width:8px;height:8px;border-radius:50%;background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;animation:navPulse 2s infinite;flex-shrink:0;"></span>
         Ticky
       </a>
-
-      <!-- Linkek -->
       <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;">
         <?php
         $links = [
-          ['href' => '/termek',  'label' => 'Termek',       'key' => 'termek'],
-          ['href' => '/tanar',   'label' => 'Tanár',        'key' => 'tanar'],
-          ['href' => '/kijelzo', 'label' => 'Kijelző',      'key' => 'kijelzo'],
-          ['href' => '/qr',      'label' => 'QR',           'key' => 'qr'],
-          ['href' => '/admin',   'label' => '⚙️ Admin',     'key' => 'admin'],
+          ['href' => '/termek',  'label' => 'Termek',   'key' => 'termek'],
+          ['href' => '/tanar',   'label' => 'Tanár',    'key' => 'tanar'],
+          ['href' => '/kijelzo', 'label' => 'Kijelző',  'key' => 'kijelzo'],
+          ['href' => '/qr',      'label' => 'QR',       'key' => 'qr'],
+          ['href' => '/admin',   'label' => '⚙️ Admin', 'key' => 'admin'],
         ];
         foreach ($links as $l):
             $isActive = ($aktiv === $l['key']);
@@ -36,21 +29,54 @@ function ticky_navbar(string $aktiv = '') {
             <?= $l['label'] ?>
           </a>
         <?php endforeach; ?>
-
-        <!-- Eseménynaptár – külső link, kiemelve -->
-        <a href="https://esemenynaptar.onrender.com/"
-           target="_blank"
-           rel="noopener"
-           style="display:flex;align-items:center;gap:6px;margin-left:6px;color:rgba(0,200,200,.8);background:rgba(0,200,200,.08);border:1px solid rgba(0,200,200,.2);border-radius:8px;padding:7px 14px;font-size:13px;font-weight:500;text-decoration:none;transition:all .15s;"
-           onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.15)';this.style.borderColor='rgba(0,200,200,.4)'"
-           onmouseout="this.style.color='rgba(0,200,200,.8)';this.style.background='rgba(0,200,200,.08)';this.style.borderColor='rgba(0,200,200,.2)'">
-          📅 Eseménynaptár
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity:.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>
       </div>
     </nav>
     <style>
       @keyframes navPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+    </style>
+    <?php
+}
+
+// ── Bal oldali sidebar (Eseménynaptár, Support, Bug) ─────────────────
+function ticky_sidebar() {
+    ?>
+    <div class="ticky-sidebar">
+      <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener"
+         class="tsb-item" data-label="Eseménynaptár">📅</a>
+      <div class="tsb-divider"></div>
+      <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support"
+         class="tsb-item" data-label="Support">✉️</a>
+      <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener"
+         class="tsb-item" data-label="Bug report">🐛</a>
+    </div>
+    <style>
+      .ticky-sidebar {
+        position:fixed; left:0; top:50%; transform:translateY(-50%);
+        z-index:150; display:flex; flex-direction:column; align-items:center; gap:2px;
+        padding:8px 6px;
+        background:rgba(6,15,30,.78); backdrop-filter:blur(20px);
+        border:1px solid rgba(255,255,255,.08); border-left:none;
+        border-radius:0 12px 12px 0;
+      }
+      .tsb-item {
+        position:relative; width:36px; height:36px; border-radius:8px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:17px; text-decoration:none;
+        color:rgba(255,255,255,.6); transition:all .18s;
+      }
+      .tsb-item:hover { background:rgba(255,255,255,.10); color:white; }
+      .tsb-item::after {
+        content:attr(data-label);
+        position:absolute; left:46px; top:50%; transform:translateY(-50%);
+        background:rgba(6,15,30,.96); color:rgba(255,255,255,.88);
+        font-size:12px; font-family:'DM Sans',sans-serif; font-weight:500;
+        padding:5px 11px; border-radius:8px; white-space:nowrap;
+        opacity:0; pointer-events:none; transition:opacity .15s;
+        border:1px solid rgba(255,255,255,.10);
+      }
+      .tsb-item:hover::after { opacity:1; }
+      .tsb-divider { width:20px; height:1px; background:rgba(255,255,255,.10); margin:2px 0; }
+      @media (max-width:600px) { .ticky-sidebar { display:none; } }
     </style>
     <?php
 }
