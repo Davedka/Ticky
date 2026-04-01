@@ -12,8 +12,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($uri === '/') {
     $nap_nevek = [0=>'Hétvége',1=>'Hétfő',2=>'Kedd',3=>'Szerda',4=>'Csütörtök',5=>'Péntek'];
     $nap = mai_nap(); $ido = aktualis_ido();
-    include __DIR__ . '/pages/_landing.php';
-    exit;
 }
 if ($uri === '/api/ping') { json_response(['status'=>'ok','time'=>date('Y-m-d H:i:s')]); }
 if ($uri === '/termek') { require __DIR__ . '/pages/termek.php'; exit; }
