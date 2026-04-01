@@ -99,6 +99,14 @@
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
 </div>
 
+  <div class="mobile-bottom-bar">
+  <a href="/" class="mbb-item"><span class="mbb-icon">🏠</span>Főoldal</a>
+  <a href="/termek" class="mbb-item"><span class="mbb-icon">🏫</span>Termek</a>
+  <a href="/tanar" class="mbb-item active"><span class="mbb-icon">👩‍🏫</span>Tanár</a>
+  <a href="/qr" class="mbb-item"><span class="mbb-icon">🖨️</span>QR</a>
+  <a href="/admin" class="mbb-item"><span class="mbb-icon">⚙️</span>Admin</a>
+</div>
+
 <!-- Navbar -->
 <nav class="navbar">
   <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">
