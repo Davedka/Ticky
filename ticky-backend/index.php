@@ -1,148 +1,111 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
-require_once __DIR__ . '/../utils/helpers.php';
+// index.php – Ticky Router
+
+require_once __DIR__ . '/config/supabase.php';
+require_once __DIR__ . '/utils/helpers.php';
+
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header_remove('X-Powered-By');
+
 handle_cors();
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
+// ─── Gyökér → Landing ────────────────────────────────
 if ($uri === '/') {
-    $nap_nevek=[0=>'Hétvége',1=>'Hétfő',2=>'Kedd',3=>'Szerda',4=>'Csütörtök',5=>'Péntek'];
-    $nap=mai_nap(); $ido=aktualis_ido();
-?>
+    $nap_nevek = [0=>'Hétvége', 1=>'Hétfő', 2=>'Kedd', 3=>'Szerda', 4=>'Csütörtök', 5=>'Péntek'];
+    $nap = mai_nap();
+    $ido = aktualis_ido();
+    ?>
 <!DOCTYPE html>
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky</title>
-<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.png" type="image/png" sizes="64x64">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  html{scroll-behavior:smooth;}
-  body{font-family:'DM Sans',sans-serif;background-color:#060f1e;min-height:100vh;overscroll-behavior:none;
-    background-image:radial-gradient(ellipse 70% 55% at 15% 10%,rgba(26,74,138,.55) 0%,transparent 60%),
-      radial-gradient(ellipse 50% 45% at 85% 85%,rgba(200,151,42,.18) 0%,transparent 55%),
-      radial-gradient(ellipse 60% 30% at 30% 90%,rgba(7,29,58,.8) 0%,transparent 50%);}
-  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  html { scroll-behavior:smooth; }
+  body { font-family:'DM Sans',sans-serif; background-color:#060f1e; min-height:100vh; overscroll-behavior:none;
+    background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(26,74,138,.55) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 45% at 85% 85%, rgba(200,151,42,.18) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 30% at 30% 90%, rgba(7,29,58,.8) 0%, transparent 50%); }
+  body::before { content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
-    background-size:40px 40px;}
-  .top-line{position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,151,42,.5),transparent);z-index:200;}
-  .glass{background:rgba(255,255,255,.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10);}
-  .card-hover{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
-  .card-hover:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.20)!important;box-shadow:0 12px 40px rgba(6,15,30,.7);}
-  .pulse{animation:pd 2s infinite;}
-  @keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-  .fade-up  {animation:fu .5s cubic-bezier(.22,1,.36,1) both;}
-  .fade-up-2{animation:fu .5s .15s cubic-bezier(.22,1,.36,1) both;}
-  .fade-up-3{animation:fu .5s .28s cubic-bezier(.22,1,.36,1) both;}
-  .fade-up-4{animation:fu .5s .40s cubic-bezier(.22,1,.36,1) both;}
-  @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-  .gold-line{height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a);}
-  a{text-decoration:none;}
-  /* Sidebar */
-  .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;
-    display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;
-    background:rgba(6,15,30,.78);backdrop-filter:blur(20px);
-    border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
-  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
-  .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
-  .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;padding:5px 11px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
-  .tsb-item:hover::after{opacity:1;}
-  .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
-  /* Mobile nav */
-  .nav-burger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);cursor:pointer;font-size:20px;flex-shrink:0;}
-  .nav-burger:hover{background:rgba(255,255,255,.12);color:white;}
-  .nav-mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;z-index:90;
-    background:rgba(6,15,30,.97);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.10);
-    padding:12px 16px 16px;flex-direction:column;gap:4px;animation:slideDown .2s ease;}
-  @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-  .nav-mobile-menu.open{display:flex;}
-  .nav-mobile-item{padding:12px 14px;border-radius:10px;font-size:14px;font-weight:500;
-    color:rgba(255,255,255,.75);text-decoration:none;display:flex;align-items:center;gap:10px;}
-  .nav-mobile-item:hover{background:rgba(255,255,255,.08);color:white;}
-  .nav-mobile-item.gold{color:#f0c76b;background:rgba(200,151,42,.08);}
-  .nav-mobile-divider{height:1px;background:rgba(255,255,255,.08);margin:4px 0;}
-  /* Mobile bottom bar (replaces sidebar) */
-  .mobile-bottom-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;
-    background:rgba(6,15,30,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);
-    padding:8px 0 max(8px,env(safe-area-inset-bottom));
-    flex-direction:row;justify-content:space-around;align-items:center;}
-  .mbb-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 16px;
-    text-decoration:none;color:rgba(255,255,255,.5);font-size:10px;font-weight:500;}
-  .mbb-item .mbb-icon{font-size:20px;}
-  .mbb-item:hover,.mbb-item.active{color:rgba(200,151,42,.9);}
-  @media(max-width:768px){
-    .nav-burger{display:flex;}
-    .nav-links{display:none!important;}
-    .ticky-sidebar{display:none!important;}
-    .mobile-bottom-bar{display:flex;}
-    body{padding-bottom:72px;}
-  }
-  @media(max-width:480px){
-    .hero-title{font-size:52px!important;}
-    .main-content{padding-left:16px!important;padding-right:16px!important;}
-  }
+    background-size:40px 40px; }
+  .top-line { position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,151,42,.5),transparent);z-index:200; }
+  .glass { background:rgba(255,255,255,.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10); }
+  .card-hover { transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease; }
+  .card-hover:hover { transform:translateY(-3px);border-color:rgba(255,255,255,.20) !important;box-shadow:0 12px 40px rgba(6,15,30,.7); }
+  .pulse { animation:pd 2s infinite; }
+  @keyframes pd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .fade-up   { animation:fu .5s cubic-bezier(.22,1,.36,1) both; }
+  .fade-up-2 { animation:fu .5s .15s cubic-bezier(.22,1,.36,1) both; }
+  .fade-up-3 { animation:fu .5s .28s cubic-bezier(.22,1,.36,1) both; }
+  .fade-up-4 { animation:fu .5s .40s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes fu { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .gold-line { height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a); }
+  a { text-decoration:none; }
 </style>
 </head>
 <body class="relative">
 <div class="top-line"></div>
 
-<!-- Sidebar (desktop) -->
-<div class="ticky-sidebar">
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
-  <div class="tsb-divider"></div>
-  <a href="/support" class="tsb-item" data-label="Support">✉️</a>
-  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
-</div>
-
-<!-- Mobile bottom bar -->
-<div class="mobile-bottom-bar">
-  <a href="/termek" class="mbb-item"><span class="mbb-icon">🏫</span>Termek</a>
-  <a href="/tanar" class="mbb-item"><span class="mbb-icon">👩‍🏫</span>Tanár</a>
-  <a href="/qr" class="mbb-item"><span class="mbb-icon">🖨️</span>QR</a>
-  <a href="/support" class="mbb-item"><span class="mbb-icon">✉️</span>Support</a>
-  <a href="/admin" class="mbb-item gold"><span class="mbb-icon">⚙️</span>Admin</a>
-</div>
-
-<!-- Mobile nav menu -->
-<div class="nav-mobile-menu" id="nav-mobile">
-  <a href="/termek" class="nav-mobile-item">🏫 Termek</a>
-  <a href="/tanar"  class="nav-mobile-item">👩‍🏫 Tanár kereső</a>
-  <a href="/qr"     class="nav-mobile-item">🖨️ QR Generátor</a>
-  <a href="/kijelzo" class="nav-mobile-item">📺 Kijelző</a>
-  <div class="nav-mobile-divider"></div>
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" class="nav-mobile-item">📅 Eseménynaptár</a>
-  <a href="/support" class="nav-mobile-item">✉️ Support</a>
-  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" class="nav-mobile-item">🐛 Bug report</a>
-  <div class="nav-mobile-divider"></div>
-  <a href="/admin" class="nav-mobile-item gold">⚙️ Admin</a>
-</div>
-
 <!-- Navbar -->
-<nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-4 sm:px-6 h-16 flex items-center justify-between">
+<nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
   <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:20px;font-weight:700;" class="flex items-center gap-2">
     <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 10px #c8972a;display:inline-block;"></span>
     Ticky
   </a>
-  <div class="nav-links flex items-center gap-1">
-    <a href="/termek" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
-    <a href="/tanar"  class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
-    <a href="/qr"     class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
-    <a href="/kijelzo" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
-    <a href="/admin"  class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
+  <div class="flex items-center gap-1 flex-wrap">
+    <a href="/termek" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
+    <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
+    <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
+    <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
+    <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
+    <!-- Hamburger -->
+    <button onclick="toggleSidebar()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.7);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:18px;line-height:1;width:auto;margin-top:0;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.7)'">☰</button>
   </div>
-  <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menü">☰</button>
 </nav>
 
-<!-- Main -->
-<div class="relative z-10 flex flex-col items-center px-4 sm:px-6 pt-12 sm:pt-20 pb-16 main-content">
+<!-- Sidebar overlay -->
+<div id="sidebar-overlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:400;"></div>
+<div id="sidebar" style="display:none;position:fixed;left:0;top:0;bottom:0;width:280px;background:rgba(6,15,30,.97);backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.08);z-index:500;padding:20px 16px;flex-direction:column;gap:8px;overflow-y:auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08);">
+    <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
+      Ticky
+    </span>
+    <button onclick="toggleSidebar()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;width:auto;margin:0;padding:0 10px;">✕</button>
+  </div>
+  <p style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:8px;padding-left:4px;">Kapcsolódó</p>
+  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" onclick="toggleSidebar()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(0,200,200,.07);border:1px solid rgba(0,200,200,.15);color:rgba(0,200,200,.9);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;" onmouseover="this.style.background='rgba(0,200,200,.13)';this.style.color='white'" onmouseout="this.style.background='rgba(0,200,200,.07)';this.style.color='rgba(0,200,200,.9)'">
+    <span style="font-size:20px;">📅</span>
+    <div><div style="font-weight:600;">Eseménynaptár</div><div style="font-size:11px;opacity:.6;margin-top:1px;">MSZC Gépészeti</div></div>
+  </a>
+  <a href="mailto:support@ticky.hu" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.04)';this.style.color='rgba(255,255,255,.75)'">
+    <span style="font-size:20px;">🛟</span>
+    <div><div style="font-weight:600;">Support</div><div style="font-size:11px;opacity:.6;margin-top:1px;">Segítség kérése</div></div>
+  </a>
+  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" onclick="toggleSidebar()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.04)';this.style.color='rgba(255,255,255,.75)'">
+    <span style="font-size:20px;">🐛</span>
+    <div><div style="font-weight:600;">Bug jelentés</div><div style="font-size:11px;opacity:.6;margin-top:1px;">GitHub Issues</div></div>
+  </a>
+</div>
+
+<!-- Main tartalom -->
+<div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
   <div class="w-full max-w-md">
-    <div class="fade-up text-center mb-8 sm:mb-10">
-      <h1 class="hero-title" style="font-family:'Playfair Display',serif;font-size:72px;font-weight:700;color:white;line-height:1;letter-spacing:-2px;">Ticky</h1>
+
+    <div class="fade-up text-center mb-10">
+      <h1 style="font-family:'Playfair Display',serif;font-size:72px;font-weight:700;color:white;line-height:1;letter-spacing:-2px;">Ticky</h1>
       <p class="text-sm mt-3" style="color:rgba(255,255,255,.45);">Digitális terem-azonosító rendszer</p>
       <div class="flex items-center justify-center gap-2 mt-4">
         <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#4ade80;display:inline-block;"></span>
@@ -152,7 +115,7 @@ if ($uri === '/') {
 
     <div class="fade-up-2 mb-3">
       <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-      <a href="/termek" class="glass card-hover block px-5 sm:px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
+      <a href="/termek" class="glass card-hover block px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
         <div>
           <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.35);">Élő nézet</p>
           <h2 style="font-family:'Playfair Display',serif;color:white;font-size:22px;font-weight:700;">Összes terem</h2>
@@ -165,58 +128,121 @@ if ($uri === '/') {
     <div class="fade-up-3 grid grid-cols-2 gap-3 mb-3">
       <div>
         <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-        <a href="/tanar" class="glass card-hover block px-4 sm:px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
+        <a href="/tanar" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
           <span style="font-size:24px;" class="block mb-2">👩‍🏫</span>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:16px;font-weight:700;">Tanár kereső</h3>
+          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Tanár kereső</h3>
           <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Hol van most?</p>
         </a>
       </div>
       <div>
         <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-        <a href="/qr" class="glass card-hover block px-4 sm:px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
+        <a href="/qr" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
           <span style="font-size:24px;" class="block mb-2">🖨️</span>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:16px;font-weight:700;">QR Generátor</h3>
+          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">QR Generátor</h3>
           <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Nyomtatható kódok</p>
         </a>
       </div>
+    </div>
+
+    <!-- Eseménynaptár kártya -->
+    <div class="fade-up-4 mb-3">
+      <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#007a7a,#00c8c8,#007a7a);"></div>
+      <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener"
+         class="glass card-hover block px-6 py-4 flex items-center justify-between gap-4"
+         style="border-radius:0 0 14px 14px;border-top:none;">
+        <div>
+          <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(0,200,200,.5);">Kapcsolódó oldal</p>
+          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;">Eseménynaptár</h3>
+          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">MSZC Gépészeti – iskolai események</p>
+        </div>
+        <span style="font-size:28px;">📅</span>
+      </a>
     </div>
 
     <p class="fade-up-4 text-center text-xs mt-6" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
   </div>
 </div>
 
+
+
+
 <script>
-function toggleMobileNav(){
-  const m=document.getElementById('nav-mobile')
-  m.classList.toggle('open')
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar')
+  const ov = document.getElementById('sidebar-overlay')
+  const open = sb.style.display !== 'flex'
+  sb.style.display = open ? 'flex' : 'none'
+  ov.style.display = open ? 'block' : 'none'
+  document.body.style.overflow = open ? 'hidden' : ''
 }
-document.addEventListener('click',e=>{
-  const menu=document.getElementById('nav-mobile')
-  if(!menu.contains(e.target)&&!e.target.closest('.nav-burger')&&menu.classList.contains('open')){
-    menu.classList.remove('open')
-  }
-})
+document.addEventListener('keydown', e => { if(e.key==='Escape') { document.getElementById('sidebar').style.display='none'; document.getElementById('sidebar-overlay').style.display='none'; document.body.style.overflow=''; } })
 </script>
 </body>
 </html>
-<?php exit; }
+    <?php
+    exit;
+}
 
-if ($uri === '/api/ping') { json_response(['status'=>'ok','time'=>date('Y-m-d H:i:s')]); }
-if ($uri === '/termek') { require __DIR__ . '/pages/termek.php'; exit; }
-if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) { require __DIR__ . '/pages/tanar.php'; exit; }
-if ($uri === '/qr') { require __DIR__ . '/pages/qr.php'; exit; }
-if ($uri === '/kijelzo') { require __DIR__ . '/pages/kijelzo.php'; exit; }
-if ($uri === '/support') { require __DIR__ . '/pages/support.php'; exit; }
-if (match_route('/terem/{szam}/nap', $uri) !== false) { require __DIR__ . '/pages/napirend.php'; exit; }
-if (match_route('/terem/{szam}', $uri) !== false) { require __DIR__ . '/pages/terem.php'; exit; }
-if ($uri === '/api/termek') { require __DIR__ . '/api/termek.php'; exit; }
-if ($uri === '/api/tanarok') { require __DIR__ . '/api/tanarok.php'; exit; }
-if ($uri === '/api/ai/chat') { require __DIR__ . '/api/ai_chat.php'; exit; }
-if (match_route('/api/tanar/{kod}/orarend', $uri) !== false) { require __DIR__ . '/api/tanar_orarend.php'; exit; }
-if (match_route('/api/terem/{szam}', $uri) !== false) { require __DIR__ . '/api/terem.php'; exit; }
-if (match_route('/api/napirend/{szam}', $uri) !== false) { require __DIR__ . '/api/napirend.php'; exit; }
-if ($uri === '/admin') { require __DIR__ . '/pages/admin.php'; exit; }
-if ($uri === '/api/admin/tanar') { require __DIR__ . '/api/admin_tanar.php'; exit; }
-if (match_route('/api/admin/terem/{szam}', $uri) !== false) { require __DIR__ . '/api/admin_terem.php'; exit; }
+// ─── API Ping ─────────────────────────────────────────
+if ($uri === '/api/ping') {
+    json_response(['status' => 'ok', 'time' => date('Y-m-d H:i:s')]);
+}
+
+// ─── Frontend oldalak ─────────────────────────────────
+if ($uri === '/termek') {
+    require __DIR__ . '/pages/termek.php'; exit;
+}
+if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
+    require __DIR__ . '/pages/tanar.php'; exit;
+}
+if ($uri === '/qr') {
+    require __DIR__ . '/pages/qr.php'; exit;
+}
+if ($uri === '/kijelzo') {
+    require __DIR__ . '/pages/kijelzo.php'; exit;
+}
+if (match_route('/terem/{szam}/nap', $uri) !== false) {
+    require __DIR__ . '/pages/napirend.php'; exit;
+}
+if (match_route('/terem/{szam}', $uri) !== false) {
+    require __DIR__ . '/pages/terem.php'; exit;
+}
+
+if (match_route('/terem/{szam}', $uri) !== false) {
+    require __DIR__ . '/pages/support.php'; exit;
+}
+
+// ─── API Routes ───────────────────────────────────────
+if ($uri === '/api/termek') {
+    require __DIR__ . '/api/termek.php'; exit;
+}
+if ($uri === '/api/tanarok') {
+    require __DIR__ . '/api/tanarok.php'; exit;
+}
+if ($uri === '/api/ai/chat') {
+    require __DIR__ . '/api/ai_chat.php'; exit;
+}
+if (match_route('/api/tanar/{kod}/orarend', $uri) !== false) {
+    require __DIR__ . '/api/tanar_orarend.php'; exit;
+}
+if (match_route('/api/terem/{szam}', $uri) !== false) {
+    require __DIR__ . '/api/terem.php'; exit;
+}
+if (match_route('/api/napirend/{szam}', $uri) !== false) {
+    require __DIR__ . '/api/napirend.php'; exit;
+}
+
+// ─── Admin ────────────────────────────────────────────
+if ($uri === '/admin') {
+    require __DIR__ . '/pages/admin.php'; exit;
+}
+if ($uri === '/api/admin/tanar') {
+    require __DIR__ . '/api/admin_tanar.php'; exit;
+}
+if (match_route('/api/admin/terem/{szam}', $uri) !== false) {
+    require __DIR__ . '/api/admin_terem.php'; exit;
+}
+
+// 404
 http_response_code(404);
-echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png"><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
+echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
