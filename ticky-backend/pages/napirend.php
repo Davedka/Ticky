@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Napirend</title>
 <link rel="icon" type="image/png" href="/favicon.png">
-<link rel="shortcut icon" href="/favicon.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -26,7 +26,7 @@
   .sum-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.55);}
   .sum-pill.gold{background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.25);color:#f0c76b;}
   .sum-pill.green{background:rgba(26,138,74,.12);border-color:rgba(26,138,74,.25);color:#4ade80;}
-  /* scroll fix – saját composite réteg, smooth scroll */
+  /* smooth scroll fix */
   .tt-outer{position:relative;z-index:10;max-width:1200px;margin:20px auto 0;padding:0 20px;
     overflow-x:auto;-webkit-overflow-scrolling:touch;
     transform:translateZ(0);will-change:transform;overscroll-behavior:contain;}
@@ -115,9 +115,9 @@
   </div>
 </nav>
 
-<!-- Fejléc: Ticky gomb felül, terem szám -->
+<!-- Fejléc -->
 <div class="page-header">
-  <!-- Ticky visszalink -->
+  <!-- Ticky visszalink – tetején -->
   <div style="margin-bottom:8px;">
     <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.3);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-decoration:none;" onmouseover="this.style.color='rgba(200,151,42,.8)'" onmouseout="this.style.color='rgba(255,255,255,.3)'">
       <span style="width:5px;height:5px;border-radius:50%;background:#c8972a;box-shadow:0 0 6px #c8972a;display:inline-block;animation:pd 2s infinite;"></span>
@@ -131,6 +131,10 @@
       <span class="sum-pill skel" style="width:90px;height:30px;"></span>
       <span class="sum-pill skel" style="width:110px;height:30px;"></span>
     </div>
+  </div>
+  <!-- Aktuális idő -->
+  <div style="padding-bottom:8px;">
+    <span id="header-ido" style="font-size:12px;color:rgba(255,255,255,.3);font-family:'DM Sans',sans-serif;">–</span>
   </div>
 </div>
 
@@ -166,6 +170,7 @@ function isAktiv(k,v){const c=new Date().getHours()*60+new Date().getMinutes();r
 function isMult(v){return new Date().getHours()*60+new Date().getMinutes()>toMin(v)}
 function pct(k,v){const c=new Date().getHours()*60+new Date().getMinutes();return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100)))}
 function nowM(){return new Date().getHours()*60+new Date().getMinutes()}
+function updateTime(){document.getElementById('header-ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})}
 async function fetchData(){
   try{
     const d=await fetch(`/api/napirend/${teremSzam}?nap=heten`).then(r=>r.json())
@@ -233,6 +238,8 @@ else{
   document.getElementById('nav-cim').textContent=teremSzam+' · Napirend'
   document.getElementById('nav-vissza').href='/terem/'+teremSzam
   document.title='Ticky – '+teremSzam+' napirend'
+  updateTime()
+  setInterval(updateTime,60_000)
   fetchData();setInterval(fetchData,5*60_000)
 }
 </script>
