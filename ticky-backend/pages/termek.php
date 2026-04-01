@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Termek</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -32,10 +34,35 @@
   input[type=search]::-webkit-search-cancel-button { display:none; }
   @keyframes modalIn { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:none} }
   a { text-decoration:none; }
+  /* sidebar */
+  .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;
+    display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;
+    background:rgba(6,15,30,.78);backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
+  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
+  .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
+  .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);
+    background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);
+    font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;
+    padding:5px 11px;border-radius:8px;white-space:nowrap;
+    opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
+  .tsb-item:hover::after{opacity:1;}
+  .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
+  @media(max-width:600px){.ticky-sidebar{display:none;}}
 </style>
 </head>
 <body>
 <div class="top-line"></div>
+
+<!-- Bal oldali sidebar -->
+<div class="ticky-sidebar">
+  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
+  <div class="tsb-divider"></div>
+  <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="tsb-item" data-label="Support">✉️</a>
+  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
+</div>
 
 <!-- Navbar -->
 <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between">
@@ -47,7 +74,7 @@
     <span style="color:rgba(255,255,255,.2);">·</span>
     <span class="text-sm" style="color:rgba(255,255,255,.45);">Összes terem</span>
   </div>
-  <<button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
+  <button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
     <svg id="refresh-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     <span id="footer-ido">–</span>
   </button>
@@ -110,7 +137,6 @@ async function fetchRooms() {
   try {
     const d=await fetch('/api/termek?allapot=1').then(r=>r.json())
     if(d.error){showError(d.error);return}
-    // Hétvégén (nap:0) nincs allapot mező – alapból szabad minden terem
     allRooms=(d.termek||[]).map(r=>({
       ...r,
       allapot: r.allapot ?? 'szabad',
