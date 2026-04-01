@@ -82,6 +82,14 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
 </div>
 
+  <div class="mobile-bottom-bar">
+  <a href="/" class="mbb-item"><span class="mbb-icon">🏠</span>Főoldal</a>
+  <a href="/termek" class="mbb-item"><span class="mbb-icon">🏫</span>Termek</a>
+  <a href="/tanar" class="mbb-item active"><span class="mbb-icon">👩‍🏫</span>Tanár</a>
+  <a href="/qr" class="mbb-item"><span class="mbb-icon">🖨️</span>QR</a>
+  <a href="/admin" class="mbb-item"><span class="mbb-icon">⚙️</span>Admin</a>
+</div>
+
 <div class="relative z-10 max-w-sm mx-auto px-4 pt-8 slide-up">
   <div class="glass rounded-2xl overflow-hidden">
 
