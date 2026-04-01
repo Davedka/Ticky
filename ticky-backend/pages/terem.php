@@ -9,7 +9,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Terem</title>
 <link rel="icon" type="image/png" href="/favicon.png">
-<link rel="shortcut icon" href="/favicon.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -30,7 +30,10 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
   .skel{background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:8px;}
   @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
   .prog-bar{transition:width .6s ease;}
-  .tt-wrap{position:relative;z-index:10;max-width:580px;margin:20px auto 0;padding:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;will-change:transform;}
+  /* Smooth scroll fix for timetable */
+  .tt-wrap{position:relative;z-index:10;max-width:580px;margin:20px auto 0;padding:0 16px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    transform:translateZ(0);will-change:transform;overscroll-behavior:contain;}
   .tt-grid{display:grid;grid-template-columns:38px repeat(5,minmax(80px,1fr));min-width:460px;}
   .tt-hdr{padding:7px 4px 9px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.07);}
   .tt-hdr.ma{color:#f0c76b;}
@@ -82,7 +85,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
 <div class="relative z-10 max-w-sm mx-auto px-4 pt-8 slide-up">
   <div class="glass rounded-2xl overflow-hidden">
 
-    <!-- Ticky link – kártya tetején -->
+    <!-- Ticky link – kártya TETEJÉN -->
     <div class="px-7 pt-4 pb-3 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,.05);">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;" onmouseover="this.style.color='rgba(200,151,42,.8)'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
         <span style="width:6px;height:6px;border-radius:50%;background:#c8972a;box-shadow:0 0 6px #c8972a;display:inline-block;animation:pd 2s infinite;"></span>
@@ -111,7 +114,7 @@ $current_room = is_array($route_match) ? strtoupper((string) ($route_match['szam
       </div>
     </div>
 
-    <!-- Footer: idő + frissít -->
+    <!-- Footer: aktuális idő + frissít -->
     <div class="px-7 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
       <span class="text-xs" style="color:rgba(255,255,255,.28);" id="footer-ido">–</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
@@ -152,6 +155,13 @@ const REFRESH_MS=60_000
 const NAP={1:'H',2:'K',3:'Sze',4:'Cs',5:'P'}
 const START=7*60+30,END=14*60+30,TOTAL=END-START,PPM=1.8,H=TOTAL*PPM
 let teremSzam=null,hetData=null
+
+function updateTime(){
+  const t=formatHM()
+  document.getElementById('footer-ido').textContent=t
+  document.getElementById('footer-ido2').textContent=t
+}
+
 function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function roomPath(v){return encodeURIComponent(String(v??''))}
 function getTerem(){const p=location.pathname.split('/').filter(Boolean);const q=new URLSearchParams(location.search).get('terem');if(p[0]==='terem'&&p[1])return p[1].toUpperCase();if(q)return q.toUpperCase();return null}
@@ -207,7 +217,7 @@ function buildTT(){
 }
 async function fetchStatus(){
   try{const d=await fetch(`/api/terem/${roomPath(teremSzam)}`).then(r=>r.json());if(!d.error){document.getElementById('terem-szam').textContent=d.terem;renderStatus(d)}}catch(e){}
-  const t=formatHM();document.getElementById('footer-ido').textContent=t;document.getElementById('footer-ido2').textContent=t
+  updateTime()
 }
 async function fetchTimetable(){
   try{const d=await fetch(`/api/napirend/${roomPath(teremSzam)}?nap=heten`).then(r=>r.json());if(d.error)return;hetData={};(d.het||[]).forEach(nd=>{hetData[nd.nap]=nd.orak||[]});buildTT()}
@@ -222,8 +232,10 @@ if(!teremSzam){
   document.getElementById('terem-szam').textContent=teremSzam
   document.getElementById('napirend-link').href='/terem/'+roomPath(teremSzam)+'/nap'
   document.title='Ticky – '+teremSzam
+  updateTime()
   fetchStatus();fetchTimetable()
   setInterval(fetchStatus,REFRESH_MS);setInterval(fetchTimetable,5*60_000)
+  setInterval(updateTime,60_000)
 }
 </script>
 </body>
