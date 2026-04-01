@@ -179,6 +179,10 @@ if (match_route('/terem/{szam}', $uri) !== false) {
     require __DIR__ . '/pages/terem.php'; exit;
 }
 
+if ($uri === '/support') {
+    require __DIR__ . '/pages/support.php'; exit;
+}
+
 // ─── API Routes ───────────────────────────────────────
 if ($uri === '/api/termek') {
     require __DIR__ . '/api/termek.php'; exit;
