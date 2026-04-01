@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Tanár kereső</title>
 <link rel="icon" type="image/png" href="/favicon.png">
-<link rel="shortcut icon" href="/favicon.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -81,7 +81,7 @@
 <div class="w-full max-w-sm slide-up">
   <div class="glass rounded-2xl overflow-hidden">
 
-    <!-- Ticky link – kártya tetején -->
+    <!-- Ticky link – kártya TETEJÉN -->
     <div class="px-6 pt-4 pb-0 flex items-center justify-between">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px;" onmouseover="this.style.color='rgba(200,151,42,.8)'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
         <span style="width:6px;height:6px;border-radius:50%;background:#c8972a;box-shadow:0 0 6px #c8972a;display:inline-block;animation:pd 2s infinite;"></span>
@@ -118,7 +118,7 @@
       <div id="lista"><p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kiválasztva tanár</p></div>
     </div>
 
-    <!-- Footer: idő + frissít -->
+    <!-- Footer: aktuális idő + frissít -->
     <div class="px-6 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
       <span class="text-xs" style="color:rgba(255,255,255,.35);" id="ido">–</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
@@ -133,6 +133,11 @@
 <script>
 const REFRESH=60_000
 let curKod=null
+
+function updateTime() {
+  document.getElementById('ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
+}
+
 function getUrlKod(){
   const p=location.pathname.split('/').filter(Boolean)
   const q=new URLSearchParams(location.search).get('tanar')
@@ -205,7 +210,7 @@ async function loadData(){
     document.getElementById('aktblock').innerHTML=`<div class="text-center py-3"><span style="font-size:32px;" class="block mb-2">⚠️</span><p class="text-sm" style="color:rgba(255,255,255,.4);">Betöltési hiba</p></div>`
     setAllapot('idle')
   }
-  document.getElementById('ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
+  updateTime()
 }
 function renderAkt(a,k){
   const el=document.getElementById('aktblock')
@@ -251,6 +256,9 @@ function renderLista(orak){
   }).join('')+`</div>`
 }
 function refresh(){const ic=document.getElementById('ri');ic.classList.add('spinning');loadData().finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600))}
+
+updateTime()
+setInterval(updateTime, 60_000)
 loadTanarok()
 setInterval(()=>{if(curKod)loadData()},REFRESH)
 </script>
