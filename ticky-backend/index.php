@@ -53,7 +53,6 @@ if ($uri === '/') {
   @keyframes fu { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .gold-line { height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a); }
   a { text-decoration:none; }
-  /* sidebar */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;
     display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;
     background:rgba(6,15,30,.78);backdrop-filter:blur(20px);
@@ -75,15 +74,13 @@ if ($uri === '/') {
 <body class="relative">
 <div class="top-line"></div>
 
-<!-- Bal oldali sidebar -->
 <div class="ticky-sidebar">
   <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
   <div class="tsb-divider"></div>
- <a href="/support" class="tsb-item" data-label="Support">✉️</a>
+  <a href="/support" class="tsb-item" data-label="Support">✉️</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
 </div>
 
-<!-- Navbar -->
 <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
   <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:20px;font-weight:700;" class="flex items-center gap-2">
     <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 10px #c8972a;display:inline-block;"></span>
@@ -98,10 +95,8 @@ if ($uri === '/') {
   </div>
 </nav>
 
-<!-- Main tartalom -->
 <div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
   <div class="w-full max-w-md">
-
     <div class="fade-up text-center mb-10">
       <h1 style="font-family:'Playfair Display',serif;font-size:72px;font-weight:700;color:white;line-height:1;letter-spacing:-2px;">Ticky</h1>
       <p class="text-sm mt-3" style="color:rgba(255,255,255,.45);">Digitális terem-azonosító rendszer</p>
@@ -111,7 +106,6 @@ if ($uri === '/') {
       </div>
     </div>
 
-    <!-- Összes terem -->
     <div class="fade-up-2 mb-3">
       <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
       <a href="/termek" class="glass card-hover block px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
@@ -124,7 +118,6 @@ if ($uri === '/') {
       </a>
     </div>
 
-    <!-- Tanár + QR -->
     <div class="fade-up-3 grid grid-cols-2 gap-3 mb-3">
       <div>
         <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
@@ -172,15 +165,14 @@ if ($uri === '/qr') {
 if ($uri === '/kijelzo') {
     require __DIR__ . '/pages/kijelzo.php'; exit;
 }
+if ($uri === '/support') {
+    require __DIR__ . '/pages/support.php'; exit;
+}
 if (match_route('/terem/{szam}/nap', $uri) !== false) {
     require __DIR__ . '/pages/napirend.php'; exit;
 }
 if (match_route('/terem/{szam}', $uri) !== false) {
     require __DIR__ . '/pages/terem.php'; exit;
-}
-
-if ($uri === '/support') {
-    require __DIR__ . '/pages/support.php'; exit;
 }
 
 // ─── API Routes ───────────────────────────────────────
@@ -190,9 +182,7 @@ if ($uri === '/api/termek') {
 if ($uri === '/api/tanarok') {
     require __DIR__ . '/api/tanarok.php'; exit;
 }
-if ($uri === '/api/ai/chat') {
-    require __DIR__ . '/api/ai_chat.php'; exit;
-}
+// NINCS /api/ai/chat – AI teljesen eltávolítva
 if (match_route('/api/tanar/{kod}/orarend', $uri) !== false) {
     require __DIR__ . '/api/tanar_orarend.php'; exit;
 }
@@ -201,6 +191,10 @@ if (match_route('/api/terem/{szam}', $uri) !== false) {
 }
 if (match_route('/api/napirend/{szam}', $uri) !== false) {
     require __DIR__ . '/api/napirend.php'; exit;
+}
+
+if ($uri === '/support') {
+    require __DIR__ . '/pages/support.php'; exit;
 }
 
 // ─── Admin ────────────────────────────────────────────
