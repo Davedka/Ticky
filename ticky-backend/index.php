@@ -27,6 +27,8 @@ if ($uri === '/') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -51,73 +53,35 @@ if ($uri === '/') {
   @keyframes fu { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .gold-line { height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a); }
   a { text-decoration:none; }
-
-  /* ── AI Chat widget ── */
-  .ai-fab {
-    position:fixed; bottom:28px; right:28px; z-index:300;
-    width:52px; height:52px; border-radius:50%;
-    background:linear-gradient(135deg,#1a4a8a,#0b2e59);
-    border:1.5px solid rgba(200,151,42,.45);
-    box-shadow:0 4px 20px rgba(0,0,0,.5), 0 0 0 0 rgba(200,151,42,.3);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:all .2s; font-size:22px;
-    animation:fabPulse 3s ease-in-out infinite;
-  }
-  @keyframes fabPulse {
-    0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 0 rgba(200,151,42,.3)}
-    50%{box-shadow:0 4px 24px rgba(0,0,0,.6),0 0 0 8px rgba(200,151,42,.0)}
-  }
-  .ai-fab:hover { transform:scale(1.08); border-color:rgba(200,151,42,.7); }
-
-  .ai-panel {
-    position:fixed; bottom:92px; right:28px; z-index:300;
-    width:320px; max-height:440px;
-    background:rgba(6,15,30,.95); backdrop-filter:blur(24px);
-    border:1px solid rgba(255,255,255,.10); border-radius:18px;
-    display:flex; flex-direction:column; overflow:hidden;
-    box-shadow:0 16px 48px rgba(0,0,0,.7);
-    animation:panelIn .3s cubic-bezier(.22,1,.36,1) both;
-    transform-origin:bottom right;
-  }
-  @keyframes panelIn { from{opacity:0;transform:scale(.9) translateY(12px)} to{opacity:1;transform:none} }
-  .ai-panel.hidden { display:none; }
-
-  .ai-header {
-    padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.08);
-    display:flex; align-items:center; justify-content:space-between;
-    background:rgba(26,74,138,.2);
-  }
-  .ai-messages {
-    flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;
-    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.1) transparent;
-  }
-  .ai-msg { max-width:88%; padding:9px 12px; border-radius:12px; font-size:13px; line-height:1.5; }
-  .ai-msg.user { background:rgba(26,74,138,.5); border:1px solid rgba(26,74,138,.4); color:white; align-self:flex-end; border-bottom-right-radius:4px; }
-  .ai-msg.bot  { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.88); align-self:flex-start; border-bottom-left-radius:4px; }
-  .ai-msg.bot.typing { color:rgba(255,255,255,.45); font-style:italic; }
-
-  .ai-input-row {
-    padding:10px 12px; border-top:1px solid rgba(255,255,255,.08);
-    display:flex; gap:8px; align-items:center;
-  }
-  .ai-input {
-    flex:1; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.10);
-    border-radius:10px; color:white; font-family:'DM Sans',sans-serif; font-size:13px;
-    padding:9px 12px; outline:none; transition:border-color .2s;
-  }
-  .ai-input:focus { border-color:rgba(200,151,42,.45); }
-  .ai-input::placeholder { color:rgba(255,255,255,.3); }
-  .ai-send {
-    width:34px; height:34px; border-radius:9px; flex-shrink:0;
-    background:linear-gradient(135deg,#c8972a,#a07020); border:none; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; transition:all .15s;
-  }
-  .ai-send:hover { transform:scale(1.08); box-shadow:0 4px 12px rgba(200,151,42,.4); }
-  .ai-send:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  /* sidebar */
+  .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;
+    display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;
+    background:rgba(6,15,30,.78);backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
+  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
+  .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
+  .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);
+    background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);
+    font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;
+    padding:5px 11px;border-radius:8px;white-space:nowrap;
+    opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
+  .tsb-item:hover::after{opacity:1;}
+  .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
+  @media(max-width:600px){.ticky-sidebar{display:none;}}
 </style>
 </head>
 <body class="relative">
 <div class="top-line"></div>
+
+<!-- Bal oldali sidebar -->
+<div class="ticky-sidebar">
+  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
+  <div class="tsb-divider"></div>
+  <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="tsb-item" data-label="Support">✉️</a>
+  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
+</div>
 
 <!-- Navbar -->
 <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
@@ -126,42 +90,11 @@ if ($uri === '/') {
     Ticky
   </a>
   <div class="flex items-center gap-1 flex-wrap">
-    <!-- Fő oldalak -->
     <a href="/termek" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
     <a href="/tanar"  class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
     <a href="/qr"     class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
     <a href="/kijelzo" class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
     <a href="/admin"  class="text-sm font-medium px-3 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
-
-    <!-- Elválasztó -->
-    <span style="width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 4px;display:inline-block;"></span>
-
-    <!-- Eseménynaptár -->
-    <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener"
-       class="text-sm font-medium px-3 py-2 rounded-md"
-       style="color:rgba(0,200,200,.85);background:rgba(0,200,200,.08);border:1px solid rgba(0,200,200,.2);border-radius:8px;transition:all .2s;display:inline-flex;align-items:center;gap:5px;"
-       onmouseover="this.style.color='white';this.style.background='rgba(0,200,200,.16)';this.style.borderColor='rgba(0,200,200,.4)'"
-       onmouseout="this.style.color='rgba(0,200,200,.85)';this.style.background='rgba(0,200,200,.08)';this.style.borderColor='rgba(0,200,200,.2)'">
-      📅 Eseménynaptár
-    </a>
-
-    <!-- Support -->
-    <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support"
-       class="text-sm font-medium px-3 py-2 rounded-md"
-       style="color:rgba(160,200,255,.8);background:rgba(100,160,255,.07);border:1px solid rgba(100,160,255,.18);border-radius:8px;transition:all .2s;display:inline-flex;align-items:center;gap:5px;"
-       onmouseover="this.style.color='white';this.style.background='rgba(100,160,255,.14)';this.style.borderColor='rgba(100,160,255,.35)'"
-       onmouseout="this.style.color='rgba(160,200,255,.8)';this.style.background='rgba(100,160,255,.07)';this.style.borderColor='rgba(100,160,255,.18)'">
-      ✉️ Support
-    </a>
-
-    <!-- Bug report – GitHub Issues -->
-    <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener"
-       class="text-sm font-medium px-3 py-2 rounded-md"
-       style="color:rgba(255,140,140,.8);background:rgba(255,80,80,.07);border:1px solid rgba(255,80,80,.18);border-radius:8px;transition:all .2s;display:inline-flex;align-items:center;gap:5px;"
-       onmouseover="this.style.color='white';this.style.background='rgba(255,80,80,.14)';this.style.borderColor='rgba(255,80,80,.35)'"
-       onmouseout="this.style.color='rgba(255,140,140,.8)';this.style.background='rgba(255,80,80,.07)';this.style.borderColor='rgba(255,80,80,.18)'">
-      🐛 Bug
-    </a>
   </div>
 </nav>
 
@@ -211,114 +144,9 @@ if ($uri === '/') {
       </div>
     </div>
 
-    <!-- Support + Bug sor -->
-    <div class="fade-up-4 grid grid-cols-2 gap-3 mb-3">
-      <div>
-        <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#64a0ff,#1a4a8a);"></div>
-        <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support"
-           class="glass card-hover block px-5 py-4"
-           style="border-radius:0 0 14px 14px;border-top:none;">
-          <span style="font-size:24px;" class="block mb-2">✉️</span>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Support</h3>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">tickysupport@gmail.com</p>
-        </a>
-      </div>
-      <div>
-        <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#5a1a1a,#ff5050,#5a1a1a);"></div>
-        <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener"
-           class="glass card-hover block px-5 py-4"
-           style="border-radius:0 0 14px 14px;border-top:none;">
-          <span style="font-size:24px;" class="block mb-2">🐛</span>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Bug report</h3>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">GitHub Issues</p>
-        </a>
-      </div>
-    </div>
-
     <p class="fade-up-4 text-center text-xs mt-6" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
   </div>
 </div>
-
-<!-- ── AI Chat asszisztens ── -->
-<button class="ai-fab" onclick="toggleAI()" title="AI Asszisztens">🤖</button>
-
-<div class="ai-panel hidden" id="ai-panel">
-  <div class="ai-header">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:18px;">🤖</span>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:white;">Ticky Asszisztens</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.4);">Claude · Kérdezz bármit</div>
-      </div>
-    </div>
-    <button onclick="toggleAI()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
-  </div>
-  <div class="ai-messages" id="ai-messages">
-    <div class="ai-msg bot">Szia! 👋 Segíthetek a Ticky rendszerrel kapcsolatban. Kérdezz teremről, tanárról, órarendről – bármit!</div>
-  </div>
-  <div class="ai-input-row">
-    <input class="ai-input" id="ai-input" placeholder="Kérdezz valamit…" onkeydown="if(event.key==='Enter')sendAI()">
-    <button class="ai-send" id="ai-send" onclick="sendAI()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
-  </div>
-</div>
-
-<script>
-let aiOpen = false
-let aiHistory = []
-
-function toggleAI() {
-  aiOpen = !aiOpen
-  document.getElementById('ai-panel').classList.toggle('hidden', !aiOpen)
-  if (aiOpen) document.getElementById('ai-input').focus()
-}
-
-async function sendAI() {
-  const input = document.getElementById('ai-input')
-  const msg   = input.value.trim()
-  if (!msg) return
-
-  input.value = ''
-  document.getElementById('ai-send').disabled = true
-
-  addMsg(msg, 'user')
-  aiHistory.push({ role: 'user', content: msg })
-
-  const typing = addMsg('Gondolkodok…', 'bot typing')
-
-  try {
-    const res  = await fetch('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, history: aiHistory.slice(0,-1) })
-    })
-    const data = await res.json()
-    const reply = data.reply || 'Valami hiba történt, próbáld újra!'
-
-    typing.className  = 'ai-msg bot'
-    typing.textContent = reply
-    aiHistory.push({ role: 'assistant', content: reply })
-
-    if (aiHistory.length > 20) aiHistory = aiHistory.slice(-20)
-  } catch(e) {
-    typing.className  = 'ai-msg bot'
-    typing.textContent = 'Kapcsolati hiba. Próbáld újra!'
-  }
-
-  document.getElementById('ai-send').disabled = false
-  document.getElementById('ai-messages').scrollTop = 9999
-}
-
-function addMsg(text, cls) {
-  const el = document.createElement('div')
-  el.className = 'ai-msg ' + cls
-  el.textContent = text
-  document.getElementById('ai-messages').appendChild(el)
-  document.getElementById('ai-messages').scrollTop = 9999
-  return el
-}
-</script>
 
 </body>
 </html>
@@ -384,4 +212,4 @@ if (match_route('/api/admin/terem/{szam}', $uri) !== false) {
 
 // 404
 http_response_code(404);
-echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png"<style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
+echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png"><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza a főoldalra</a></body></html>';
