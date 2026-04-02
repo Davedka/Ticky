@@ -53,10 +53,26 @@ if ($uri === '/') {
   @keyframes fu { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .gold-line { height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a); }
   a { text-decoration:none; }
+  /* Floating sidebar */
+  .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
+  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
+  .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
+  .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;padding:5px 11px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
+  .tsb-item:hover::after{opacity:1;}
+  .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
+  @media(max-width:600px){.ticky-sidebar{display:none;}}
 </style>
 </head>
 <body class="relative">
 <div class="top-line"></div>
+
+<!-- Floating sidebar -->
+<div class="ticky-sidebar">
+  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
+  <div class="tsb-divider"></div>
+  <a href="/support" class="tsb-item" data-label="Support">✉️</a>
+  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
+</div>
 
 <!-- Navbar -->
 <nav style="background:rgba(6,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);" class="sticky top-0 z-50 px-6 h-16 flex items-center justify-between">
@@ -71,112 +87,9 @@ if ($uri === '/') {
     <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
     <a href="/admin" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(200,151,42,.7);border:1px solid rgba(200,151,42,.2);border-radius:8px;transition:all .2s" onmouseover="this.style.color='#f0c76b';this.style.background='rgba(200,151,42,.1)'" onmouseout="this.style.color='rgba(200,151,42,.7)';this.style.background='transparent'">⚙️ Admin</a>
     <!-- Hamburger -->
-    <button onclick="toggleSidebar()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.7);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:18px;line-height:1;width:auto;margin-top:0;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.7)'">☰</button>
   </div>
 </nav>
 
-<!-- Sidebar overlay -->
-<div id="sidebar-overlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:400;"></div>
-<div id="sidebar" style="display:none;position:fixed;left:0;top:0;bottom:0;width:280px;background:rgba(6,15,30,.97);backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.08);z-index:500;padding:20px 16px;flex-direction:column;gap:8px;overflow-y:auto;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08);">
-    <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;">
-      <span style="width:7px;height:7px;border-radius:50%;background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
-      Ticky
-    </span>
-    <button onclick="toggleSidebar()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;width:auto;margin:0;padding:0 10px;">✕</button>
-  </div>
-  <p style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:8px;padding-left:4px;">Kapcsolódó</p>
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" onclick="toggleSidebar()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(0,200,200,.07);border:1px solid rgba(0,200,200,.15);color:rgba(0,200,200,.9);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;" onmouseover="this.style.background='rgba(0,200,200,.13)';this.style.color='white'" onmouseout="this.style.background='rgba(0,200,200,.07)';this.style.color='rgba(0,200,200,.9)'">
-    <span style="font-size:20px;">📅</span>
-    <div><div style="font-weight:600;">Eseménynaptár</div><div style="font-size:11px;opacity:.6;margin-top:1px;">MSZC Gépészeti</div></div>
-  </a>
-  <a href="mailto:support@ticky.hu" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.04)';this.style.color='rgba(255,255,255,.75)'">
-    <span style="font-size:20px;">🛟</span>
-    <div><div style="font-weight:600;">Support</div><div style="font-size:11px;opacity:.6;margin-top:1px;">Segítség kérése</div></div>
-  </a>
-  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" onclick="toggleSidebar()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.04)';this.style.color='rgba(255,255,255,.75)'">
-    <span style="font-size:20px;">🐛</span>
-    <div><div style="font-weight:600;">Bug jelentés</div><div style="font-size:11px;opacity:.6;margin-top:1px;">GitHub Issues</div></div>
-  </a>
-</div>
-
-<!-- Main tartalom -->
-<div class="relative z-10 flex flex-col items-center px-6 pt-20 pb-16">
-  <div class="w-full max-w-md">
-
-    <div class="fade-up text-center mb-10">
-      <h1 style="font-family:'Playfair Display',serif;font-size:72px;font-weight:700;color:white;line-height:1;letter-spacing:-2px;">Ticky</h1>
-      <p class="text-sm mt-3" style="color:rgba(255,255,255,.45);">Digitális terem-azonosító rendszer</p>
-      <div class="flex items-center justify-center gap-2 mt-4">
-        <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#4ade80;display:inline-block;"></span>
-        <span class="text-xs font-medium" style="color:#4ade80;"><?= htmlspecialchars($nap_nevek[$nap]) ?> · <?= htmlspecialchars($ido) ?> · Aktív</span>
-      </div>
-    </div>
-
-    <div class="fade-up-2 mb-3">
-      <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-      <a href="/termek" class="glass card-hover block px-6 py-5 flex items-center justify-between gap-4" style="border-radius:0 0 14px 14px;border-top:none;">
-        <div>
-          <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.35);">Élő nézet</p>
-          <h2 style="font-family:'Playfair Display',serif;color:white;font-size:22px;font-weight:700;">Összes terem</h2>
-          <p class="text-sm mt-0.5" style="color:rgba(255,255,255,.45);">Szabad & foglalt termek valós időben</p>
-        </div>
-        <span style="font-size:32px;">🏫</span>
-      </a>
-    </div>
-
-    <div class="fade-up-3 grid grid-cols-2 gap-3 mb-3">
-      <div>
-        <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-        <a href="/tanar" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
-          <span style="font-size:24px;" class="block mb-2">👩‍🏫</span>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Tanár kereső</h3>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Hol van most?</p>
-        </a>
-      </div>
-      <div>
-        <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
-        <a href="/qr" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
-          <span style="font-size:24px;" class="block mb-2">🖨️</span>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">QR Generátor</h3>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Nyomtatható kódok</p>
-        </a>
-      </div>
-    </div>
-
-    <!-- Eseménynaptár kártya -->
-    <div class="fade-up-4 mb-3">
-      <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#007a7a,#00c8c8,#007a7a);"></div>
-      <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener"
-         class="glass card-hover block px-6 py-4 flex items-center justify-between gap-4"
-         style="border-radius:0 0 14px 14px;border-top:none;">
-        <div>
-          <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(0,200,200,.5);">Kapcsolódó oldal</p>
-          <h3 style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;">Eseménynaptár</h3>
-          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">MSZC Gépészeti – iskolai események</p>
-        </div>
-        <span style="font-size:28px;">📅</span>
-      </a>
-    </div>
-
-    <p class="fade-up-4 text-center text-xs mt-6" style="color:rgba(255,255,255,.18);">Ticky v1.0 · Render · Supabase · PHP</p>
-  </div>
-</div>
-
-
-
-
-<script>
-function toggleSidebar() {
-  const sb = document.getElementById('sidebar')
-  const ov = document.getElementById('sidebar-overlay')
-  const open = sb.style.display !== 'flex'
-  sb.style.display = open ? 'flex' : 'none'
-  ov.style.display = open ? 'block' : 'none'
-  document.body.style.overflow = open ? 'hidden' : ''
-}
-document.addEventListener('keydown', e => { if(e.key==='Escape') { document.getElementById('sidebar').style.display='none'; document.getElementById('sidebar-overlay').style.display='none'; document.body.style.overflow=''; } })
-</script>
 </body>
 </html>
     <?php
