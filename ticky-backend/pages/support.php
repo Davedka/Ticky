@@ -121,6 +121,7 @@ textarea.inp{resize:vertical;min-height:90px;}
             <option value="kerdes" style="background:#0b2e59;">❓ Általános kérdés</option>
             <option value="terem" style="background:#0b2e59;">🏫 Terem / órarend probléma</option>
             <option value="tanar" style="background:#0b2e59;">👩‍🏫 Tanár adat módosítás</option>
+            <option value="osztaly" style="background:#0b2e59;">🎓 Osztály / osztálynézet probléma</option>
             <option value="javaslat" style="background:#0b2e59;">💡 Fejlesztési javaslat</option>
             <option value="egyeb" style="background:#0b2e59;">📋 Egyéb</option>
           </select>
@@ -149,6 +150,9 @@ textarea.inp{resize:vertical;min-height:90px;}
     $faq = [
       ['q'=>'Miért nem jelenik meg helyesen a terem foglaltsága?','a'=>'Az órarend adatbázisból töltődik be. Ha egy terem tévesen foglaltnak vagy szabadnak látszik, valószínűleg az órarend frissítésre szorul. Jelezd a support emailen a terem számával együtt.'],
       ['q'=>'Hogyan lehet hozzáadni egy új tanárt?','a'=>'Tanárokat az Admin panelen lehet kezelni (⚙️ Admin gomb). Az admin jelszó az iskolai rendszergazdánál van. Ha nincs hozzáférésed, küldj emailt a support címre.'],
+      ['q'=>'Miért nem látom az osztályomat a listában?','a'=>'Az osztálylista az órarend adatbázisból épül fel. Ha egy osztály hiányzik, vagy hibás néven jelenik meg, jelezd supporton az osztály nevét és ha tudod, az érintett napot vagy órát is.'],
+      ['q'=>'Mit jelent a párhuzamos jelzés az osztálynézetben?','a'=>'A párhuzamos jelzés azt mutatja, hogy ugyanabban az idősávban az osztály több csoportra bontva tanul. Ilyenkor több terem, tanár vagy tantárgy is megjelenhet ugyanazon az óránál.'],
+      ['q'=>'Miért látok egyszerre több tanárt vagy több termet az osztálynézetben?','a'=>'Ez általában csoportbontás vagy párhuzamos óra miatt történik. A nézet ilyenkor az összes kapcsolódó csoportot egy idősávban mutatja meg.'],
       ['q'=>'A QR kód nem a megfelelő teremre mutat.','a'=>'A QR kódok a /terem/{szám} URL-re mutatnak. Ha a szám rossz, nyomtasd újra a QR Generátor oldalon.'],
       ['q'=>'Hétvégén miért nem látszanak a foglaltsági adatok?','a'=>'Ez szándékos: az órarend hétfőtől péntekig működik. Hétvégén minden terem szabadnak jelenik meg.'],
       ['q'=>'Az oldal nem tölt be / fehér képernyőt látok.','a'=>'Próbáld Ctrl+Shift+R kombinációval frissíteni. Ha ez nem segít, jelezd a bug reporton a böngésző verzióját és az oldal URL-jét.'],
@@ -182,7 +186,7 @@ function sendForm(){
   if(!email.includes('@')){showToast('Érvénytelen email cím!');return}
   const btn=document.getElementById('send-btn')
   btn.disabled=true;btn.innerHTML='Küldés…'
-  const targyNevek={hiba:'🐛 Hibajelentés',kerdes:'❓ Általános kérdés',terem:'🏫 Terem / órarend',tanar:'👩‍🏫 Tanár adat',javaslat:'💡 Fejlesztési javaslat',egyeb:'📋 Egyéb'}
+  const targyNevek={hiba:'🐛 Hibajelentés',kerdes:'❓ Általános kérdés',terem:'🏫 Terem / órarend',tanar:'👩‍🏫 Tanár adat',osztaly:'🎓 Osztály / osztálynézet probléma',javaslat:'💡 Fejlesztési javaslat',egyeb:'📋 Egyéb'}
   const subject=encodeURIComponent('[Ticky Support] '+(targyNevek[targy]||targy)+' – '+nev)
   const body=encodeURIComponent('Feladó: '+nev+'\nEmail: '+email+'\nKategória: '+(targyNevek[targy]||targy)+'\n\nÜzenet:\n'+uzenet)
   setTimeout(()=>{

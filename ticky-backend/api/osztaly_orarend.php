@@ -1,49 +1,9 @@
 <?php
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/osztaly.php';
 
 handle_cors();
-
-function osztaly_valid_code(string $value): bool
-{
-    return preg_match('/^[\p{L}\p{N}.-]{1,32}$/u', $value) === 1;
-}
-
-function osztaly_resolve_code(string $requested_code): ?string
-{
-    $rows = sb_get('orarendek', [
-        'select' => 'osztaly',
-        'aktiv' => 'eq.true',
-        'order' => 'osztaly.asc',
-    ]);
-
-    $requested_normalized = function_exists('mb_strtolower')
-        ? mb_strtolower($requested_code, 'UTF-8')
-        : strtolower($requested_code);
-
-    $classes = [];
-    foreach ($rows as $row) {
-        $class_code = trim((string) ($row['osztaly'] ?? ''));
-        if ($class_code === '') {
-            continue;
-        }
-
-        $classes[$class_code] = true;
-        $normalized_code = function_exists('mb_strtolower')
-            ? mb_strtolower($class_code, 'UTF-8')
-            : strtolower($class_code);
-
-        if ($normalized_code === $requested_normalized) {
-            return $class_code;
-        }
-    }
-
-    if (isset($classes[$requested_code])) {
-        return $requested_code;
-    }
-
-    return null;
-}
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $params = match_route('/api/osztaly/{kod}/orarend', $uri);
@@ -52,12 +12,18 @@ if ($params === false || empty($params['kod'])) {
     json_error('Hiányzó osztály kód', 400);
 }
 
-$requested_code = trim(urldecode((string) $params['kod']));
-if (!osztaly_valid_code($requested_code)) {
+$requested_code = osztaly_normalize_code(urldecode((string) $params['kod']));
+if (!osztaly_is_valid_code($requested_code)) {
     json_error('Érvénytelen osztály kód', 400);
 }
 
-$class_code = osztaly_resolve_code($requested_code);
+$class_rows = sb_get('orarendek', [
+    'select' => 'osztaly',
+    'aktiv' => 'eq.true',
+    'order' => 'osztaly.asc',
+]);
+
+$class_code = osztaly_resolve_code_from_values($requested_code, array_column($class_rows, 'osztaly'));
 if ($class_code === null) {
     json_error('Osztály nem található: ' . $requested_code, 404);
 }
@@ -72,7 +38,7 @@ if ($day === 0) {
 }
 
 $lessons_raw = sb_get('orarendek', [
-    'osztaly' => 'ilike.' . $class_code,
+    'osztaly' => 'eq.' . $class_code,
     'het_napja' => 'eq.' . $day,
     'aktiv' => 'eq.true',
     'select' => 'ora_sorszam,kezdes,vegzes,tantargy,tanar_id,termek(terem_szam)',

@@ -5,6 +5,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'fs'
 import { config } from 'dotenv'
+import { isRoomToken, isValidClassCode, normalizeToken, splitCompoundValue } from './scripts/osztaly-rules.mjs'
 
 config()
 
@@ -20,7 +21,6 @@ const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 
 const NAP = { 'Hétfő':1, 'Kedd':2, 'Szerda':3, 'Csütörtök':4, 'Péntek':5 }
 const ORA = { '07:30':1,'08:20':2,'09:15':3,'10:15':4,'11:10':5,'12:05':6,'12:50':7,'13:40':8 }
-const CLASS_RE = /^\d+\.[a-zA-Z]/
 
 // ─── Segédfüggvények ─────────────────────────────────────
 
@@ -96,8 +96,6 @@ function loadData(file) {
 
 // ─── SLASH SZÉTBONTÁS ────────────────────────────────────
 
-const split = v => v.includes(' ') ? [v.trim()] : v.split('/').map(x=>x.trim()).filter(Boolean)
-const isRoom = v => !CLASS_RE.test(v)
 
 // ─── BULK INSERT ─────────────────────────────────────────
 
@@ -142,7 +140,7 @@ async function run() {
   
   for (const e of entries) {
     tanarSet.add(e.teacher)
-    split(e.room).filter(isRoom).forEach(r => teremSet.add(r))
+    splitCompoundValue(e.room).map(normalizeToken).filter(isRoomToken).forEach(r => teremSet.add(r))
   }
   
   console.log(`│  ${tanarSet.size} egyedi tanár`)
@@ -184,8 +182,13 @@ async function run() {
     const tanarId = tanarMap[e.teacher]
     if (!tanarId) { hibak.push(`Nem találom: ${e.teacher}`); continue }
     
-    const termek = split(e.room).filter(isRoom)
-    const osztalyok = split(e.class)
+    const termek = splitCompoundValue(e.room).map(normalizeToken).filter(isRoomToken)
+    const osztalyok = splitCompoundValue(e.class).map(normalizeToken).filter(isValidClassCode)
+
+    if (!osztalyok.length) {
+      hibak.push(`Nincs érvényes osztály: ${e.class}`)
+      continue
+    }
     
     for (const teremSzam of termek) {
       const teremId = teremMap[teremSzam]
