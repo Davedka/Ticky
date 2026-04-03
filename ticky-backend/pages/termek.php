@@ -48,6 +48,7 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
     $links = [
         ['href'=>'/termek',  'label'=>'Termek',  'key'=>'termek'],
         ['href'=>'/tanar',   'label'=>'Tanár',   'key'=>'tanar'],
+        ['href'=>'/osztaly', 'label'=>'Osztály', 'key'=>'osztaly'],
         ['href'=>'/qr',      'label'=>'QR',      'key'=>'qr'],
         ['href'=>'/kijelzo', 'label'=>'Kijelző', 'key'=>'kijelzo'],
     ];

@@ -130,8 +130,8 @@ if ($uri === '/') {
   .card-big .info p.desc{font-size:13px;color:rgba(255,255,255,.45);margin-top:2px;}
   .card-big .emoji{font-size:30px;flex-shrink:0;}
 
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-  .grid2 .card-wrap{margin-bottom:0;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
+  .grid3 .card-wrap{margin-bottom:0;}
   .card-sm{
     display:flex;flex-direction:column;align-items:flex-start;
     padding:18px 18px;border-radius:0 0 14px 14px;border-top:none;
@@ -150,6 +150,7 @@ if ($uri === '/') {
     .main{padding:32px 16px 60px;}
     .card-big{padding:16px 18px;}
     .card-sm{padding:14px 16px;}
+    .grid3{grid-template-columns:1fr 1fr;}
   }
   @media(min-width:601px){
     .mobile-menu{display:none!important;}
@@ -227,13 +228,21 @@ if ($uri === '/') {
     </a>
   </div>
 
-  <!-- Tanár + QR -->
-  <div class="grid2 fade-up-3">
+  <!-- Tanár + Osztály + QR -->
+  <div class="grid3 fade-up-3">
     <div class="card-wrap">
       <div class="gold-line"></div>
       <a href="/tanar" class="glass card-hover card-sm">
         <span class="emoji">👩‍🏫</span>
         <h3>Tanár kereső</h3>
+        <p>Hol van most?</p>
+      </a>
+    </div>
+    <div class="card-wrap">
+      <div class="gold-line"></div>
+      <a href="/osztaly" class="glass card-hover card-sm">
+        <span class="emoji">🎓</span>
+        <h3>Osztály nézet</h3>
         <p>Hol van most?</p>
       </a>
     </div>
@@ -247,19 +256,7 @@ if ($uri === '/') {
     </div>
   </div>
 
-  <div class="card-wrap fade-up-4">
-    <div class="gold-line"></div>
-    <a href="/osztaly" class="glass card-hover card-big">
-      <div class="info">
-        <p class="eyebrow">Mai órák</p>
-        <h2>Osztály nézet</h2>
-        <p class="desc">Hol van most egy osztály?</p>
-      </div>
-      <span class="emoji">🎓</span>
-    </a>
-  </div>
-
-  <p class="footer-note">Ticky v1.0 · Render · Supabase · PHP</p>
+  <p class="footer-note fade-up-4">Ticky v1.0 · Render · Supabase · PHP</p>
 </div>
 
 <script>
