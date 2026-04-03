@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
-require_once __DIR__ . '/../utils/osztaly.php';
+require_once __DIR__ . '/../utils/tanarok_source.php';
 
 handle_cors();
 
@@ -17,13 +17,7 @@ if (!osztaly_is_valid_code($requested_code)) {
     json_error('Érvénytelen osztály kód', 400);
 }
 
-$class_rows = sb_get('orarendek', [
-    'select' => 'osztaly',
-    'aktiv' => 'eq.true',
-    'order' => 'osztaly.asc',
-]);
-
-$class_code = osztaly_resolve_code_from_values($requested_code, array_column($class_rows, 'osztaly'));
+$class_code = ticky_source_resolve_class_code($requested_code);
 if ($class_code === null) {
     json_error('Osztály nem található: ' . $requested_code, 404);
 }
@@ -37,43 +31,59 @@ if ($day === 0) {
     ]);
 }
 
-$lessons_raw = sb_get('orarendek', [
-    'osztaly' => 'eq.' . $class_code,
-    'het_napja' => 'eq.' . $day,
-    'aktiv' => 'eq.true',
-    'select' => 'ora_sorszam,kezdes,vegzes,tantargy,tanar_id,termek(terem_szam)',
-    'order' => 'kezdes.asc,ora_sorszam.asc',
-]);
-
-$teacher_ids = array_values(array_filter(array_unique(array_column($lessons_raw, 'tanar_id'))));
 $teacher_map = [];
-if (!empty($teacher_ids)) {
+if (SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '') {
     $teachers = sb_get('tanarok', [
-        'id' => 'in.(' . implode(',', $teacher_ids) . ')',
-        'select' => 'id,rovid_nev,nev',
+        'select' => 'rovid_nev,nev',
+        'order' => 'rovid_nev.asc',
     ]);
 
     foreach ($teachers as $teacher) {
-        $teacher_map[$teacher['id']] = $teacher;
+        $code = osztaly_lower((string) ($teacher['rovid_nev'] ?? ''));
+        if ($code === '') {
+            continue;
+        }
+
+        $teacher_map[$code] = trim((string) ($teacher['nev'] ?? ''));
     }
 }
 
 $grouped = [];
-foreach ($lessons_raw as $lesson) {
-    $room = $lesson['termek']['terem_szam'] ?? '?';
-    $teacher = $teacher_map[$lesson['tanar_id']] ?? null;
-    $teacher_code = $teacher['rovid_nev'] ?? '?';
-    $teacher_name = $teacher['nev'] ?? null;
-    $subject = trim((string) ($lesson['tantargy'] ?? ''));
-    $start = substr((string) ($lesson['kezdes'] ?? ''), 0, 5);
-    $end = substr((string) ($lesson['vegzes'] ?? ''), 0, 5);
+foreach (ticky_source_load_schedule_entries() as $lesson) {
+    if (ticky_source_day_to_index((string) ($lesson['day'] ?? '')) !== $day) {
+        continue;
+    }
+
+    $lesson_classes = array_values(array_filter(
+        ticky_source_split_compound_value((string) ($lesson['class'] ?? '')),
+        'osztaly_is_valid_code'
+    ));
+
+    $matches_class = false;
+    foreach ($lesson_classes as $lesson_class) {
+        if (osztaly_lower($lesson_class) === osztaly_lower($class_code)) {
+            $matches_class = true;
+            break;
+        }
+    }
+
+    if (!$matches_class) {
+        continue;
+    }
+
+    $room = ticky_source_normalize_token((string) ($lesson['room'] ?? '?'));
+    $teacher_code = ticky_source_normalize_token((string) ($lesson['teacher'] ?? '?'));
+    $teacher_name = $teacher_map[osztaly_lower($teacher_code)] ?? null;
+    $subject = ticky_source_normalize_token((string) ($lesson['subject'] ?? ''));
+    $start = substr(ticky_source_normalize_token((string) ($lesson['start'] ?? '')), 0, 5);
+    $end = substr(ticky_source_normalize_token((string) ($lesson['end'] ?? '')), 0, 5);
     $key = $start . '_' . $end;
 
     if (!isset($grouped[$key])) {
         $grouped[$key] = [
             'kezdes' => $start,
             'vegzes' => $end,
-            'ora_sorszam' => $lesson['ora_sorszam'] ?? null,
+            'ora_sorszam' => ticky_source_period_number($start),
             'csoportok' => [],
         ];
     }
@@ -94,7 +104,7 @@ foreach ($lessons_raw as $lesson) {
         $grouped[$key]['csoportok'][] = [
             'terem' => $room,
             'tanar' => $teacher_code,
-            'tanar_nev' => $teacher_name,
+            'tanar_nev' => $teacher_name !== '' ? $teacher_name : null,
             'tantargy' => $subject,
         ];
     }

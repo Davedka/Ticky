@@ -112,7 +112,7 @@ if ($uri === '/') {
   .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
 
   /* ── MAIN ── */
-  .main{position:relative;z-index:10;padding:48px 20px 60px;max-width:500px;margin:0 auto;}
+  .main{position:relative;z-index:10;padding:48px 20px 60px;max-width:680px;margin:0 auto;}
 
   .hero{text-align:center;margin-bottom:40px;}
   .hero h1{font-family:'Playfair Display',serif;font-size:clamp(56px,16vw,80px);font-weight:700;line-height:1;letter-spacing:-2px;color:white;}
@@ -130,14 +130,16 @@ if ($uri === '/') {
   .card-big .info p.desc{font-size:13px;color:rgba(255,255,255,.45);margin-top:2px;}
   .card-big .emoji{font-size:30px;flex-shrink:0;}
 
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
-  .grid3 .card-wrap{margin-bottom:0;}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px;align-items:stretch;}
+  .grid3 .card-wrap{margin-bottom:0;display:flex;}
   .card-sm{
     display:flex;flex-direction:column;align-items:flex-start;
+    justify-content:space-between;gap:8px;
+    width:100%;height:100%;
     padding:18px 18px;border-radius:0 0 14px 14px;border-top:none;
   }
   .card-sm .emoji{font-size:24px;margin-bottom:10px;}
-  .card-sm h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;}
+  .card-sm h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;line-height:1.15;min-height:2.3em;}
   .card-sm p{font-size:12px;color:rgba(255,255,255,.4);margin-top:3px;}
 
   .footer-note{text-align:center;font-size:11px;color:rgba(255,255,255,.18);margin-top:24px;}
@@ -150,7 +152,10 @@ if ($uri === '/') {
     .main{padding:32px 16px 60px;}
     .card-big{padding:16px 18px;}
     .card-sm{padding:14px 16px;}
-    .grid3{grid-template-columns:1fr 1fr;}
+    .main{padding:32px 16px 60px;max-width:680px;}
+    .grid3{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .card-sm h3{font-size:15px;min-height:2.4em;}
+    .card-sm p{font-size:11px;}
   }
   @media(min-width:601px){
     .mobile-menu{display:none!important;}
