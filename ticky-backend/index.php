@@ -106,6 +106,7 @@ if ($uri === '/') {
     <div class="landing-links flex flex-wrap items-center gap-1">
       <a href="/termek" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Termek</a>
       <a href="/tanar" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Tanár</a>
+      <a href="/osztaly" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Osztaly</a>
       <a href="/qr" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">QR</a>
       <a href="/kijelzo" class="text-sm font-medium px-4 py-2 rounded-md" style="color:rgba(255,255,255,.6);transition:all .2s" onmouseover="this.style.color='white';this.style.background='rgba(255,255,255,.09)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.background='transparent'">Kijelző</a>
       <?php if (admin_can_see_ui()): ?>
@@ -134,13 +135,21 @@ if ($uri === '/') {
           <span style="font-size:32px;">🏫</span>
         </a>
       </div>
-      <div class="landing-subgrid fade-up-3 grid grid-cols-2 gap-3">
+      <div class="landing-subgrid fade-up-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
           <a href="/tanar" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
             <span style="font-size:24px;" class="block mb-2">👩‍🏫</span>
             <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Tanár kereső</h3>
             <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Hol van most?</p>
+          </a>
+        </div>
+        <div>
+          <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
+          <a href="/osztaly" class="glass card-hover block px-5 py-4" style="border-radius:0 0 14px 14px;border-top:none;">
+            <span style="font-size:24px;" class="block mb-2">OSZ</span>
+            <h3 style="font-family:'Playfair Display',serif;color:white;font-size:17px;font-weight:700;">Osztaly nezet</h3>
+            <p class="text-xs mt-0.5" style="color:rgba(255,255,255,.40);">Hol van most az osztaly?</p>
           </a>
         </div>
         <div>
@@ -180,6 +189,9 @@ if ($uri === '/termek') {
 if ($uri === '/tanar' || match_route('/tanar/{kod}', $uri) !== false) {
     require __DIR__ . '/pages/tanar.php'; exit;
 }
+if ($uri === '/osztaly' || match_route('/osztaly/{kod}', $uri) !== false) {
+    require __DIR__ . '/pages/osztaly.php'; exit;
+}
 if ($uri === '/qr') {
     require __DIR__ . '/pages/qr.php'; exit;
 }
@@ -204,12 +216,18 @@ if ($uri === '/api/termek') {
 if ($uri === '/api/tanarok') {
     require __DIR__ . '/api/tanarok.php'; exit;
 }
+if ($uri === '/api/osztalyok') {
+    require __DIR__ . '/api/osztalyok.php'; exit;
+}
 if ($uri === '/api/assistant') {
     require __DIR__ . '/api/assistant.php'; exit;
 }
 // Tanár órarend – ELŐBB mint /api/terem/{szam}!
 if (match_route('/api/tanar/{kod}/orarend', $uri) !== false) {
     require __DIR__ . '/api/tanar_orarend.php'; exit;
+}
+if (match_route('/api/osztaly/{kod}/orarend', $uri) !== false) {
+    require __DIR__ . '/api/osztaly_orarend.php'; exit;
 }
 if (match_route('/api/terem/{szam}', $uri) !== false) {
     require __DIR__ . '/api/terem.php'; exit;
