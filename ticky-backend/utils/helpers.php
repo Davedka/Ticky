@@ -509,13 +509,6 @@ function render_assistant_widget(array $options = []): void {
     .ta-launcher { border-radius:16px; padding:12px; }
     .ta-panel { width:min(380px, calc(100vw - 24px)); max-height:min(68vh, 560px); }
   }
-  @media (max-width: 560px) {
-    .ta-shell { right:10px; left:10px; bottom:10px; align-items:stretch; }
-    .ta-launcher { align-self:flex-end; }
-    .ta-panel { width:100%; max-height:min(72vh, 540px); }
-    .ta-foot-row { flex-direction:column; align-items:stretch; }
-    .ta-submit { width:100%; }
-  }
 </style>
 <div id="<?= htmlspecialchars($widget_id, ENT_QUOTES, 'UTF-8') ?>" class="ta-shell">
   <aside class="ta-panel" aria-hidden="true">
