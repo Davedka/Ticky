@@ -40,7 +40,7 @@ function assistant_normalize(string $text): string {
 
 function assistant_context_key(string $context): string {
     $context = assistant_normalize($context);
-    $allowed = ['general', 'home', 'termek', 'tanar', 'osztaly', 'terem', 'napirend'];
+    $allowed = ['general', 'home', 'termek', 'tanar', 'terem', 'napirend'];
     return in_array($context, $allowed, true) ? $context : 'general';
 }
 
@@ -55,7 +55,7 @@ function assistant_has_any(string $text, array $needles): bool {
 }
 
 function assistant_extract_room(string $text): ?string {
-    if (preg_match('/(?<!\d)(\d{1,4}[A-Za-z]?)(?![\d.])/u', $text, $matches)) {
+    if (preg_match('/(?<!\d)(\d{1,4}[A-Za-z]?)(?!\d)/', $text, $matches)) {
         return strtoupper($matches[1]);
     }
 
@@ -69,15 +69,6 @@ function assistant_context_room_code(array $context_data): ?string {
     }
 
     return strtoupper($room);
-}
-
-function assistant_context_class_code(array $context_data): ?string {
-    $class_code = trim((string) ($context_data['class'] ?? ''));
-    if ($class_code === '') {
-        return null;
-    }
-
-    return $class_code;
 }
 
 function assistant_get_teacher_directory(): array {
@@ -174,91 +165,6 @@ function assistant_find_teacher(string $message, string $normalized): ?array {
     }
 
     return count($matches) === 1 ? $matches[0] : null;
-}
-
-function assistant_sort_class_codes(array &$classes): void {
-    usort($classes, static function (string $left, string $right): int {
-        $left = trim($left);
-        $right = trim($right);
-
-        $left_match = [];
-        $right_match = [];
-        $left_has_grade = preg_match('/^(\d+)\.(.+)$/u', $left, $left_match) === 1;
-        $right_has_grade = preg_match('/^(\d+)\.(.+)$/u', $right, $right_match) === 1;
-
-        if ($left_has_grade && $right_has_grade) {
-            $grade_compare = (int) $left_match[1] <=> (int) $right_match[1];
-            if ($grade_compare !== 0) {
-                return $grade_compare;
-            }
-
-            return strnatcasecmp($left_match[2], $right_match[2]);
-        }
-
-        return strnatcasecmp($left, $right);
-    });
-}
-
-function assistant_get_class_directory(): array {
-    static $classes = null;
-
-    if ($classes !== null) {
-        return $classes;
-    }
-
-    $rows = sb_get('orarendek', [
-        'select' => 'osztaly',
-        'aktiv' => 'eq.true',
-        'order' => 'osztaly.asc',
-    ]);
-
-    $directory = [];
-    foreach ($rows as $row) {
-        $class_code = trim((string) ($row['osztaly'] ?? ''));
-        if ($class_code === '') {
-            continue;
-        }
-
-        $directory[$class_code] = true;
-    }
-
-    $classes = array_keys($directory);
-    assistant_sort_class_codes($classes);
-    return $classes;
-}
-
-function assistant_extract_class_candidate(string $message): ?string {
-    if (preg_match('/(?<!\d)(\d{1,2}\.[\p{L}\p{N}-]{1,10})(?![\p{L}\p{N}])/u', $message, $matches)) {
-        return trim((string) $matches[1]);
-    }
-
-    return null;
-}
-
-function assistant_find_class(string $message, string $normalized): ?string {
-    $classes = assistant_get_class_directory();
-    if (empty($classes)) {
-        return null;
-    }
-
-    $candidate = assistant_extract_class_candidate($message);
-    if ($candidate !== null) {
-        $candidate_normalized = assistant_normalize($candidate);
-        foreach ($classes as $class_code) {
-            if (assistant_normalize($class_code) === $candidate_normalized) {
-                return $class_code;
-            }
-        }
-    }
-
-    foreach ($classes as $class_code) {
-        $normalized_code = assistant_normalize($class_code);
-        if ($normalized === $normalized_code || str_contains($normalized, $normalized_code)) {
-            return $class_code;
-        }
-    }
-
-    return null;
 }
 
 function assistant_day_name(int $day): string {
@@ -654,229 +560,8 @@ function assistant_respond_with_teacher(array $teacher, string $normalized): nev
     );
 }
 
-function assistant_get_class_lessons(string $class_code, int $day): array {
-    if ($day === 0) {
-        return [];
-    }
-
-    $lessons_raw = sb_get('orarendek', [
-        'osztaly' => 'ilike.' . $class_code,
-        'het_napja' => 'eq.' . $day,
-        'aktiv' => 'eq.true',
-        'select' => 'ora_sorszam,kezdes,vegzes,tantargy,tanar_id,termek(terem_szam)',
-        'order' => 'kezdes.asc,ora_sorszam.asc',
-    ]);
-
-    $teacher_map = assistant_get_teachers_by_ids(array_column($lessons_raw, 'tanar_id'));
-    $grouped = [];
-
-    foreach ($lessons_raw as $lesson) {
-        $room = $lesson['termek']['terem_szam'] ?? '?';
-        $teacher = $teacher_map[$lesson['tanar_id']] ?? null;
-        $teacher_code = $teacher['rovid_nev'] ?? '?';
-        $teacher_name = $teacher['nev'] ?? null;
-        $subject = trim((string) ($lesson['tantargy'] ?? ''));
-        $start = substr((string) ($lesson['kezdes'] ?? ''), 0, 5);
-        $end = substr((string) ($lesson['vegzes'] ?? ''), 0, 5);
-        $key = $start . '_' . $end;
-
-        if (!isset($grouped[$key])) {
-            $grouped[$key] = [
-                'kezdes' => $start,
-                'vegzes' => $end,
-                'ora_sorszam' => $lesson['ora_sorszam'] ?? null,
-                'csoportok' => [],
-            ];
-        }
-
-        $exists = false;
-        foreach ($grouped[$key]['csoportok'] as $group) {
-            if (
-                $group['terem'] === $room
-                && $group['tanar'] === $teacher_code
-                && $group['tantargy'] === $subject
-            ) {
-                $exists = true;
-                break;
-            }
-        }
-
-        if (!$exists) {
-            $grouped[$key]['csoportok'][] = [
-                'terem' => $room,
-                'tanar' => $teacher_code,
-                'tanar_nev' => $teacher_name,
-                'tantargy' => $subject,
-            ];
-        }
-    }
-
-    $lessons = [];
-    foreach ($grouped as $lesson) {
-        $rooms = [];
-        $teacher_codes = [];
-        $teacher_names = [];
-        $subjects = [];
-
-        foreach ($lesson['csoportok'] as $group) {
-            if (!in_array($group['terem'], $rooms, true)) {
-                $rooms[] = $group['terem'];
-            }
-            if (!in_array($group['tanar'], $teacher_codes, true)) {
-                $teacher_codes[] = $group['tanar'];
-            }
-            if (!empty($group['tanar_nev']) && !in_array($group['tanar_nev'], $teacher_names, true)) {
-                $teacher_names[] = $group['tanar_nev'];
-            }
-            if ($group['tantargy'] !== '' && !in_array($group['tantargy'], $subjects, true)) {
-                $subjects[] = $group['tantargy'];
-            }
-        }
-
-        $lessons[] = [
-            'kezdes' => $lesson['kezdes'],
-            'vegzes' => $lesson['vegzes'],
-            'ora_sorszam' => $lesson['ora_sorszam'],
-            'is_csoport' => count($lesson['csoportok']) > 1,
-            'terem' => implode(' / ', $rooms),
-            'tanar' => implode(' / ', $teacher_codes),
-            'tanar_nev' => implode(' / ', $teacher_names),
-            'tantargy' => implode(' / ', $subjects),
-            'csoportok' => $lesson['csoportok'],
-        ];
-    }
-
-    usort($lessons, static fn(array $a, array $b): int => strcmp($a['kezdes'], $b['kezdes']));
-    return $lessons;
-}
-
-function assistant_get_class_context(string $class_code): array {
-    $day = mai_nap();
-    $time = aktualis_ido();
-    $lessons = assistant_get_class_lessons($class_code, $day);
-
-    $current = null;
-    $next = null;
-    foreach ($lessons as $lesson) {
-        if ($time >= $lesson['kezdes'] && $time <= $lesson['vegzes']) {
-            $current = $lesson;
-            continue;
-        }
-
-        if ($time < $lesson['kezdes'] && $next === null) {
-            $next = $lesson;
-        }
-    }
-
-    return [
-        'class' => $class_code,
-        'day' => $day,
-        'time' => $time,
-        'lessons' => $lessons,
-        'current' => $current,
-        'next' => $next,
-    ];
-}
-
-function assistant_respond_with_class(string $class_code, string $normalized): never {
-    $class_context = assistant_get_class_context($class_code);
-    $day = $class_context['day'];
-    $current = $class_context['current'];
-    $next = $class_context['next'];
-    $lessons = $class_context['lessons'];
-    $actions = [
-        ['label' => 'Osztaly oldal', 'href' => '/osztaly/' . rawurlencode($class_code)],
-    ];
-
-    if ($day === 0) {
-        assistant_response(
-            $class_code . ' eseten most hetvege van, ezert nincs tanitasi helyzet.',
-            [],
-            $actions
-        );
-    }
-
-    if ($current !== null) {
-        $cards = [[
-            'eyebrow' => 'Most',
-            'title' => assistant_room_label($current['terem']),
-            'meta' => ($current['tanar_nev'] ?: $current['tanar']) . ' - ' . $current['kezdes'] . ' - ' . $current['vegzes'],
-            'detail' => $current['tantargy'],
-        ]];
-
-        if ($next !== null) {
-            $cards[] = [
-                'eyebrow' => 'Kovetkezo',
-                'title' => assistant_room_label($next['terem']),
-                'meta' => ($next['tanar_nev'] ?: $next['tanar']) . ' - ' . $next['kezdes'] . ' - ' . $next['vegzes'],
-                'detail' => $next['tantargy'],
-            ];
-        }
-
-        $reply = $current['is_csoport']
-            ? $class_code . ' most parhuzamosan tobb helyen van: ' . assistant_room_location_label($current['terem']) . '.'
-            : $class_code . ' most a ' . assistant_room_location_label($current['terem']) . ' van.';
-
-        assistant_response($reply, $cards, $actions);
-    }
-
-    if (assistant_has_any($normalized, ['napirend', 'orarend', 'mai'])) {
-        if (empty($lessons)) {
-            assistant_response(
-                $class_code . ' szamara ma nincs ora beirva.',
-                [],
-                $actions
-            );
-        }
-
-        $cards = [];
-        foreach (array_slice($lessons, 0, 6) as $lesson) {
-            $cards[] = [
-                'eyebrow' => ($lesson['ora_sorszam'] ?? '?') . '. ora',
-                'title' => assistant_room_label($lesson['terem']),
-                'meta' => ($lesson['tanar_nev'] ?: $lesson['tanar']) . ' - ' . $lesson['kezdes'] . ' - ' . $lesson['vegzes'],
-                'detail' => $lesson['tantargy'],
-            ];
-        }
-
-        assistant_response(
-            $class_code . ' mai napirendje ' . assistant_day_name($day) . ' napra.',
-            $cards,
-            $actions
-        );
-    }
-
-    if ($next !== null) {
-        assistant_response(
-            $class_code . ' most nincs oran. A kovetkezo oraja ' . $next['kezdes'] . '-kor lesz a ' . assistant_room_location_label($next['terem']) . '.',
-            [[
-                'eyebrow' => 'Kovetkezo',
-                'title' => assistant_room_label($next['terem']),
-                'meta' => ($next['tanar_nev'] ?: $next['tanar']) . ' - ' . $next['kezdes'] . ' - ' . $next['vegzes'],
-                'detail' => $next['tantargy'],
-            ]],
-            $actions
-        );
-    }
-
-    if (!empty($lessons)) {
-        assistant_response(
-            $class_code . ' szamara ma mar nincs tobb ora.',
-            [],
-            $actions
-        );
-    }
-
-    assistant_response(
-        $class_code . ' szamara ma nincs ora beirva.',
-        [],
-        $actions
-    );
-}
-
 function assistant_help(string $context, array $context_data = []): never {
     $room = assistant_context_room_code($context_data);
-    $class_code = assistant_context_class_code($context_data);
 
     switch ($context) {
         case 'home':
@@ -907,19 +592,6 @@ function assistant_help(string $context, array $context_data = []): never {
                     ['label' => 'Összes terem', 'href' => '/termek'],
                 ]
             );
-
-        case 'osztaly':
-            $reply = $class_code !== null
-                ? 'Itt a ' . $class_code . ' osztalyhoz segitek. Kerdezhetsz arrol, hol van most, mi lesz a kovetkezo oraja, vagy hogyan nez ki a mai napja.'
-                : 'Itt az osztaly oldalhoz segitek. Kerdezhetsz egy osztaly jelenlegi helyerol, a kovetkezo orajarol vagy a mai napirendjerol.';
-            $actions = [
-                ['label' => 'Osztaly nezet', 'href' => '/osztaly'],
-                ['label' => 'Osszes terem', 'href' => '/termek'],
-            ];
-            if ($class_code !== null) {
-                array_unshift($actions, ['label' => 'Aktualis osztaly', 'href' => '/osztaly/' . rawurlencode($class_code)]);
-            }
-            assistant_response($reply, [], $actions);
 
         case 'terem':
             $reply = $room !== null
@@ -970,13 +642,6 @@ $teacher_lookup_intent = $teacher !== null && (
     $context === 'tanar'
     || assistant_has_any($normalized, ['hol van', 'melyik teremben', 'hol tanit', 'hol tart', 'merre van', 'tanar', 'orarend', 'napirend'])
 );
-$class_candidate = assistant_extract_class_candidate($message);
-$class_code = assistant_find_class($message, $normalized);
-$class_lookup_intent = $class_code !== null && (
-    $context === 'osztaly'
-    || $class_candidate !== null
-    || assistant_has_any($normalized, ['osztaly', 'hol van', 'hol vannak', 'melyik teremben', 'orarend', 'napirend'])
-);
 
 if ($message === '' || assistant_has_any($normalized, ['help', 'segit', 'mit tudsz', 'szia', 'hello'])) {
     assistant_help($context, $context_data);
@@ -984,24 +649,6 @@ if ($message === '' || assistant_has_any($normalized, ['help', 'segit', 'mit tud
 
 if ($teacher_lookup_intent) {
     assistant_respond_with_teacher($teacher, $normalized);
-}
-
-if ($class_lookup_intent) {
-    assistant_respond_with_class($class_code, $normalized);
-}
-
-if (
-    $class_code === null
-    && $class_candidate !== null
-    && assistant_has_any($normalized, ['osztaly', 'hol van', 'hol vannak', 'orarend', 'napirend'])
-) {
-    assistant_response(
-        'Nem talaltam ilyen osztalyt a megadott kod alapjan.',
-        [],
-        [
-            ['label' => 'Osztaly oldal', 'href' => '/osztaly'],
-        ]
-    );
 }
 
 if (
@@ -1020,21 +667,6 @@ if (
 }
 
 if (
-    $class_code === null
-    && $context === 'osztaly'
-    && $class_candidate !== null
-    && !assistant_has_any($normalized, ['szabad', 'foglalt', 'terem', 'termek', 'qr', 'kijelzo', 'admin'])
-) {
-    assistant_response(
-        'Nem talaltam ilyen osztalyt a megadott kod alapjan.',
-        [],
-        [
-            ['label' => 'Osztaly oldal', 'href' => '/osztaly'],
-        ]
-    );
-}
-
-if (
     assistant_has_any($normalized, ['tanar kereso', 'tanar oldal'])
     || (assistant_has_any($normalized, ['tanar']) && assistant_has_any($normalized, ['megnyit', 'nyisd', 'oldal', 'kereso']))
 ) {
@@ -1043,19 +675,6 @@ if (
         [],
         [
             ['label' => 'Tanár kereső megnyitása', 'href' => '/tanar'],
-        ]
-    );
-}
-
-if (
-    assistant_has_any($normalized, ['osztaly nezet', 'osztaly oldal', 'osztaly kereso'])
-    || (assistant_has_any($normalized, ['osztaly']) && assistant_has_any($normalized, ['megnyit', 'nyisd', 'oldal', 'kereso']))
-) {
-    assistant_response(
-        'Megnyitom neked az Osztaly oldalt.',
-        [],
-        [
-            ['label' => 'Osztaly oldal', 'href' => '/osztaly'],
         ]
     );
 }
@@ -1085,16 +704,6 @@ if (assistant_has_any($normalized, ['admin'])) {
         'A publikus asszisztens nem ad ki admin belépési pontot.',
         []
     );
-}
-
-$context_class = assistant_context_class_code($context_data);
-if (
-    $class_code === null
-    && $context_class !== null
-    && $context === 'osztaly'
-    && assistant_has_any($normalized, ['itt', 'ebben', 'most', 'kovetkezo', 'mi van', 'mi lesz', 'napirend', 'orarend', 'osztaly'])
-) {
-    assistant_respond_with_class($context_class, $normalized);
 }
 
 $room_code = assistant_extract_room($message);

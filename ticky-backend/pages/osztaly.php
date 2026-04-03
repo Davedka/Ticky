@@ -1,7 +1,3 @@
-<?php
-$route_match = match_route('/osztaly/{kod}', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '');
-$current_class = is_array($route_match) ? trim((string) ($route_match['kod'] ?? '')) : '';
-?>
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -381,17 +377,5 @@ function refresh() {
 loadOsztalyok()
 setInterval(() => { if (curClass) loadData() }, REFRESH)
 </script>
-<?php render_assistant_widget([
-  'title' => 'Osztaly AI',
-  'eyebrow' => 'Osztaly oldal',
-  'context' => 'osztaly',
-  'context_data' => ['class' => $current_class],
-  'empty_state' => $current_class !== ''
-    ? 'Itt a ' . $current_class . ' osztalyhoz kapcsolodoan kerdezhetsz. Peldaul: hol vannak most, vagy mi lesz a kovetkezo orajuk.'
-    : 'Itt osztalykoddal vagy konkret kerdesekkel tudsz rakeresni arra, hol van most egy osztaly.',
-  'placeholder' => $current_class !== ''
-    ? 'Irj egy kerdest a ' . $current_class . ' osztalyrol...'
-    : 'Irj be egy osztalyt vagy kerdezz ra, hol van most...',
-]); ?>
 </body>
 </html>
