@@ -178,6 +178,7 @@ if ($uri === '/') {
   <div class="nav-links">
     <a href="/termek"  class="nav-link">Termek</a>
     <a href="/tanar"   class="nav-link">Tanár</a>
+    <a href="/osztaly" class="nav-link">Osztály</a>
     <a href="/qr"      class="nav-link">QR</a>
     <a href="/kijelzo" class="nav-link">Kijelző</a>
     <a href="/admin"   class="nav-link gold">⚙️ Admin</a>
@@ -192,6 +193,7 @@ if ($uri === '/') {
 <div class="mobile-menu" id="mobile-menu">
   <a href="/termek">🏫 Termek</a>
   <a href="/tanar">👩‍🏫 Tanár kereső</a>
+  <a href="/osztaly">🎓 Osztály nézet</a>
   <a href="/qr">🖨️ QR Generátor</a>
   <a href="/kijelzo">📺 Kijelző</a>
   <a href="/support">✉️ Support</a>
@@ -245,7 +247,19 @@ if ($uri === '/') {
     </div>
   </div>
 
-  <p class="footer-note fade-up-4">Ticky v1.0 · Render · Supabase · PHP</p>
+  <div class="card-wrap fade-up-4">
+    <div class="gold-line"></div>
+    <a href="/osztaly" class="glass card-hover card-big">
+      <div class="info">
+        <p class="eyebrow">Mai órák</p>
+        <h2>Osztály nézet</h2>
+        <p class="desc">Hol van most egy osztály?</p>
+      </div>
+      <span class="emoji">🎓</span>
+    </a>
+  </div>
+
+  <p class="footer-note">Ticky v1.0 · Render · Supabase · PHP</p>
 </div>
 
 <script>
@@ -272,6 +286,7 @@ document.addEventListener('click', function(e){
 if ($uri === '/api/ping') { json_response(['status'=>'ok','time'=>date('Y-m-d H:i:s')]); }
 if ($uri === '/termek') { require __DIR__.'/pages/termek.php'; exit; }
 if ($uri === '/tanar' || match_route('/tanar/{kod}',$uri)!==false) { require __DIR__.'/pages/tanar.php'; exit; }
+if ($uri === '/osztaly' || match_route('/osztaly/{kod}',$uri)!==false) { require __DIR__.'/pages/osztaly.php'; exit; }
 if ($uri === '/qr') { require __DIR__.'/pages/qr.php'; exit; }
 if ($uri === '/kijelzo') { require __DIR__.'/pages/kijelzo.php'; exit; }
 if ($uri === '/support') { require __DIR__.'/pages/support.php'; exit; }
@@ -279,7 +294,9 @@ if (match_route('/terem/{szam}/nap',$uri)!==false) { require __DIR__.'/pages/nap
 if (match_route('/terem/{szam}',$uri)!==false) { require __DIR__.'/pages/terem.php'; exit; }
 if ($uri === '/api/termek') { require __DIR__.'/api/termek.php'; exit; }
 if ($uri === '/api/tanarok') { require __DIR__.'/api/tanarok.php'; exit; }
+if ($uri === '/api/osztalyok') { require __DIR__.'/api/osztalyok.php'; exit; }
 if (match_route('/api/tanar/{kod}/orarend',$uri)!==false) { require __DIR__.'/api/tanar_orarend.php'; exit; }
+if (match_route('/api/osztaly/{kod}/orarend',$uri)!==false) { require __DIR__.'/api/osztaly_orarend.php'; exit; }
 if (match_route('/api/terem/{szam}',$uri)!==false) { require __DIR__.'/api/terem.php'; exit; }
 if (match_route('/api/napirend/{szam}',$uri)!==false) { require __DIR__.'/api/napirend.php'; exit; }
 if ($uri === '/admin') { require __DIR__.'/pages/admin.php'; exit; }
