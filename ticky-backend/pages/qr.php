@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – QR Generátor</title>
-<link rel="icon" type="image/png" href="/favicon.png">
-<link rel="shortcut icon" href="/favicon.ico">
+<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
+<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -31,10 +31,12 @@
   .nav-btn { background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12); color:rgba(255,255,255,.6); border-radius:10px; padding:9px 18px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; width:auto; margin-top:0; }
   .nav-btn:hover { background:rgba(255,255,255,.10); color:white; }
   .nav-btn.active { background:rgba(200,151,42,.15); border-color:rgba(200,151,42,.4); color:#f0c76b; }
+
   .skeleton { background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:10px; }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
   .fade-in { animation:fadeIn .4s cubic-bezier(.22,1,.36,1) both; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
   /* QR kártya – screen nézet */
   .qr-card {
     background:rgba(255,255,255,.05);
@@ -50,29 +52,35 @@
   .qr-card.selected .check { background:#c8972a; border-color:#c8972a; }
   .qr-card .check svg { opacity:0; transition:opacity .15s; }
   .qr-card.selected .check svg { opacity:1; }
+
+  /* QR div (fehér háttér kell a QR-hoz) */
   .qr-wrap { background:white; border-radius:10px; padding:8px; display:flex; align-items:center; justify-content:center; }
   .qr-wrap canvas, .qr-wrap img { display:block !important; }
+
   a { text-decoration:none; }
-  /* sidebar */
-  .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
-  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
-  .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
-  .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;padding:5px 11px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
-  .tsb-item:hover::after{opacity:1;}
-  .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
-  @media(max-width:600px){.ticky-sidebar{display:none;}}
-  /* ── NYOMTATÁS ── */
+  #qr-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:16px; }
+  @media (max-width: 640px) {
+    body::before { background-size:28px 28px; }
+    #qr-grid { grid-template-columns:1fr; gap:12px; }
+    .qr-card { padding:16px; }
+    .gold-btn, .nav-btn { width:100%; justify-content:center; }
+  }
+
+  /* ── NYOMTATÁS ────────────────────────────── */
   @media print {
     * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
     body { background:white !important; background-image:none !important; color:black !important; }
     body::before { display:none; }
-    .top-line, nav, .screen-only, .ticky-sidebar { display:none !important; }
+    .top-line, nav, .screen-only { display:none !important; }
+
     .print-grid {
       display:grid !important;
       grid-template-columns: repeat(3, 1fr);
       gap:12mm;
       padding:8mm;
     }
+
+    /* Csak a kijelölt kártyák, vagy összes ha nincs kijelölve */
     .qr-card { display:none !important; }
     .qr-card.print-me {
       display:flex !important;
@@ -86,29 +94,36 @@
       page-break-inside:avoid !important;
       box-shadow:none !important;
     }
+
     .qr-card.print-me .check { display:none !important; }
-    .print-room-num { font-family:'Playfair Display',serif !important; font-size:28px !important; font-weight:700 !important; color:#060f1e !important; line-height:1 !important; }
-    .print-label { font-size:9px !important; font-weight:600 !important; letter-spacing:.1em !important; text-transform:uppercase !important; color:#888 !important; }
-    .print-url { font-size:9px !important; color:#555 !important; text-align:center !important; word-break:break-all !important; }
-    .print-ticky { font-family:'Playfair Display',serif !important; font-size:11px !important; color:#aaa !important; font-weight:600 !important; }
+
+    .print-room-num {
+      font-family:'Playfair Display',serif !important;
+      font-size:28px !important; font-weight:700 !important;
+      color:#060f1e !important; line-height:1 !important;
+    }
+    .print-label {
+      font-size:9px !important; font-weight:600 !important;
+      letter-spacing:.1em !important; text-transform:uppercase !important;
+      color:#888 !important;
+    }
+    .print-url {
+      font-size:9px !important; color:#555 !important;
+      text-align:center !important; word-break:break-all !important;
+    }
+    .print-ticky {
+      font-family:'Playfair Display',serif !important;
+      font-size:11px !important; color:#aaa !important; font-weight:600 !important;
+    }
     .qr-wrap { padding:6px !important; border-radius:8px !important; border:1px solid #eee !important; }
   }
-  @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
 </style>
 </head>
 <body>
 <div class="top-line"></div>
 
-<!-- Bal oldali sidebar -->
-<div class="ticky-sidebar">
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
-  <div class="tsb-divider"></div>
-  <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="tsb-item" data-label="Support">✉️</a>
-  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
-</div>
-
 <!-- Navbar -->
-<nav class="sticky top-0 z-50 px-5 h-16 flex items-center justify-between screen-only" style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);">
+<nav class="sticky top-0 z-50 px-4 sm:px-5 py-3 sm:py-0 min-h-16 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 screen-only" style="background:rgba(6,15,30,.75);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);">
   <div class="flex items-center gap-3">
     <a href="/" style="font-family:'Playfair Display',serif;color:white;font-size:18px;font-weight:700;" class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;animation:pulseDot 2s infinite;"></span>
@@ -117,7 +132,7 @@
     <span style="color:rgba(255,255,255,.2);">·</span>
     <span class="text-sm" style="color:rgba(255,255,255,.45);">QR Generátor</span>
   </div>
-  <div class="flex items-center gap-2">
+  <div class="w-full sm:w-auto flex items-center gap-2">
     <a href="/termek" class="nav-btn">← Termek</a>
   </div>
 </nav>
@@ -129,7 +144,7 @@
       <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:white;letter-spacing:-.5px;">QR Kódok</h1>
       <p class="text-sm mt-1" style="color:rgba(255,255,255,.4);">Kattints egy teremre a kijelöléshez, aztán nyomtasd ki</p>
     </div>
-    <div class="flex items-center gap-2 flex-wrap">
+    <div class="flex w-full sm:w-auto flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-wrap">
       <button class="nav-btn" id="btn-select-all" onclick="selectAll()">Összes kijelölése</button>
       <button class="nav-btn" id="btn-clear" onclick="clearSelection()" style="display:none;">Kijelölés törlése</button>
       <button class="gold-btn" onclick="printSelected()" id="btn-print">
@@ -137,6 +152,8 @@
       </button>
     </div>
   </div>
+
+  <!-- Kijelölt szám -->
   <div id="selection-info" class="mt-3 text-sm" style="color:rgba(255,255,255,.4);display:none;">
     <span id="selected-count">0</span> terem kijelölve
   </div>
@@ -144,6 +161,7 @@
 
 <!-- QR Grid -->
 <main class="relative z-10 max-w-5xl mx-auto px-5 pb-16 print-grid" id="qr-grid">
+  <!-- skeleton -->
   <div class="skeleton h-48 rounded-2xl screen-only"></div>
   <div class="skeleton h-48 rounded-2xl screen-only"></div>
   <div class="skeleton h-48 rounded-2xl screen-only"></div>
@@ -152,77 +170,174 @@
   <div class="skeleton h-48 rounded-2xl screen-only"></div>
 </main>
 
+<style>
+@keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+</style>
+
 <script>
-const BASE_URL = window.location.origin
+const BASE_URL = window.location.origin  // pl. https://ticky-6r32.onrender.com
 let selectedRooms = new Set()
 let allRooms = []
 
 function esc(value) {
-  return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
-function roomPath(value) { return encodeURIComponent(String(value ?? '')) }
-function roomDomId(prefix, value) { return `${prefix}-${encodeURIComponent(String(value ?? ''))}` }
 
+function roomPath(value) {
+  return encodeURIComponent(String(value ?? ''))
+}
+
+function roomDomId(prefix, value) {
+  return `${prefix}-${encodeURIComponent(String(value ?? ''))}`
+}
+
+// ─── Betöltés ────────────────────────────────────────
 async function loadRooms() {
   try {
     const data = await fetch('/api/termek').then(r => r.json())
     allRooms = (data.termek || []).map(t => t.terem_szam)
     renderCards()
   } catch(e) {
-    document.getElementById('qr-grid').innerHTML = `<div class="col-span-full text-center py-16 screen-only"><span class="text-4xl block mb-3">⚠️</span><p style="color:rgba(255,255,255,.5);">Nem sikerült betölteni a termeket</p></div>`
+    document.getElementById('qr-grid').innerHTML = `
+      <div class="col-span-full text-center py-16 screen-only">
+        <span class="text-4xl block mb-3">⚠️</span>
+        <p style="color:rgba(255,255,255,.5);">Nem sikerült betölteni a termeket</p>
+      </div>`
   }
 }
 
+// ─── Kártyák renderelése ─────────────────────────────
 function renderCards() {
   const grid = document.getElementById('qr-grid')
+
+  // Skeleton eltávolítása
   grid.innerHTML = ''
+
   allRooms.forEach((szam, i) => {
     const url = `${BASE_URL}/terem/${roomPath(szam)}`
     const cardId = roomDomId('card', szam)
     const qrId = roomDomId('qr', szam)
+
     const card = document.createElement('div')
     card.className = 'qr-card fade-in'
     card.id = cardId
     card.style.animationDelay = `${i * 40}ms`
     card.onclick = () => toggleSelect(szam)
+
     card.innerHTML = `
-      <div class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="check">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+          <path d="M20 6 9 17l-5-5"/>
+        </svg>
+      </div>
       <div>
         <p class="print-label text-xs font-semibold tracking-widest uppercase text-center" style="color:rgba(255,255,255,.35);">Terem</p>
         <p class="print-room-num" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1;text-align:center;">${esc(szam)}</p>
       </div>
       <div class="qr-wrap" id="${qrId}"></div>
       <p class="print-url text-xs text-center" style="color:rgba(255,255,255,.3);word-break:break-all;max-width:140px;">${esc(url)}</p>
-      <p class="print-ticky" style="font-family:'Playfair Display',serif;font-size:11px;color:rgba(255,255,255,.2);font-weight:600;">Ticky</p>`
+      <p class="print-ticky" style="font-family:'Playfair Display',serif;font-size:11px;color:rgba(255,255,255,.2);font-weight:600;">Ticky</p>
+    `
+
     grid.appendChild(card)
-    new QRCode(document.getElementById(qrId), {text:url,width:128,height:128,colorDark:'#060f1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})
+
+    // QR generálás
+    new QRCode(document.getElementById(qrId), {
+      text:          url,
+      width:         128,
+      height:        128,
+      colorDark:     '#060f1e',
+      colorLight:    '#ffffff',
+      correctLevel:  QRCode.CorrectLevel.M,
+    })
+  })
+
+  updateUI()
+}
+
+// ─── Kijelölés ───────────────────────────────────────
+function toggleSelect(szam) {
+  if (selectedRooms.has(szam)) {
+    selectedRooms.delete(szam)
+    document.getElementById(roomDomId('card', szam)).classList.remove('selected')
+  } else {
+    selectedRooms.add(szam)
+    document.getElementById(roomDomId('card', szam)).classList.add('selected')
+  }
+  updateUI()
+}
+
+function selectAll() {
+  allRooms.forEach(szam => {
+    selectedRooms.add(szam)
+    document.getElementById(roomDomId('card', szam))?.classList.add('selected')
   })
   updateUI()
 }
 
-function toggleSelect(szam) {
-  if (selectedRooms.has(szam)) { selectedRooms.delete(szam); document.getElementById(roomDomId('card',szam)).classList.remove('selected') }
-  else { selectedRooms.add(szam); document.getElementById(roomDomId('card',szam)).classList.add('selected') }
+function clearSelection() {
+  allRooms.forEach(szam => {
+    selectedRooms.delete(szam)
+    document.getElementById(roomDomId('card', szam))?.classList.remove('selected')
+  })
   updateUI()
 }
-function selectAll() { allRooms.forEach(szam=>{selectedRooms.add(szam);document.getElementById(roomDomId('card',szam))?.classList.add('selected')}); updateUI() }
-function clearSelection() { allRooms.forEach(szam=>{selectedRooms.delete(szam);document.getElementById(roomDomId('card',szam))?.classList.remove('selected')}); updateUI() }
 
 function updateUI() {
-  const n=selectedRooms.size, total=allRooms.length
-  const info=document.getElementById('selection-info'), cnt=document.getElementById('selected-count')
-  const label=document.getElementById('print-label'), btnClear=document.getElementById('btn-clear'), btnSelectAll=document.getElementById('btn-select-all')
-  if(n>0){info.style.display='block';cnt.textContent=n;label.textContent=`🖨️ ${n} terem nyomtatása`;btnClear.style.display='inline-flex';btnSelectAll.textContent=n===total?'Összes kijelölve ✓':'Összes kijelölése'}
-  else{info.style.display='none';label.textContent='🖨️ Összes nyomtatása';btnClear.style.display='none';btnSelectAll.textContent='Összes kijelölése'}
+  const n = selectedRooms.size
+  const total = allRooms.length
+
+  const info  = document.getElementById('selection-info')
+  const cnt   = document.getElementById('selected-count')
+  const label = document.getElementById('print-label')
+  const btnClear = document.getElementById('btn-clear')
+  const btnSelectAll = document.getElementById('btn-select-all')
+
+  if (n > 0) {
+    info.style.display = 'block'
+    cnt.textContent = n
+    label.textContent = `🖨️ ${n} terem nyomtatása`
+    btnClear.style.display = 'inline-flex'
+    btnSelectAll.textContent = n === total ? 'Összes kijelölve ✓' : 'Összes kijelölése'
+  } else {
+    info.style.display = 'none'
+    label.textContent = '🖨️ Összes nyomtatása'
+    btnClear.style.display = 'none'
+    btnSelectAll.textContent = 'Összes kijelölése'
+  }
 }
 
+// ─── Nyomtatás ───────────────────────────────────────
 function printSelected() {
-  const toPrint=selectedRooms.size>0?selectedRooms:new Set(allRooms)
-  allRooms.forEach(szam=>{const card=document.getElementById(`card-${szam}`);if(!card)return;toPrint.has(szam)?card.classList.add('print-me'):card.classList.remove('print-me')})
+  // Ha nincs kijelölve semmi → nyomtat mindent
+  const toPrint = selectedRooms.size > 0 ? selectedRooms : new Set(allRooms)
+
+  // Minden kártyán beállítjuk a print-me osztályt
+  allRooms.forEach(szam => {
+    const card = document.getElementById(`card-${szam}`)
+    if (!card) return
+    if (toPrint.has(szam)) {
+      card.classList.add('print-me')
+    } else {
+      card.classList.remove('print-me')
+    }
+  })
+
+  // Print párbeszédablak
   window.print()
-  allRooms.forEach(szam=>{document.getElementById(roomDomId('card',szam))?.classList.remove('print-me')})
+
+  // print-me osztályok eltávolítása (cleanup)
+  allRooms.forEach(szam => {
+    document.getElementById(roomDomId('card', szam))?.classList.remove('print-me')
+  })
 }
 
+// ─── Init ────────────────────────────────────────────
 loadRooms()
 </script>
 </body>
