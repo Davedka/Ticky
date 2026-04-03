@@ -3,25 +3,25 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
 // Env var olvasás
-$admin_pw = admin_password();
-private_response_headers();
+$admin_pw = trim(getenv('ADMIN_PASSWORD') ?: '');
+if (empty($admin_pw)) $admin_pw = trim($_ENV['ADMIN_PASSWORD'] ?? '');
 
 // Token generálás: HMAC-SHA256 a jelszóból
-// Privát, aláírt admin session
-$authed = admin_is_authenticated();
-$no_pw_set = !admin_is_configured();
-
-if (isset($_GET['forget'])) {
-    admin_clear_auth_cookie();
-    admin_clear_visibility_cookie();
-    header('Location: /');
-    exit;
+function makeToken(string $pw): string {
+    return hash_hmac('sha256', 'ticky_admin_' . $pw, $pw);
 }
+
+$token    = makeToken($admin_pw);
+$cookie   = $_COOKIE['ticky_auth'] ?? '';
+$authed   = !empty($admin_pw) && hash_equals($token, $cookie);
+$no_pw_set = empty($admin_pw);
 
 // Kijelentkezés
 if (isset($_GET['logout'])) {
-    admin_clear_auth_cookie();
-    header('Location: ' . admin_path_value());
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+               || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    setcookie('ticky_auth', '', time()-3600, '/', '', $isSecure, true);
+    header('Location: /admin');
     exit;
 }
 
@@ -29,10 +29,11 @@ if (isset($_GET['logout'])) {
 $login_error = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
     $input = trim($_POST['pw']);
-    if ($admin_pw !== '' && hash_equals($admin_pw, $input)) {
-        admin_set_auth_cookie();
-        admin_set_visibility_cookie();
-        header('Location: ' . admin_path_value());
+    if ($admin_pw && $input === $admin_pw) {
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+               || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    setcookie('ticky_auth', $token, time() + 8*3600, '/', '', $isSecure, true);
+        header('Location: /admin');
         exit;
     } else {
         $login_error = true;
@@ -45,8 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Admin</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=20260327c">
-<link rel="shortcut icon" href="/favicon.ico?v=20260327c">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -162,11 +161,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
       <?php if ($no_pw_set): ?>
         <div style="text-align:center;padding:8px 0;">
           <span style="font-size:36px;display:block;margin-bottom:12px;">⚠️</span>
-          <p style="font-size:14px;font-weight:600;color:#f0c76b;margin-bottom:8px;">Az admin felület nem elérhető</p>
-          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Ez a felület jelenleg le van zárva.</p>
+          <p style="font-size:14px;font-weight:600;color:#f0c76b;margin-bottom:8px;">Nincs jelszó beállítva</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Add hozzá az <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.65);">ADMIN_PASSWORD</span> env változót a Render dashboardon.</p>
         </div>
       <?php else: ?>
-        <form method="POST" action="<?= htmlspecialchars(admin_path_value(), ENT_QUOTES, 'UTF-8') ?>">
+        <form method="POST" action="/admin">
           <div style="margin-bottom:16px;">
             <label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:8px;">Jelszó</label>
             <input type="password" name="pw" class="inp" placeholder="Admin jelszó…" autofocus style="<?= $login_error?'border-color:rgba(232,51,74,.5);':'' ?>">
@@ -176,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
           <?php endif; ?>
           <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:12px;font-size:14px;">Belépés →</button>
         </form>
+        <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.2);">Jelszó: <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.3);">ADMIN_PASSWORD</span> env var</p>
       <?php endif; ?>
     </div>
     <p style="text-align:center;margin-top:14px;"><a href="/" style="font-size:12px;color:rgba(255,255,255,.3);">← Vissza a főoldalra</a></p>
@@ -195,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <span style="font-size:12px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;" id="nav-time">–</span>
-    <a href="<?= htmlspecialchars(admin_url(['logout' => 1]), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost btn-sm">Kilépés</a>
+    <a href="/admin?logout=1" class="btn btn-ghost btn-sm">Kilépés</a>
   </div>
 </nav>
 
@@ -308,11 +308,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
   </main>
 </div>
 
-<?php render_time_sync_bootstrap(); ?>
 <script>
-const { formatHMS, weekdayIndex } = window.TickyTime
 // ── Óra ──────────────────────────────────────────────
-setInterval(()=>{document.getElementById('nav-time').textContent=formatHMS()},1000)
+setInterval(()=>{document.getElementById('nav-time').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000)
 
 // ── Sidebar ───────────────────────────────────────────
 function showSection(id) {
@@ -373,24 +371,6 @@ function emeletLabel(emelet) {
   return emelet+'. emelet'
 }
 
-function esc(value) {
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;')
-}
-
-function roomToken(value) {
-  return encodeURIComponent(String(value ?? ''))
-}
-
-function editTanarFromButton(button) {
-  if (!button) return
-  editTanar(button.dataset.kod || '', button.dataset.nev || '')
-}
-
 // ── DASHBOARD ────────────────────────────────────────
 async function loadDashboard() {
   const ic=document.getElementById('dash-ri'); ic?.classList.add('spinning')
@@ -412,13 +392,13 @@ async function loadDashboard() {
       <div class="status-row"><span class="status-label">API Backend</span><span class="status-badge badge-ok"><span class="badge-dot pulse" style="background:#00c896;"></span> Online</span></div>
       <div class="status-row"><span class="status-label">Supabase DB</span><span class="status-badge ${td.count>0?'badge-ok':'badge-warn'}"><span class="badge-dot" style="background:${td.count>0?'#00c896':'#f0c76b'};"></span> ${td.count>0?'Kapcsolódva':'Ellenőrizd'}</span></div>
       <div class="status-row"><span class="status-label">Időzóna</span><span class="tag tag-gold">Europe/Budapest</span></div>
-      <div class="status-row"><span class="status-label">Mai nap</span><span class="status-badge ${nap===0?'badge-warn':'badge-ok'}"><span class="badge-dot" style="background:${nap===0?'#f0c76b':'#00c896'};"></span>${['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'][weekdayIndex()]}</span></div>`
+      <div class="status-row"><span class="status-label">Mai nap</span><span class="status-badge ${nap===0?'badge-warn':'badge-ok'}"><span class="badge-dot" style="background:${nap===0?'#f0c76b':'#00c896'};"></span>${['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'][new Date().getDay()]}</span></div>`
     const fo2=(ta.termek||[]).filter(t=>t.allapot==='foglalt')
     document.getElementById('mai-list').innerHTML=nap===0
       ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">🌙 Hétvége</div>`
       :!fo2.length
         ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">✅ Jelenleg nincs foglalt terem</div>`
-        :`<table class="data-table"><thead><tr><th>Terem</th><th>Tanár</th><th>Osztály</th><th>Tantárgy</th><th>Időpont</th></tr></thead><tbody>${fo2.map(t=>`<tr><td><a href="/terem/${roomToken(t.terem_szam)}" target="_blank" style="color:#f0c76b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;">${esc(t.terem_szam)}</a></td><td>${esc(t.aktualis?.tanar||'–')}</td><td>${esc(t.aktualis?.osztaly||'–')}</td><td>${esc(t.aktualis?.tantargy||'–')}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.4);">${esc(t.aktualis?.kezdes||'')}–${esc(t.aktualis?.vegzes||'')}</td></tr>`).join('')}</tbody></table>`
+        :`<table class="data-table"><thead><tr><th>Terem</th><th>Tanár</th><th>Osztály</th><th>Tantárgy</th><th>Időpont</th></tr></thead><tbody>${fo2.map(t=>`<tr><td><a href="/terem/${t.terem_szam}" target="_blank" style="color:#f0c76b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;">${t.terem_szam}</a></td><td>${t.aktualis?.tanar||'–'}</td><td>${t.aktualis?.osztaly||'–'}</td><td>${t.aktualis?.tantargy||'–'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.4);">${t.aktualis?.kezdes||''}–${t.aktualis?.vegzes||''}</td></tr>`).join('')}</tbody></table>`
   } catch(e){toast('Betöltési hiba','err')}
   ic?.classList.remove('spinning')
 }
@@ -440,9 +420,9 @@ function filterTanarok() {
 function renderTanarok(list) {
   if(!list.length){document.getElementById('tanar-table').innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">Nincs találat</div>`;return}
   document.getElementById('tanar-table').innerHTML=`<table class="data-table"><thead><tr><th>Kód</th><th>Teljes név</th><th></th></tr></thead><tbody>${list.map(t=>`<tr>
-    <td><span class="tag tag-blue">${esc(t.rovid_nev)}</span></td>
-    <td style="color:${t.nev?'rgba(255,255,255,.85)':'rgba(255,255,255,.25)'};">${esc(t.nev||'– nincs megadva –')}</td>
-    <td><button class="btn btn-ghost btn-sm" data-kod="${esc(t.rovid_nev)}" data-nev="${esc(t.nev||'')}" onclick="editTanarFromButton(this)">✏️</button></td>
+    <td><span class="tag tag-blue">${t.rovid_nev}</span></td>
+    <td style="color:${t.nev?'rgba(255,255,255,.85)':'rgba(255,255,255,.25)'};">${t.nev||'– nincs megadva –'}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="editTanar('${t.rovid_nev}','${(t.nev||'').replace(/'/g,"\\'")}')">✏️</button></td>
   </tr>`).join('')}</tbody></table>`
 }
 function editTanar(kod,nev) {
@@ -456,7 +436,7 @@ async function saveTanarNev() {
   const nev=document.getElementById('edit-nev').value.trim()
   if(!kod){toast('Add meg a tanár kódot!','err');return}
   try {
-    const res=await fetch('/api/admin/tanar',{method:'POST',headers:{'Content-Type':'application/json','X-Ticky-Admin':'1'},body:JSON.stringify({kod,nev})})
+    const res=await fetch('/api/admin/tanar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kod,nev})})
     const d=await res.json()
     if(d.ok){
       toast(`✅ ${kod} elmentve`,'ok')
@@ -488,33 +468,31 @@ function renderTermek(list) {
       <thead><tr><th>Terem</th><th>Épület / Szárny</th><th>Emelet (DB)</th><th>Linkek</th></tr></thead>
       <tbody>${list.map(t=>{
         const det=detectEpulet(t.terem_szam)
-        const roomEsc = esc(t.terem_szam)
-        const roomEncoded = roomToken(t.terem_szam)
         const tagStyle=det.tag==='tag-orange'?'background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);':''
         return `<tr>
-          <td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">${roomEsc}</td>
+          <td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">${t.terem_szam}</td>
           <td>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span class="tag ${det.tag!=='tag-orange'?det.tag:''}" style="${tagStyle}">${esc(det.emoji)} ${esc(det.epulet)}</span>
-              <span style="font-size:11px;color:rgba(255,255,255,.3);">${esc(emeletLabel(det.emelet))}</span>
+              <span class="tag ${det.tag!=='tag-orange'?det.tag:''}" style="${tagStyle}">${det.emoji} ${det.epulet}</span>
+              <span style="font-size:11px;color:rgba(255,255,255,.3);">${emeletLabel(det.emelet)}</span>
             </div>
           </td>
           <td>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" min="0" max="5"
-                value="${esc(t.emelet!==null&&t.emelet!==undefined?t.emelet:'')}"
-                placeholder="${esc(det.emelet!==null?det.emelet:'–')}"
+                value="${t.emelet!==null&&t.emelet!==undefined?t.emelet:''}"
+                placeholder="${det.emelet!==null?det.emelet:'–'}"
                 class="inp inp-sm" style="width:72px;"
-                onblur="saveEmelet(decodeURIComponent('${roomEncoded}'),this.value)"
+                onblur="saveEmelet('${t.terem_szam}',this.value)"
                 onkeydown="if(event.key==='Enter')this.blur()"
                 title="0=Földszint, 1=1.em stb. – üres = auto">
               <span style="font-size:10px;color:rgba(255,255,255,.28);">em.</span>
-              ${t.emelet===null?`<span title="Auto-detektált érték: ${esc(det.emelet!==null?emeletLabel(det.emelet):'?')}" style="font-size:10px;color:rgba(200,151,42,.6);cursor:help;">auto</span>`:''}
+              ${t.emelet===null?`<span title="Auto-detektált érték: ${det.emelet!==null?emeletLabel(det.emelet):'?'}" style="font-size:10px;color:rgba(200,151,42,.6);cursor:help;">auto</span>`:''}
             </div>
           </td>
           <td style="display:flex;gap:6px;">
-            <a href="/terem/${roomEncoded}" target="_blank" class="btn btn-ghost btn-sm">🚪</a>
-            <a href="/terem/${roomEncoded}/nap" target="_blank" class="btn btn-ghost btn-sm">📅</a>
+            <a href="/terem/${t.terem_szam}" target="_blank" class="btn btn-ghost btn-sm">🚪</a>
+            <a href="/terem/${t.terem_szam}/nap" target="_blank" class="btn btn-ghost btn-sm">📅</a>
           </td>
         </tr>`
       }).join('')}
@@ -525,7 +503,7 @@ function renderTermek(list) {
 async function saveEmelet(szam,val) {
   const emelet=val===''?null:parseInt(val)
   try {
-    const res=await fetch(`/api/admin/terem/${encodeURIComponent(szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Ticky-Admin':'1'},body:JSON.stringify({emelet})})
+    const res=await fetch(`/api/admin/terem/${encodeURIComponent(szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({emelet})})
     const d=await res.json()
     if(d.ok) toast(`✅ ${szam} – ${emelet!==null?emelet+'. emelet':'auto'}`)
     else toast(d.error||'Hiba','err')
@@ -541,7 +519,7 @@ async function autoDetectAll() {
     const det=detectEpulet(t.terem_szam)
     if(det.emelet===null) continue
     try {
-      const res=await fetch(`/api/admin/terem/${encodeURIComponent(t.terem_szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Ticky-Admin':'1'},body:JSON.stringify({emelet:det.emelet})})
+      const res=await fetch(`/api/admin/terem/${encodeURIComponent(t.terem_szam)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({emelet:det.emelet})})
       const d=await res.json()
       d.ok?ok++:err++
     } catch(e){err++}

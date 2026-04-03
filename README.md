@@ -1,7 +1,7 @@
 # 🏫 Ticky — Real-Time Classroom Availability System
 
 [![Live](https://img.shields.io/badge/Live-ticky--6r32.onrender.com-00c896?style=for-the-badge&logo=render&logoColor=white)](https://ticky-6r32.onrender.com)
-[![License](https://img.shields.io/github/license/Davedka/Ticky?style=for-the-badge)](LICENSE)
+
 [![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 
@@ -129,20 +129,7 @@ ticky-backend/
 5. Set environment variables (see below)
 6. Deploy — takes ~1–2 minutes
 
-### Required Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `SUPABASE_URL` | Your Supabase project URL |
-| `SUPABASE_ANON_KEY` | Public anon key |
-| `SUPABASE_SERVICE_KEY` | Service role key (admin ops) |
-| `TIMEZONE` | `Europe/Budapest` |
-| `ADMIN_PASSWORD` | Admin panel password |
-| `ADMIN_PATH` | Secret admin route, e.g. `ticky-panel-7f3a9b2x` or `/ticky-panel-7f3a9b2x` |
-
-> ⚠️ **Never commit these keys.** Set them via Render dashboard → Environment Variables.
-
----
 
 ## 📥 Timetable Importer (Node.js)
 
