@@ -13,12 +13,23 @@ handle_cors();
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
+$request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$file = __DIR__ . $request;
+
+// Ha a fájl létezik, azonnal adjuk ki és állítsuk le a PHP-t
+if (file_exists($file) && is_file($file)) {
+    return false;
+}
+
 // ─── Gyökér → Landing ────────────────────────────────
 if ($uri === '/') {
     $nap_nevek = [0=>'Hétvége',1=>'Hétfő',2=>'Kedd',3=>'Szerda',4=>'Csütörtök',5=>'Péntek'];
     $nap = mai_nap();
     $ido = aktualis_ido();
 ?>
+
+http_response_code(404);
+echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png"><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza</a></body></html>';
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -232,5 +243,4 @@ if ($uri === '/admin') { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if (match_route('/api/admin/terem/{szam}',$uri)!==false) { require __DIR__.'/api/admin_terem.php'; exit; }
 
-http_response_code(404);
-echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png"><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza</a></body></html>';
+
