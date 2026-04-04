@@ -5,64 +5,53 @@ require_once __DIR__ . '/../utils/helpers.php';
 handle_cors();
 header('Content-Type: application/json');
 
-// 1. Jogosultság ellenőrzése
 if (!is_admin()) {
     http_response_code(403);
-    echo json_encode(['error' => 'Nincs admin jogosultságod a művelethez.']);
+    echo json_encode(['error' => 'Nincs jogosultságod.']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Terem szám kinyerése (pl. /api/admin/terem/102 -> 102)
-$parts = explode('/', trim($uri, '/'));
-$terem_szam = end($parts);
+// Terem kinyerése precízebben: utolsó számjegyek az URL végén
+$pathParts = explode('/', rtrim($uri, '/'));
+$terem_szam = end($pathParts);
 
-// Csak POST vagy PATCH metódust fogadunk el a módosításhoz
 if (($method === 'POST' || $method === 'PATCH' || $method === 'PUT') && $terem_szam) {
     $input = json_decode(file_get_contents('php://input'), true);
-    
     $dataToUpdate = [];
-    
-    // Emelet frissítése
+
     if (isset($input['emelet'])) {
-        $dataToUpdate['emelet'] = (int)$input['emelet'];
+        // Próbáljuk meg számmá alakítani, hátha az adatbázis azt várja
+        $dataToUpdate['emelet'] = is_numeric($input['emelet']) ? (int)$input['emelet'] : $input['emelet'];
     }
     
-    // Terem név frissítése (opcionális)
     if (isset($input['nev'])) {
         $dataToUpdate['nev'] = $input['nev'];
     }
 
     if (!empty($dataToUpdate)) {
-        // A szűrés formátuma a Supabase REST API-hoz: eq.ERTEK
-        $filters = ['szam' => 'eq.' . $terem_szam];
-        
-        // Frissítés indítása a Service Key-el (megkerüli az RLS korlátokat)
-        $success = sb_update('termek', $dataToUpdate, $filters, 'service');
+        // A szűrő formátuma: "szam=eq.102"
+        $res = sb_update('termek', $dataToUpdate, ['szam' => 'eq.' . $terem_szam], 'service');
 
-        if ($success) {
-            echo json_encode([
-                'success' => true, 
-                'message' => "A(z) $terem_szam számú terem adatai sikeresen frissítve lettek."
-            ]);
+        if ($res['success']) {
+            echo json_encode(['success' => true, 'message' => 'Sikeres mentés!']);
         } else {
-            http_response_code(500);
-            echo json_encode(['error' => 'Szerver hiba: Nem sikerült kommunikálni az adatbázissal.']);
+            http_response_code(400);
+            echo json_encode(['error' => 'Supabase hiba', 'details' => $res['error']]);
         }
     } else {
-        echo json_encode(['error' => 'Nem érkezett módosítandó adat a kérésben.']);
+        echo json_encode(['error' => 'Nem érkezett adat.']);
     }
     exit;
 }
 
-// Ha csak sima lekérdezés történik (GET)
 if ($method === 'GET' && $terem_szam) {
     $data = sb_get('termek', ['szam' => 'eq.' . $terem_szam]);
-    echo json_encode($data[0] ?? ['error' => 'Terem nem található']);
+    echo json_encode($data[0] ?? ['error' => 'Nem található']);
     exit;
 }
 
 http_response_code(405);
-echo json_encode(['error' => 'Nem támogatott HTTP metódus.']);
+echo json_encode(['error' => 'Hibás metódus']);
