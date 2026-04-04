@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/utils/helpers.php';
-require_once __DIR__ . '/utils/_nav.php';
+require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/_nav.php';
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -64,13 +64,11 @@ function renderGroups(list) {
     return;
   }
 
-  // CSOPORTOSÍTÁS LOGIKA JAVÍTÁSA
   const groups = {};
   list.forEach(name => {
     let gradeLabel;
     const upper = name.toUpperCase();
     
-    // Itt dől el: ha van benne HT vagy alulvonás, akkor "Egyéb"
     if (upper.includes('HT') || name.includes('_')) {
       gradeLabel = 'Egyéb';
     } else {
@@ -86,7 +84,6 @@ function renderGroups(list) {
     groups[gradeLabel].push(name);
   });
 
-  // Megjelenítés
   Object.keys(groups).forEach(label => {
     const section = document.createElement('div');
     section.innerHTML = `
