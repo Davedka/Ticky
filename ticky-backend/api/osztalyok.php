@@ -1,76 +1,59 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php'; // Ellenőrizd, hogy az elérési út nálad is ez-e!
-require_once __DIR__ . '/../utils/helpers.php';
+// api/osztalyok.php vége felé, a válasz összeállítása:
 
-function _osz_normalize(string $v): string {
-    $v = trim($v);
-    return $v === '' ? '' : (preg_replace('/\\s+/u', ' ', $v) ?? $v);
-}
+// ... (a kód eleje marad: require-ek és a $codes feltöltése)
 
-function _osz_is_room(string $v): bool {
-    $compact = preg_replace('/\\s+/u', '', _osz_normalize($v)) ?? '';
-    if ($compact === '') return false;
-    
-    // VÁLTOZTATÁS: Ha van benne pont, kötőjel, vagy perjel (pl. 1/9, 10.A), az biztosan osztály!
-    if (str_contains($compact, '.') || str_contains($compact, '/') || str_contains($compact, '_')) return false;
-    
-    // Termek szűrése
-    if (preg_match('/^\\d{1,4}$/', $compact) === 1) return true;
-    return preg_match('/^(?:K\\d{1,4}|T\\d{1,2}|M\\d{1,3}|KT)$/iu', $compact) === 1;
-}
+$final_codes = array_values($codes);
+usort($final_codes, 'osztaly_sort_compare');
 
-function _osz_split_and_collect(string $raw, array &$codes): void {
-    if (str_contains($raw, ',')) {
-        foreach (explode(',', $raw) as $part) _osz_split_and_collect($part, $codes);
-        return;
-    }
-    if (str_contains($raw, '/')) {
-        // VÁLTOZTATÁS: Kivétel a perjelre, hogy az 1/9 Déri egyben maradjon!
-        if (preg_match('/^\d+\/\d+/', trim($raw))) {
-            $c = _osz_normalize($raw);
-            if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
-            return;
+$groups = [
+    '9' => [],
+    '10' => [],
+    '11' => [],
+    '12' => [],
+    '13' => [],
+    'Egyéb' => []
+];
+
+// Speciális "Egyéb" kategóriába kényszerített szavak
+$force_egyeb_prefixes = ['ht_', '1/8'];
+
+foreach ($final_codes as $kod) {
+    $low_kod = mb_strtolower($kod, 'UTF-8');
+    $placed = false;
+
+    // 1. Ellenőrizzük, hogy kényszerített egyéb-e (HT_13, 1/8 Déri)
+    foreach ($force_egyeb_prefixes as $prefix) {
+        if (str_starts_with($low_kod, $prefix)) {
+            $groups['Egyéb'][] = $kod;
+            $placed = true;
+            break;
         }
-        foreach (explode('/', $raw) as $part) _osz_split_and_collect($part, $codes);
-        return;
     }
-    $c = _osz_normalize($raw);
-    if ($c !== '' && !_osz_is_room($c)) {
-        $codes[mb_strtolower($c, 'UTF-8')] = $c;
+    if ($placed) continue;
+
+    // 2. Évfolyam kinyerése (9.f, 13.c_du, stb.)
+    if (preg_match('/^(\d+)/', $kod, $m)) {
+        $evf = $m[1];
+        if (isset($groups[$evf])) {
+            $groups[$evf][] = $kod;
+            $placed = true;
+        }
     }
-}
 
-$codes = [];
-
-// Adatbázisból (Supabase)
-$db_classes = sb_get('orarendek', ['select' => 'osztaly']);
-if ($db_classes) {
-    foreach ($db_classes as $row) {
-        if (!empty($row['osztaly'])) _osz_split_and_collect($row['osztaly'], $codes);
-    }
-}
-
-// JS fájlból (tanárok.js)
-$js_path = __DIR__ . '/../tanárok.js'; // Ellenőrizd a mappaszerkezetet!
-if (is_file($js_path)) {
-    $contents = file_get_contents($js_path);
-    preg_match_all("/\\bclass\\s*:\\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
-    foreach ($matches[1] as $raw) {
-        _osz_split_and_collect($raw, $codes);
+    // 3. Ha nem sikerült besorolni, megy az egyébhez
+    if (!$placed) {
+        $groups['Egyéb'][] = $kod;
     }
 }
 
-$result = array_values($codes);
+// Üres csoportok törlése
+$groups = array_filter($groups, fn($g) => !empty($g));
 
-// VÁLTOZTATÁS: Sorrendezés 9-től a végéig
-usort($result, function($a, $b) {
-    preg_match('/^(\d+)/', $a, $ma);
-    preg_match('/^(\d+)/', $b, $mb);
-    $ga = isset($ma[1]) ? (int)$ma[1] : 999; // Ha nincs szám az elején, megy a végére (Egyéb)
-    $gb = isset($mb[1]) ? (int)$mb[1] : 999;
-    
-    if ($ga !== $gb) return $ga <=> $gb;
-    return strnatcasecmp($a, $b);
-});
-
-json_response(['osztalyok' => $result, 'count' => count($result)]);
+// Tiszta PHP JSON válasz (HTML nélkül)
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode([
+    'count' => count($final_codes),
+    'groups' => $groups
+], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+exit;
