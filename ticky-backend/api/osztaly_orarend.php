@@ -2,11 +2,10 @@
 // api/osztaly_orarend.php
 // GET /api/osztaly/{kod}/orarend
 // Visszaadja az osztály mai órarendjét, csoportbontással.
-// Ha Supabase-ben nincs adat, a tanárok.js-ből tölti be.
+// Ha Supabase-ben nincs adat → tanárok.js fallback.
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
-require_once __DIR__ . '/../utils/ticky_source.php';
 
 handle_cors();
 
@@ -44,48 +43,55 @@ $orak_raw = sb_get('orarendek', [
 
 // ─── 2. Ha nincs Supabase adat → tanárok.js fallback ─────────────────
 if (empty($orak_raw)) {
-    $result = ticky_source_class_lessons_for_day($kod, $nap);
-
-    if ($result === null) {
-        json_error('Osztály nem található: ' . $kod, 404);
-    }
-
-    $raw_orak = $result['orak'] ?? [];
-    $orak     = [];
-
-    foreach ($raw_orak as $o) {
-        $cs         = $o['csoportok'] ?? [];
-        $is_csoport = $o['is_csoport'] ?? (count($cs) > 1);
-
-        $normalized_cs = [];
-        foreach ($cs as $c) {
-            $normalized_cs[] = [
-                'terem'    => (string) ($c['terem']    ?? '?'),
-                'tanar'    => (string) ($c['tanar']    ?? '?'),
-                'tanar_nev'=> $c['tanar_nev'] ?? null,
-            ];
+    $ticky_source_file = __DIR__ . '/../utils/ticky_source.php';
+    if (is_file($ticky_source_file)) {
+        try {
+            require_once $ticky_source_file;
+            if (function_exists('ticky_source_class_lessons_for_day')) {
+                $result = ticky_source_class_lessons_for_day($kod, $nap);
+                if ($result !== null) {
+                    $orak = [];
+                    foreach ($result['orak'] ?? [] as $o) {
+                        $cs         = $o['csoportok'] ?? [];
+                        $is_csoport = $o['is_csoport'] ?? (count($cs) > 1);
+                        $norm_cs    = [];
+                        foreach ($cs as $c) {
+                            $norm_cs[] = [
+                                'terem'    => (string) ($c['terem']    ?? '?'),
+                                'tanar'    => (string) ($c['tanar']    ?? '?'),
+                                'tanar_nev'=> $c['tanar_nev'] ?? null,
+                            ];
+                        }
+                        $orak[] = [
+                            'kezdes'      => (string) ($o['kezdes']      ?? ''),
+                            'vegzes'      => (string) ($o['vegzes']      ?? ''),
+                            'ora_sorszam' => $o['ora_sorszam'] ?? null,
+                            'tantargy'    => (string) ($o['tantargy']    ?? ''),
+                            'is_csoport'  => $is_csoport,
+                            'terem'       => (string) ($o['terem']       ?? '?'),
+                            'tanar'       => (string) ($o['tanar']       ?? '?'),
+                            'tanar_nev'   => $o['tanar_nev'] ?? null,
+                            'csoportok'   => $norm_cs,
+                        ];
+                    }
+                    json_response([
+                        'osztaly' => $result['osztaly'],
+                        'orak'    => $orak,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // ticky_source nem elérhető, folytatjuk
         }
-
-        $orak[] = [
-            'kezdes'      => (string) ($o['kezdes']      ?? ''),
-            'vegzes'      => (string) ($o['vegzes']      ?? ''),
-            'ora_sorszam' => $o['ora_sorszam'] ?? null,
-            'tantargy'    => (string) ($o['tantargy']    ?? ''),
-            'is_csoport'  => $is_csoport,
-            'terem'       => (string) ($o['terem']       ?? '?'),
-            'tanar'       => (string) ($o['tanar']       ?? '?'),
-            'tanar_nev'   => $o['tanar_nev'] ?? null,
-            'csoportok'   => $normalized_cs,
-        ];
     }
-
+    // Se Supabase, se ticky_source → üres napirend (nem 404, hogy a frontend ne törjön)
     json_response([
-        'osztaly' => $result['osztaly'],
-        'orak'    => $orak,
+        'osztaly' => $kod,
+        'orak'    => [],
     ]);
 }
 
-// ─── 3. Tanárnevek (Supabase) ─────────────────────────────────────────
+// ─── 3. Tanárnevek ────────────────────────────────────────────────────
 $tanar_map = [];
 $ids = array_unique(array_column($orak_raw, 'tanar_id'));
 foreach (sb_get('tanarok', [
@@ -95,7 +101,7 @@ foreach (sb_get('tanarok', [
     $tanar_map[$t['id']] = $t;
 }
 
-// ─── 4. Termek (Supabase) ─────────────────────────────────────────────
+// ─── 4. Termek ────────────────────────────────────────────────────────
 $terem_map = [];
 $ids = array_unique(array_column($orak_raw, 'terem_id'));
 foreach (sb_get('termek', [
@@ -105,7 +111,7 @@ foreach (sb_get('termek', [
     $terem_map[$t['id']] = $t['terem_szam'];
 }
 
-// ─── 5. Csoportosítás ────────────────────────────────────────────────
+// ─── 5. Csoportosítás: azonos kezdes+vegzes = csoportbontásos óra ────
 $map = [];
 foreach ($orak_raw as $o) {
     $key   = $o['kezdes'] . '_' . $o['vegzes'];
