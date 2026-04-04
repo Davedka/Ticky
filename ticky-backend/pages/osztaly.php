@@ -7,7 +7,7 @@ $current_class = is_array($route_match) ? trim((string) ($route_match['kod'] ?? 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ticky - Osztaly nezet</title>
+<title>Ticky – Osztály nézet</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="shortcut icon" href="/favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@ html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background-color:#060f1e;min-height:100vh;color:white;transition:background-image .5s;
   background-image:radial-gradient(ellipse 70% 55% at 15% 10%,rgba(26,74,138,.55) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 85%,rgba(200,151,42,.18) 0%,transparent 55%);}
 body.oraban{background-image:radial-gradient(ellipse 70% 55% at 15% 10%,rgba(200,16,46,.35) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 85%,rgba(200,151,42,.15) 0%,transparent 55%);}
-body.szabad{background-image:radial-gradient(ellipse 70% 55% at 15% 10%,rgba(26,138,74,.35) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 85%,rgba(26,74,138,.2) 0%,transparent 55%);}
+body.szunet{background-image:radial-gradient(ellipse 70% 55% at 15% 10%,rgba(26,138,74,.35) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 85%,rgba(26,74,138,.2) 0%,transparent 55%);}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:40px 40px;}
 a{text-decoration:none;color:inherit;}
 .glass{background:rgba(255,255,255,.05);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10);}
@@ -34,6 +34,7 @@ a{text-decoration:none;color:inherit;}
 .custom-select:focus{border-color:rgba(200,151,42,.5);}
 .custom-select option{background:#0b2e59;color:white;}
 .ora-row{transition:background .15s;border-radius:10px;}
+.ora-row:hover{background:rgba(255,255,255,.05);}
 .ora-row.aktiv{background:rgba(200,16,46,.12);border-left:3px solid #e8334a;border-radius:0 10px 10px 0;}
 .ora-row.mult{opacity:.38;}
 .aktiv-card{animation:cardIn .35s cubic-bezier(.22,1,.36,1) both;}
@@ -49,10 +50,10 @@ if (!function_exists('ticky_nav')) {
 function ticky_nav(string $aktiv = '', string $cim = '') {
     $links = [
         ['href'=>'/termek',  'label'=>'Termek',  'key'=>'termek'],
-        ['href'=>'/tanar',   'label'=>'Tanar',   'key'=>'tanar'],
-        ['href'=>'/osztaly', 'label'=>'Osztaly', 'key'=>'osztaly'],
+        ['href'=>'/tanar',   'label'=>'Tanár',   'key'=>'tanar'],
+        ['href'=>'/osztaly', 'label'=>'Osztály', 'key'=>'osztaly'],
         ['href'=>'/qr',      'label'=>'QR',      'key'=>'qr'],
-        ['href'=>'/kijelzo', 'label'=>'Kijelzo', 'key'=>'kijelzo'],
+        ['href'=>'/kijelzo', 'label'=>'Kijelző', 'key'=>'kijelzo'],
     ];
     ?>
 <style>
@@ -90,7 +91,7 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
 </style>
 <div style="position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,151,42,.5),transparent);z-index:300;"></div>
 <div class="ticky-sidebar">
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Esemenynaptar">📅</a>
+  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
   <div class="tsb-divider"></div>
   <a href="/support" class="tsb-item" data-label="Support">✉️</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
@@ -126,49 +127,48 @@ document.addEventListener('click',function(e){if(!e.target.closest('#tn-mobile')
 }
 }
 ?>
-<?php ticky_nav('osztaly','Osztaly nezet'); ?>
+<?php ticky_nav('osztaly','Osztály nézet'); ?>
 
 <div style="position:relative;z-index:10;display:flex;justify-content:center;padding:24px 16px 60px;">
 <div style="width:100%;max-width:440px;" class="slide-up">
   <div class="glass" style="border-radius:18px;overflow:hidden;">
-
     <div style="padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between;">
       <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.35);font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;text-decoration:none;" onmouseover="this.style.color='rgba(200,151,42,.8)'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
         <span style="width:6px;height:6px;border-radius:50%;background:#c8972a;box-shadow:0 0 6px #c8972a;display:inline-block;animation:pd 2s infinite;"></span>Ticky
       </a>
-      <span style="font-size:11px;color:rgba(255,255,255,.28);">Osztaly nezet</span>
+      <span style="font-size:11px;color:rgba(255,255,255,.28);">Osztály nézet</span>
     </div>
 
     <div style="padding:14px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08);">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
-        <p style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);">Valassz osztalyt</p>
+        <p style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);">Válassz osztályt</p>
         <div id="status-pill" style="display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);flex-shrink:0;">
           <span id="sd" style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);display:inline-block;animation:pd 2s infinite;"></span>
-          <span id="st">-</span>
+          <span id="st">–</span>
         </div>
       </div>
       <select id="sel" class="custom-select" onchange="onSelect()">
-        <option value="">- Valassz osztalyt -</option>
+        <option value="">— Válassz osztályt —</option>
       </select>
     </div>
 
     <div id="aktblock" style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);">
       <div style="text-align:center;padding:12px 0;">
         <span style="font-size:32px;display:block;margin-bottom:8px;">🎓</span>
-        <p style="font-size:13px;color:rgba(255,255,255,.4);">Valassz osztalyt a legordulo menubol</p>
+        <p style="font-size:13px;color:rgba(255,255,255,.4);">Válassz osztályt a legördülő menüből</p>
       </div>
     </div>
 
     <div style="padding:16px 20px;">
       <p style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:12px;">Mai napirend</p>
-      <div id="lista"><p style="font-size:13px;color:rgba(255,255,255,.3);">Nincs kivalasztva osztaly</p></div>
+      <div id="lista"><p style="font-size:13px;color:rgba(255,255,255,.3);">Nincs kiválasztva osztály</p></div>
     </div>
 
     <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:12px;color:rgba(255,255,255,.35);" id="ido">-</span>
+      <span style="font-size:12px;color:rgba(255,255,255,.35);" id="ido">–</span>
       <button onclick="refresh()" style="display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;cursor:pointer;">
         <svg id="ri" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        Frissit
+        Frissít
       </button>
     </div>
   </div>
@@ -191,11 +191,6 @@ function getUrlClass(){
 
 function esc(value){
   return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
-}
-
-function cssEsc(value){
-  if(window.CSS&&typeof window.CSS.escape==='function')return window.CSS.escape(String(value??''))
-  return String(value??'').replace(/["\\#.:,[\]()]/g,'\\$&')
 }
 
 function roomLabel(room){
@@ -238,27 +233,28 @@ function onSelect(){
   if(!v){curClass=null;reset();return}
   curClass=v
   history.replaceState(null,'','/osztaly/'+encodeURIComponent(v))
-  document.title='Ticky - '+v
+  document.title='Ticky – '+v
   loadData()
 }
 
 function reset(){
-  document.getElementById('aktblock').innerHTML=`<div style="text-align:center;padding:12px 0;"><span style="font-size:32px;display:block;margin-bottom:8px;">🎓</span><p style="font-size:13px;color:rgba(255,255,255,.4);">Valassz osztalyt a legordulo menubol</p></div>`
-  document.getElementById('lista').innerHTML=`<p style="font-size:13px;color:rgba(255,255,255,.3);">Nincs kivalasztva osztaly</p>`
+  document.getElementById('aktblock').innerHTML=`<div style="text-align:center;padding:12px 0;"><span style="font-size:32px;display:block;margin-bottom:8px;">🎓</span><p style="font-size:13px;color:rgba(255,255,255,.4);">Válassz osztályt a legördülő menüből</p></div>`
+  document.getElementById('lista').innerHTML=`<p style="font-size:13px;color:rgba(255,255,255,.3);">Nincs kiválasztva osztály</p>`
   setAllapot('idle')
 }
 
 function setAllapot(state){
   const pill=document.getElementById('status-pill'),dot=document.getElementById('sd'),txt=document.getElementById('st')
-  if(state==='oraban'){document.body.className='oraban';pill.style.cssText='display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(200,16,46,.25);color:#ff6b82;border:1px solid rgba(200,16,46,.4);flex-shrink:0;';dot.style.background='#ff6b82';txt.textContent='ORAN VAN'}
-  else if(state==='szabad'){document.body.className='szabad';pill.style.cssText='display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(26,138,74,.25);color:#4ade80;border:1px solid rgba(26,138,74,.4);flex-shrink:0;';dot.style.background='#4ade80';txt.textContent='SZABAD'}
-  else{document.body.className='';pill.style.cssText='display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);flex-shrink:0;';dot.style.background='rgba(255,255,255,.3)';txt.textContent='-'}
+  if(state==='oraban'){document.body.className='oraban';pill.style.cssText='display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(200,16,46,.25);color:#ff6b82;border:1px solid rgba(200,16,46,.4);flex-shrink:0;';dot.style.background='#ff6b82';txt.textContent='ÓRÁN VAN'}
+  else if(state==='szunet'){document.body.className='szunet';pill.style.cssText='display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(26,138,74,.25);color:#4ade80;border:1px solid rgba(26,138,74,.4);flex-shrink:0;';dot.style.background='#4ade80';txt.textContent='SZÜNET'}
+  else{document.body.className='';pill.style.cssText='display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);flex-shrink:0;';dot.style.background='rgba(255,255,255,.3)';txt.textContent='–'}
 }
 
 function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
-function isAktiv(k,v){const c=new Date().getHours()*60+new Date().getMinutes();return c>=toMin(k)&&c<=toMin(v)}
-function isMult(v){return new Date().getHours()*60+new Date().getMinutes()>toMin(v)}
-function calcPct(k,v){const c=new Date().getHours()*60+new Date().getMinutes();return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100)))}
+function nowMin(){const now=new Date();return now.getHours()*60+now.getMinutes()}
+function isAktiv(k,v){const c=nowMin();return c>=toMin(k)&&c<=toMin(v)}
+function isMult(v){return nowMin()>toMin(v)}
+function calcPct(k,v){const c=nowMin();return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100)))}
 
 async function loadData(){
   if(!curClass)return
@@ -266,15 +262,15 @@ async function loadData(){
   try{
     const d=await fetch(`/api/osztaly/${encodeURIComponent(curClass)}/orarend`).then(r=>r.json())
     if(d.error){document.getElementById('aktblock').innerHTML=`<div style="text-align:center;padding:12px 0;"><span style="font-size:28px;display:block;margin-bottom:8px;">⚠️</span><p style="font-size:13px;color:rgba(255,255,255,.4);">${esc(d.error)}</p></div>`;setAllapot('idle');return}
-    const orak=d.orak||[]
-    const akt=orak.find(o=>isAktiv(o.kezdes,o.vegzes))
-    const kov=orak.find(o=>!isMult(o.vegzes)&&!isAktiv(o.kezdes,o.vegzes))
-    setAllapot(akt?'oraban':orak.length>0?'szabad':'idle')
-    renderAkt(akt,kov,orak)
-    renderLista(orak)
+    const lessons=d.orak||[]
+    const current=lessons.find(item=>isAktiv(item.kezdes,item.vegzes))
+    const next=lessons.find(item=>!isMult(item.vegzes)&&!isAktiv(item.kezdes,item.vegzes))
+    setAllapot(current?'oraban':lessons.length>0?'szunet':'idle')
+    renderAkt(current,next,lessons)
+    renderLista(lessons)
     if(d.osztaly){
       const sel=document.getElementById('sel')
-      if(!document.querySelector(`#sel option[value="${cssEsc(d.osztaly)}"]`)){
+      if(![...sel.options].some(option=>option.value===d.osztaly)){
         const option=document.createElement('option')
         option.value=d.osztaly
         option.textContent=d.osztaly
@@ -283,42 +279,43 @@ async function loadData(){
       sel.value=d.osztaly
       curClass=d.osztaly
       history.replaceState(null,'','/osztaly/'+encodeURIComponent(d.osztaly))
-      document.title='Ticky - '+d.osztaly
+      document.title='Ticky – '+d.osztaly
     }
-  }catch(e){document.getElementById('aktblock').innerHTML=`<div style="text-align:center;padding:12px 0;"><span style="font-size:28px;display:block;margin-bottom:8px;">⚠️</span><p style="font-size:13px;color:rgba(255,255,255,.4);">Betoltesi hiba</p></div>`;setAllapot('idle')}
+  }catch(e){document.getElementById('aktblock').innerHTML=`<div style="text-align:center;padding:12px 0;"><span style="font-size:28px;display:block;margin-bottom:8px;">⚠️</span><p style="font-size:13px;color:rgba(255,255,255,.4);">Betöltési hiba</p></div>`;setAllapot('idle')}
   updateTime()
 }
 
-function renderGroupLines(groups){
+function renderCsoportok(groups){
   if(!Array.isArray(groups)||groups.length<=1)return''
-  return `<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">${groups.map(group=>`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:600;padding:0 5px;border-radius:3px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);flex-shrink:0;">${roomLabel(group.terem)}</span><span style="font-size:11px;color:rgba(255,255,255,.35);">${esc(getTeacherLabel(group))} · ${esc(group.tantargy)}</span></div>`).join('')}</div>`
+  return `<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">${groups.map(group=>`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);flex-shrink:0;">${roomLabel(group.terem)}</span><span style="font-size:12px;color:rgba(255,255,255,.5);">${esc(getTeacherLabel(group))}</span><span style="font-size:12px;color:rgba(255,255,255,.35);">${esc(group.tantargy)}</span></div>`).join('')}</div>`
 }
 
-function renderAkt(current,next,orak){
+function renderAkt(current,next,lessons){
   const el=document.getElementById('aktblock')
   if(current){
     const p=calcPct(current.kezdes,current.vegzes)
-    el.innerHTML=`<div style="display:flex;flex-direction:column;gap:12px;" class="aktiv-card"><div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;"><p style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);">Most itt van</p>${current.is_csoport?'<span class="group-badge">Parhuzamos</span>':''}</div><p style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:white;line-height:1.1;">${roomLabel(current.terem)}</p></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><p style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px;">Tanar</p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">${esc(current.tanar_nev||current.tanar)}</p></div><div><p style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px;">Tantargy</p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">${esc(current.tantargy)}</p></div></div>${renderGroupLines(current.csoportok)}<div><div style="height:5px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,#e8334a,#ff6b82);transition:width .6s;"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:rgba(255,255,255,.35);"><span>${esc(current.kezdes)}</span><span style="color:#ff6b82;font-weight:600;">${esc(current.vegzes)}-ig</span><span>${esc(current.vegzes)}</span></div></div></div>`
+    el.innerHTML=`<div style="display:flex;flex-direction:column;gap:12px;" class="aktiv-card"><div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;"><p style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);">Most itt van</p>${current.is_csoport?'<span class="group-badge">Párhuzamos</span>':''}</div><p style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:white;line-height:1.1;">${roomLabel(current.terem)}</p></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><p style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px;">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">${esc(current.tanar_nev||current.tanar)}</p></div><div><p style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px;">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">${esc(current.tantargy)}</p></div></div>${renderCsoportok(current.csoportok)}<div><div style="height:5px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,#e8334a,#ff6b82);transition:width .6s;"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:rgba(255,255,255,.35);"><span>${esc(current.kezdes)}</span><span style="color:#ff6b82;font-weight:600;">${esc(current.vegzes)}-ig</span><span>${esc(current.vegzes)}</span></div></div></div>`
   }else if(next){
-    el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:4px 0;" class="aktiv-card"><span style="font-size:26px;">☕</span><div><p style="font-weight:600;color:rgba(255,255,255,.8);">Jelenleg szabad</p><p style="font-size:12px;margin-top:2px;color:rgba(255,255,255,.4);">Kovetkezo: <strong style="color:rgba(255,255,255,.7);">${roomLabel(next.terem)}</strong> · ${esc(next.kezdes)}-${esc(next.vegzes)} ${next.is_csoport?'<span class="group-badge">Parhuzamos</span>':''}</p></div></div>`
+    el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:4px 0;" class="aktiv-card"><span style="font-size:26px;">☕</span><div><p style="font-weight:600;color:rgba(255,255,255,.8);">Jelenleg nincs órán</p><p style="font-size:12px;margin-top:2px;color:rgba(255,255,255,.4);">Következő: <strong style="color:rgba(255,255,255,.7);">${roomLabel(next.terem)}</strong> · ${esc(next.kezdes)}–${esc(next.vegzes)} ${next.is_csoport?'<span class="group-badge">Párhuzamos</span>':''}</p></div></div>`
   }else{
-    el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:4px 0;" class="aktiv-card"><span style="font-size:26px;">✅</span><div><p style="font-weight:600;color:#4ade80;">Szabad</p><p style="font-size:12px;margin-top:2px;color:rgba(255,255,255,.4);">${orak.length?'Ma mar nincs tobb ora':'Ma nincs ora beirva'}</p></div></div>`
+    el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:4px 0;" class="aktiv-card"><span style="font-size:26px;">✅</span><div><p style="font-weight:600;color:#4ade80;">Szabad</p><p style="font-size:12px;margin-top:2px;color:rgba(255,255,255,.4);">${lessons.length?'Ma már nincs több óra':'Ma nincs óra beírva'}</p></div></div>`
   }
 }
 
-function renderLista(orak){
+function renderLista(lessons){
   const el=document.getElementById('lista')
-  if(!orak.length){el.innerHTML=`<p style="font-size:13px;color:rgba(255,255,255,.35);">Nincs mai ora</p>`;return}
-  el.innerHTML=`<div class="lista-in">`+orak.map((o,i)=>{
-    const ak=isAktiv(o.kezdes,o.vegzes),mu=isMult(o.vegzes)
-    return `<div class="ora-row${ak?' aktiv':mu?' mult':''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px 10px;margin:0 -4px;"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:${mu?'rgba(255,255,255,.2)':'rgba(255,255,255,.85)'};width:20px;text-align:right;flex-shrink:0;line-height:1.4;">${o.ora_sorszam||i+1}</span><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:13px;font-weight:500;color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${roomLabel(o.terem)}</span>${o.is_csoport?'<span class="group-badge">Parhuzamos</span>':''}<span style="font-size:11px;color:rgba(255,255,255,.35);">${esc(o.tanar_nev||o.tanar)} · ${esc(o.tantargy)}</span></div>${renderGroupLines(o.csoportok)}<p style="font-size:11px;color:rgba(255,255,255,.28);">${esc(o.kezdes)} - ${esc(o.vegzes)}</p></div>${ak?`<span style="width:7px;height:7px;border-radius:50%;background:#ff6b82;display:inline-block;animation:pd 2s infinite;flex-shrink:0;margin-top:6px;"></span>`:''}</div>`
+  if(!lessons.length){el.innerHTML=`<p style="font-size:13px;color:rgba(255,255,255,.35);">Nincs mai óra</p>`;return}
+  el.innerHTML=`<div class="lista-in">`+lessons.map((lesson,i)=>{
+    const active=isAktiv(lesson.kezdes,lesson.vegzes),past=isMult(lesson.vegzes)
+    const groups=Array.isArray(lesson.csoportok)&&lesson.csoportok.length>1?`<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">${lesson.csoportok.map(group=>`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:600;padding:0 5px;border-radius:3px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);flex-shrink:0;">${roomLabel(group.terem)}</span><span style="font-size:11px;color:rgba(255,255,255,.35);">${esc(getTeacherLabel(group))} · ${esc(group.tantargy)}</span></div>`).join('')}</div>`:''
+    return `<div class="ora-row${active?' aktiv':past?' mult':''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px 10px;margin:0 -4px;"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:${past?'rgba(255,255,255,.2)':'rgba(255,255,255,.85)'};width:20px;text-align:right;flex-shrink:0;line-height:1.4;">${lesson.ora_sorszam||i+1}</span><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span style="font-size:13px;font-weight:500;color:${past?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${roomLabel(lesson.terem)}</span>${lesson.is_csoport?'<span class="group-badge">Párhuzamos</span>':''}<span style="font-size:11px;color:rgba(255,255,255,.35);">${esc(lesson.tanar_nev||lesson.tanar)} · ${esc(lesson.tantargy)}</span></div>${groups}<p style="font-size:11px;color:rgba(255,255,255,.28);">${esc(lesson.kezdes)} – ${esc(lesson.vegzes)}</p></div>${active?`<span style="width:7px;height:7px;border-radius:50%;background:#ff6b82;display:inline-block;animation:pd 2s infinite;flex-shrink:0;margin-top:6px;"></span>`:''}</div>`
   }).join('')+`</div>`
 }
 
 function refresh(){const ic=document.getElementById('ri');ic.classList.add('spinning');loadData().finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600))}
 
 updateTime()
-document.title=<?= json_encode($current_class !== '' ? 'Ticky - ' . $current_class : 'Ticky - Osztaly nezet', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+document.title=<?= json_encode($current_class !== '' ? 'Ticky – ' . $current_class : 'Ticky – Osztály nézet', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
 setInterval(updateTime,60000)
 loadOsztalyok()
 setInterval(()=>{if(curClass)loadData()},REFRESH)
