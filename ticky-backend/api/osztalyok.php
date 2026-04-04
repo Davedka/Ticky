@@ -1,98 +1,76 @@
 <?php
-// api/osztalyok.php
-require_once __DIR__ . '/../config/supabase.php';
+require_once __DIR__ . '/../config/supabase.php'; // Ellenőrizd, hogy az elérési út nálad is ez-e!
 require_once __DIR__ . '/../utils/helpers.php';
-require_once __DIR__ . '/../utils/osztaly_helpers.php';
 
-// 1. Összes osztálykód begyűjtése (Supabase-ből)
+function _osz_normalize(string $v): string {
+    $v = trim($v);
+    return $v === '' ? '' : (preg_replace('/\\s+/u', ' ', $v) ?? $v);
+}
+
+function _osz_is_room(string $v): bool {
+    $compact = preg_replace('/\\s+/u', '', _osz_normalize($v)) ?? '';
+    if ($compact === '') return false;
+    
+    // VÁLTOZTATÁS: Ha van benne pont, kötőjel, vagy perjel (pl. 1/9, 10.A), az biztosan osztály!
+    if (str_contains($compact, '.') || str_contains($compact, '/') || str_contains($compact, '_')) return false;
+    
+    // Termek szűrése
+    if (preg_match('/^\\d{1,4}$/', $compact) === 1) return true;
+    return preg_match('/^(?:K\\d{1,4}|T\\d{1,2}|M\\d{1,3}|KT)$/iu', $compact) === 1;
+}
+
+function _osz_split_and_collect(string $raw, array &$codes): void {
+    if (str_contains($raw, ',')) {
+        foreach (explode(',', $raw) as $part) _osz_split_and_collect($part, $codes);
+        return;
+    }
+    if (str_contains($raw, '/')) {
+        // VÁLTOZTATÁS: Kivétel a perjelre, hogy az 1/9 Déri egyben maradjon!
+        if (preg_match('/^\d+\/\d+/', trim($raw))) {
+            $c = _osz_normalize($raw);
+            if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
+            return;
+        }
+        foreach (explode('/', $raw) as $part) _osz_split_and_collect($part, $codes);
+        return;
+    }
+    $c = _osz_normalize($raw);
+    if ($c !== '' && !_osz_is_room($c)) {
+        $codes[mb_strtolower($c, 'UTF-8')] = $c;
+    }
+}
+
 $codes = [];
+
+// Adatbázisból (Supabase)
 $db_classes = sb_get('orarendek', ['select' => 'osztaly']);
 if ($db_classes) {
     foreach ($db_classes as $row) {
-        if (!empty($row['osztaly'])) {
-            $parts = explode(',', $row['osztaly']);
-            foreach ($parts as $p) {
-                $p = trim($p);
-                if ($p !== '') {
-                    $codes[mb_strtolower($p, 'UTF-8')] = $p;
-                }
-            }
-        }
+        if (!empty($row['osztaly'])) _osz_split_and_collect($row['osztaly'], $codes);
     }
 }
 
-// 2. Csoportosítás előkészítése
-$groups = [
-    '9'     => [],
-    '10'    => [],
-    '11'    => [],
-    '12'    => [],
-    '13'    => [],
-    'Egyéb' => []
-];
-
-// Ezeket kényszerítjük az "Egyéb" kategóriába (kisbetűvel nézzük)
-$force_egyeb_patterns = ['ht_', '1/9'];
-
-$final_list = array_values($codes);
-usort($final_list, 'strnatcasecmp'); // Alap rendezés
-
-foreach ($final_list as $kod) {
-    $low_kod = mb_strtolower($kod, 'UTF-8');
-    $placed = false;
-
-    // SZABÁLY 1: Ha HT_ vagy 1/8 van benne, AZONNAL az Egyébhez megy
-    foreach ($force_egyeb_patterns as $pattern) {
-        if (str_contains($low_kod, $pattern)) {
-            $groups['Egyéb'][] = $kod;
-            $placed = true;
-            break;
-        }
-    }
-    if ($placed) continue;
-
-    // SZABÁLY 2: Ha számmal kezdődik (9.f, 13.c_du), az évfolyamhoz megy
-    if (preg_match('/^(\d+)/', $kod, $m)) {
-        $evf = $m[1];
-        if (isset($groups[$evf])) {
-            $groups[$evf][] = $kod;
-            $placed = true;
-        }
-    }
-
-    // SZABÁLY 3: Minden más megy az Egyébhez
-    if (!$placed) {
-        $groups['Egyéb'][] = $kod;
+// JS fájlból (tanárok.js)
+$js_path = __DIR__ . '/../tanárok.js'; // Ellenőrizd a mappaszerkezetet!
+if (is_file($js_path)) {
+    $contents = file_get_contents($js_path);
+    preg_match_all("/\\bclass\\s*:\\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
+    foreach ($matches[1] as $raw) {
+        _osz_split_and_collect($raw, $codes);
     }
 }
 
-// 3. MEGJELENÍTÉS (HTML)
-?>
-<div class="space-y-8">
-  <?php 
-  // Meghatározott sorrendben megyünk végig az évfolyamokon
-  $display_order = ['9', '10', '11', '12', '13', 'Egyéb'];
-  
-  foreach ($display_order as $key): 
-    $list = $groups[$key];
-    if (empty($list)) continue;
-    ?>
-    <section>
-      <h3 class="text-xs font-bold uppercase tracking-widest text-white/30 mb-4 px-1">
-        <?= ($key === 'Egyéb') ? 'Egyéb / Tanfolyamok' : $key . '. évfolyam' ?>
-      </h3>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        <?php foreach ($list as $kod): ?>
-          <a href="/osztaly/<?= urlencode($kod) ?>" 
-             class="group relative overflow-hidden bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#f0c76b]/50 rounded-xl p-4 transition-all duration-300">
-            <div class="relative z-10">
-              <span class="text-lg font-semibold text-white/90 group-hover:text-[#f0c76b] transition-colors">
-                <?= htmlspecialchars($kod) ?>
-              </span>
-            </div>
-          </a>
-        <?php endforeach; ?>
-      </div>
-    </section>
-  <?php endforeach; ?>
-</div>
+$result = array_values($codes);
+
+// VÁLTOZTATÁS: Sorrendezés 9-től a végéig
+usort($result, function($a, $b) {
+    preg_match('/^(\d+)/', $a, $ma);
+    preg_match('/^(\d+)/', $b, $mb);
+    $ga = isset($ma[1]) ? (int)$ma[1] : 999; // Ha nincs szám az elején, megy a végére (Egyéb)
+    $gb = isset($mb[1]) ? (int)$mb[1] : 999;
+    
+    if ($ga !== $gb) return $ga <=> $gb;
+    return strnatcasecmp($a, $b);
+});
+
+json_response(['osztalyok' => $result, 'count' => count($result)]);
