@@ -4,57 +4,82 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/osztaly_helpers.php';
 
-// 1. ADATGYŰJTÉS (Supabase + JS fallback)
+// 1. Összes osztálykód begyűjtése (Supabase-ből)
 $codes = [];
 $db_classes = sb_get('orarendek', ['select' => 'osztaly']);
 if ($db_classes) {
     foreach ($db_classes as $row) {
         if (!empty($row['osztaly'])) {
-            // Itt a meglévő _osz_split_and_collect logikádat használd
             $parts = explode(',', $row['osztaly']);
             foreach ($parts as $p) {
                 $p = trim($p);
-                if ($p !== '') $codes[mb_strtolower($p, 'UTF-8')] = $p;
+                if ($p !== '') {
+                    $codes[mb_strtolower($p, 'UTF-8')] = $p;
+                }
             }
         }
     }
 }
 
-$final_codes = array_values($codes);
-usort($final_codes, 'osztaly_sort_compare');
-
-// 2. CSOPORTOSÍTÁS LOGIKA (A kérésed alapján)
+// 2. Csoportosítás előkészítése
 $groups = [
-    '9' => [], '10' => [], '11' => [], '12' => [], '13' => [], 'Egyéb' => []
+    '9'     => [],
+    '10'    => [],
+    '11'    => [],
+    '12'    => [],
+    '13'    => [],
+    'Egyéb' => []
 ];
 
-$force_egyeb = ['ht_', '1/8'];
+// Ezeket kényszerítjük az "Egyéb" kategóriába (kisbetűvel nézzük)
+$force_egyeb_patterns = ['ht_', '1/8'];
 
-foreach ($final_codes as $kod) {
-    $low = mb_strtolower($kod, 'UTF-8');
-    $is_egyeb = false;
-    foreach ($force_egyeb as $f) {
-        if (str_contains($low, $f)) { $is_egyeb = true; break; }
+$final_list = array_values($codes);
+usort($final_list, 'strnatcasecmp'); // Alap rendezés
+
+foreach ($final_list as $kod) {
+    $low_kod = mb_strtolower($kod, 'UTF-8');
+    $placed = false;
+
+    // SZABÁLY 1: Ha HT_ vagy 1/8 van benne, AZONNAL az Egyébhez megy
+    foreach ($force_egyeb_patterns as $pattern) {
+        if (str_contains($low_kod, $pattern)) {
+            $groups['Egyéb'][] = $kod;
+            $placed = true;
+            break;
+        }
+    }
+    if ($placed) continue;
+
+    // SZABÁLY 2: Ha számmal kezdődik (9.f, 13.c_du), az évfolyamhoz megy
+    if (preg_match('/^(\d+)/', $kod, $m)) {
+        $evf = $m[1];
+        if (isset($groups[$evf])) {
+            $groups[$evf][] = $kod;
+            $placed = true;
+        }
     }
 
-    if ($is_egyeb) {
-        $groups['Egyéb'][] = $kod;
-    } elseif (preg_match('/^(\d+)/', $kod, $m)) {
-        $evf = $m[1];
-        if (isset($groups[$evf])) $groups[$evf][] = $kod;
-        else $groups['Egyéb'][] = $kod;
-    } else {
+    // SZABÁLY 3: Minden más megy az Egyébhez
+    if (!$placed) {
         $groups['Egyéb'][] = $kod;
     }
 }
 
-// 3. MEGJELENÍTÉS (Visszatesszük a HTML-t, hogy ne legyen üres az oldal)
+// 3. MEGJELENÍTÉS (HTML)
 ?>
 <div class="space-y-8">
-  <?php foreach ($groups as $label => $list): if (empty($list)) continue; ?>
+  <?php 
+  // Meghatározott sorrendben megyünk végig az évfolyamokon
+  $display_order = ['9', '10', '11', '12', '13', 'Egyéb'];
+  
+  foreach ($display_order as $key): 
+    $list = $groups[$key];
+    if (empty($list)) continue;
+    ?>
     <section>
       <h3 class="text-xs font-bold uppercase tracking-widest text-white/30 mb-4 px-1">
-        <?= $label === 'Egyéb' ? 'Egyéb / Tanfolyamok' : $label . '. évfolyam' ?>
+        <?= ($key === 'Egyéb') ? 'Egyéb / Tanfolyamok' : $key . '. évfolyam' ?>
       </h3>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         <?php foreach ($list as $kod): ?>
