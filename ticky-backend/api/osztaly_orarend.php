@@ -1,13 +1,8 @@
 <?php
 // api/osztaly_orarend.php
 // GET /api/osztaly/{kod}/orarend
-// Visszaadja az osztály mai órarendjét, csoportbontással.
-//
-// Forrás prioritás:
-//   1. Supabase orarendek tábla (ha található bejegyzés)
-//   2. tanárok.js / ticky_source (fallback)
+// Visszaadja az osztály mai órarendjét kizárólag tanárok.js-ből
 
-require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/osztaly_helpers.php';
 require_once __DIR__ . '/../utils/ticky_source.php';
@@ -37,145 +32,42 @@ if ($nap === 0) {
     ]);
 }
 
-// ─── 1. Supabase lekérés ─────────────────────────────────────────────
-$orak_raw = sb_get('orarendek', [
-    'osztaly'   => 'eq.' . $kod,
-    'het_napja' => 'eq.' . $nap,
-    'aktiv'     => 'eq.true',
-    'select'    => 'ora_sorszam,kezdes,vegzes,tantargy,terem_id,tanar_id',
-    'order'     => 'kezdes.asc,ora_sorszam.asc',
-]);
+$result = ticky_source_class_lessons_for_day($kod, $nap);
 
-// ─── 2. Ha Supabase-ben van adat → eredeti logika ────────────────────
-if (!empty($orak_raw)) {
-
-    // Tanárnevek
-    $tanar_map = [];
-    $tanar_ids = array_unique(array_column($orak_raw, 'tanar_id'));
-    foreach (sb_get('tanarok', [
-        'id'     => 'in.(' . implode(',', $tanar_ids) . ')',
-        'select' => 'id,rovid_nev,nev',
-    ]) as $t) {
-        $tanar_map[$t['id']] = $t;
-    }
-
-    // Termek
-    $terem_map = [];
-    $terem_ids = array_unique(array_column($orak_raw, 'terem_id'));
-    foreach (sb_get('termek', [
-        'id'     => 'in.(' . implode(',', $terem_ids) . ')',
-        'select' => 'id,terem_szam',
-    ]) as $t) {
-        $terem_map[$t['id']] = $t['terem_szam'];
-    }
-
-    // Csoportosítás
-    $map = [];
-    foreach ($orak_raw as $o) {
-        $key   = $o['kezdes'] . '_' . $o['vegzes'];
-        $tanar = $tanar_map[$o['tanar_id']] ?? null;
-        $terem = $terem_map[$o['terem_id']] ?? '?';
-
-        if (!isset($map[$key])) {
-            $map[$key] = [
-                'kezdes'      => $o['kezdes'],
-                'vegzes'      => $o['vegzes'],
-                'ora_sorszam' => $o['ora_sorszam'] ?? null,
-                'tantargy'    => $o['tantargy'] ?? '',
-                'csoportok'   => [],
-            ];
-        }
-
-        foreach ($map[$key]['csoportok'] as $c) {
-            if ($c['terem'] === $terem && $c['tanar'] === ($tanar['rovid_nev'] ?? '?')) {
-                continue 2;
-            }
-        }
-
-        $map[$key]['csoportok'][] = [
-            'terem'    => $terem,
-            'tanar'    => $tanar['rovid_nev'] ?? '?',
-            'tanar_nev'=> $tanar['nev'] ?? null,
-        ];
-    }
-
-    $orak = [];
-    foreach ($map as $o) {
-        $cs         = $o['csoportok'];
-        $is_csoport = count($cs) > 1;
-
-        $termek_lista  = [];
-        $tanarok_lista = [];
-        foreach ($cs as $c) {
-            if (!in_array($c['terem'], $termek_lista, true))  $termek_lista[]  = $c['terem'];
-            if (!in_array($c['tanar'], $tanarok_lista, true)) $tanarok_lista[] = $c['tanar'];
-        }
-
-        $orak[] = [
-            'kezdes'      => substr($o['kezdes'], 0, 5),
-            'vegzes'      => substr($o['vegzes'], 0, 5),
-            'ora_sorszam' => $o['ora_sorszam'],
-            'tantargy'    => $o['tantargy'],
-            'is_csoport'  => $is_csoport,
-            'terem'       => implode(' / ', $termek_lista),
-            'tanar'       => implode(', ', $tanarok_lista),
-            'tanar_nev'   => !$is_csoport ? ($cs[0]['tanar_nev'] ?? null) : null,
-            'csoportok'   => $cs,
-        ];
-    }
-
-    usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
-
-    json_response([
-        'osztaly' => $kod,
-        'orak'    => $orak,
-        'forras'  => 'supabase',
-    ]);
-}
-
-// ─── 3. Fallback: tanárok.js (ticky_source) ──────────────────────────
-$source_result = ticky_source_class_lessons_for_day($kod, $nap);
-
-if ($source_result === null) {
-    // Nincs ilyen osztály sem a DB-ben, sem a JS-ben
+if ($result === null) {
     json_error('Osztály nem található: ' . $kod, 404);
 }
 
-// ticky_source_class_lessons_for_day() már a helyes formátumban adja vissza az adatokat,
-// de a csoportok struktúráját az osztálynézet JS-ével kompatibilissé kell tenni.
-$raw_orak = $source_result['orak'] ?? [];
+$raw_orak = $result['orak'] ?? [];
 $orak     = [];
 
 foreach ($raw_orak as $o) {
     $cs         = $o['csoportok'] ?? [];
     $is_csoport = $o['is_csoport'] ?? (count($cs) > 1);
 
-    // A ticky_source a 'tanar' mezőt 'tanar'-ként adja, 'tanar_nev' null
-    // Minden csoportban egységesítjük a struktúrát
     $normalized_cs = [];
     foreach ($cs as $c) {
         $normalized_cs[] = [
-            'terem'    => (string) ($c['terem'] ?? '?'),
-            'tanar'    => (string) ($c['tanar'] ?? '?'),
+            'terem'    => (string) ($c['terem']    ?? '?'),
+            'tanar'    => (string) ($c['tanar']    ?? '?'),
             'tanar_nev'=> $c['tanar_nev'] ?? null,
         ];
     }
 
     $orak[] = [
-        'kezdes'      => (string) ($o['kezdes'] ?? ''),
-        'vegzes'      => (string) ($o['vegzes'] ?? ''),
+        'kezdes'      => (string) ($o['kezdes']      ?? ''),
+        'vegzes'      => (string) ($o['vegzes']      ?? ''),
         'ora_sorszam' => $o['ora_sorszam'] ?? null,
-        'tantargy'    => (string) ($o['tantargy'] ?? ''),
+        'tantargy'    => (string) ($o['tantargy']    ?? ''),
         'is_csoport'  => $is_csoport,
-        'terem'       => (string) ($o['terem'] ?? '?'),
-        'tanar'       => (string) ($o['tanar'] ?? '?'),
+        'terem'       => (string) ($o['terem']       ?? '?'),
+        'tanar'       => (string) ($o['tanar']       ?? '?'),
         'tanar_nev'   => $o['tanar_nev'] ?? null,
         'csoportok'   => $normalized_cs,
     ];
 }
 
 json_response([
-    'osztaly' => $source_result['osztaly'],
+    'osztaly' => $result['osztaly'],
     'orak'    => $orak,
-    'forras'  => 'tanarok_js',
 ]);
