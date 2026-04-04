@@ -157,26 +157,56 @@ if ($uri === '/') {
     exit;
 }
 
-// 3. ROUTES
+// 3. ROUTES - JAVÍTOTT PARAMÉTER ÁTADÁS
 if ($uri === '/api/ping') { json_response(['status'=>'ok','time'=>date('Y-m-d H:i:s')]); }
 if ($uri === '/termek') { require __DIR__.'/pages/termek.php'; exit; }
-if ($uri === '/tanar' || match_route('/tanar/{kod}',$uri)!==false) { require __DIR__.'/pages/tanar.php'; exit; }
-if ($uri === '/osztaly' || match_route('/osztaly/{kod}',$uri)!==false) { require __DIR__.'/pages/osztaly.php'; exit; }
+
+if ($uri === '/tanar' || ($params = match_route('/tanar/{kod}',$uri))) { 
+    if ($params) $_GET['kod'] = $params['kod']; 
+    require __DIR__.'/pages/tanar.php'; exit; 
+}
+if ($uri === '/osztaly' || ($params = match_route('/osztaly/{kod}',$uri))) { 
+    if ($params) $_GET['kod'] = $params['kod']; 
+    require __DIR__.'/pages/osztaly.php'; exit; 
+}
+
 if ($uri === '/qr') { require __DIR__.'/pages/qr.php'; exit; }
 if ($uri === '/kijelzo') { require __DIR__.'/pages/kijelzo.php'; exit; }
 if ($uri === '/support') { require __DIR__.'/pages/support.php'; exit; }
-if (match_route('/terem/{szam}/nap',$uri)!==false) { require __DIR__.'/pages/napirend.php'; exit; }
-if (match_route('/terem/{szam}',$uri)!==false) { require __DIR__.'/pages/terem.php'; exit; }
+
+if (($params = match_route('/terem/{szam}/nap',$uri))) { 
+    $_GET['szam'] = $params['szam']; require __DIR__.'/pages/napirend.php'; exit; 
+}
+if (($params = match_route('/terem/{szam}',$uri))) { 
+    $_GET['szam'] = $params['szam']; require __DIR__.'/pages/terem.php'; exit; 
+}
+
 if ($uri === '/api/termek') { require __DIR__.'/api/termek.php'; exit; }
 if ($uri === '/api/tanarok') { require __DIR__.'/api/tanarok.php'; exit; }
 if ($uri === '/api/osztalyok') { require __DIR__.'/api/osztalyok.php'; exit; }
-if (match_route('/api/tanar/{kod}/orarend',$uri)!==false) { require __DIR__.'/api/tanar_orarend.php'; exit; }
-if (match_route('/api/osztaly/{kod}/orarend',$uri)!==false) { require __DIR__.'/api/osztaly_orarend.php'; exit; }
-if (match_route('/api/terem/{szam}',$uri)!==false) { require __DIR__.'/api/terem.php'; exit; }
-if (match_route('/api/napirend/{szam}',$uri)!==false) { require __DIR__.'/api/napirend.php'; exit; }
+
+if (($params = match_route('/api/tanar/{kod}/orarend',$uri))) { 
+    $_GET['kod'] = $params['kod']; require __DIR__.'/api/tanar_orarend.php'; exit; 
+}
+if (($params = match_route('/api/osztaly/{kod}/orarend',$uri))) { 
+    $_GET['kod'] = $params['kod']; require __DIR__.'/api/osztaly_orarend.php'; exit; 
+}
+if (($params = match_route('/api/terem/{szam}',$uri))) { 
+    $_GET['szam'] = $params['szam']; require __DIR__.'/api/terem.php'; exit; 
+}
+if (($params = match_route('/api/napirend/{szam}',$uri))) { 
+    $_GET['szam'] = $params['szam']; require __DIR__.'/api/napirend.php'; exit; 
+}
+
 if ($uri === '/admin') { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
-if (match_route('/api/admin/terem/{szam}',$uri)!==false) { require __DIR__.'/api/admin_terem.php'; exit; }
+
+// --- ADMIN TEREM FIX ---
+if (($params = match_route('/api/admin/terem/{szam}',$uri))) { 
+    $_GET['szam'] = $params['szam']; 
+    require __DIR__.'/api/admin_terem.php'; 
+    exit; 
+}
 
 // 4. 404 HIBAOLDAL
 http_response_code(404);
