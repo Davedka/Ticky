@@ -7,51 +7,39 @@ header('Content-Type: application/json');
 
 if (!is_admin()) {
     http_response_code(403);
-    echo json_encode(['error' => 'Nincs jogosultságod.']);
+    echo json_encode(['error' => 'Permission denied']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-// Terem kinyerése precízebben: utolsó számjegyek az URL végén
-$pathParts = explode('/', rtrim($uri, '/'));
-$terem_szam = end($pathParts);
+$parts = explode('/', rtrim($uri, '/'));
+$terem_szam = end($parts);
 
 if (($method === 'POST' || $method === 'PATCH' || $method === 'PUT') && $terem_szam) {
     $input = json_decode(file_get_contents('php://input'), true);
-    $dataToUpdate = [];
+    $updateData = [];
 
+    // Kényszerítsük az emeletet számmá, ha létezik
     if (isset($input['emelet'])) {
-        // Próbáljuk meg számmá alakítani, hátha az adatbázis azt várja
-        $dataToUpdate['emelet'] = is_numeric($input['emelet']) ? (int)$input['emelet'] : $input['emelet'];
-    }
-    
-    if (isset($input['nev'])) {
-        $dataToUpdate['nev'] = $input['nev'];
+        $updateData['emelet'] = intval($input['emelet']);
     }
 
-    if (!empty($dataToUpdate)) {
-        // A szűrő formátuma: "szam=eq.102"
-        $res = sb_update('termek', $dataToUpdate, ['szam' => 'eq.' . $terem_szam], 'service');
+    if (!empty($updateData)) {
+        // A szűrésnél a terem számát stringként küldjük (biztos, ami biztos)
+        $res = sb_update('termek', $updateData, ['szam' => 'eq.' . (string)$terem_szam]);
 
         if ($res['success']) {
-            echo json_encode(['success' => true, 'message' => 'Sikeres mentés!']);
+            echo json_encode(['success' => true, 'message' => 'Frissítve!']);
         } else {
             http_response_code(400);
-            echo json_encode(['error' => 'Supabase hiba', 'details' => $res['error']]);
+            // Itt most már látni fogod a PONTOS hibaüzenetet a válaszban!
+            echo json_encode([
+                'error' => 'API hiba történt',
+                'debug_info' => $res['error'],
+                'details' => $res['details'] ?? 'Nincs részlet'
+            ]);
         }
-    } else {
-        echo json_encode(['error' => 'Nem érkezett adat.']);
     }
     exit;
 }
-
-if ($method === 'GET' && $terem_szam) {
-    $data = sb_get('termek', ['szam' => 'eq.' . $terem_szam]);
-    echo json_encode($data[0] ?? ['error' => 'Nem található']);
-    exit;
-}
-
-http_response_code(405);
-echo json_encode(['error' => 'Hibás metódus']);
