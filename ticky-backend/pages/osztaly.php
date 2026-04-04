@@ -39,16 +39,13 @@
   .lista-in{animation:listaIn .3s cubic-bezier(.22,1,.36,1) both;}
   @keyframes listaIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   a{text-decoration:none;}
-  /* Csoport badge */
   .csoport-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;}
-  /* Floating sidebar */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
   .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
   .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
   .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;padding:5px 11px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
   .tsb-item:hover::after{opacity:1;}
   .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
-  /* Mobile bottom bar */
   .mobile-bottom-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;background:rgba(6,15,30,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);padding:6px 0 max(6px,env(safe-area-inset-bottom));flex-direction:row;justify-content:space-around;align-items:center;}
   .mbb-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:rgba(255,255,255,.5);font-size:10px;font-weight:500;}
   .mbb-icon{font-size:19px;line-height:1;}
@@ -162,18 +159,54 @@ async function loadOsztalyok() {
     const list = d.osztalyok || []
 
     // Évfolyamok csoportosítása
+    // Felismerjük: "9.a", "10.f", "13.c_du", "HT_13.ap", "1/9 Déri" stb.
     const evfolyamok = {}
+
     list.forEach(kod => {
-      const m = kod.match(/^(\d+)\./)
-      const ev = m ? m[1] + '. évfolyam' : 'Egyéb'
+      // Próbáljuk kinyerni az évfolyamszámot: "9.a" → 9, "13.c_du" → 13, "HT_13.ap" → 13
+      let ev = null
+
+      // Standard: "9.a", "10.f", "12.c" stb.
+      const stdMatch = kod.match(/^(\d+)\./)
+      if (stdMatch) {
+        ev = stdMatch[1] + '. évfolyam'
+      }
+
+      // HT_ prefixű: "HT_13.ap", "HT_13.iT", "HT_13.ir"
+      if (!ev) {
+        const htMatch = kod.match(/^HT_(\d+)\./)
+        if (htMatch) {
+          ev = htMatch[1] + '. évfolyam (HT)'
+        }
+      }
+
+      // Numerikus prefix perjellel: "1/9 Déri"
+      if (!ev) {
+        const numSlashMatch = kod.match(/^(\d+)\//)
+        if (numSlashMatch) {
+          ev = 'Egyéb'
+        }
+      }
+
+      if (!ev) ev = 'Egyéb'
+
       if (!evfolyamok[ev]) evfolyamok[ev] = []
       evfolyamok[ev].push(kod)
     })
 
-    Object.keys(evfolyamok).sort((a,b) => {
-      const na = parseInt(a), nb = parseInt(b)
-      return isNaN(na) || isNaN(nb) ? a.localeCompare(b) : na - nb
-    }).forEach(ev => {
+    // Rendezés: évfolyamok szám szerint, Egyéb a végén
+    const sortedKeys = Object.keys(evfolyamok).sort((a, b) => {
+      const na = parseInt(a)
+      const nb = parseInt(b)
+      const aIsNum = !isNaN(na)
+      const bIsNum = !isNaN(nb)
+      if (a === 'Egyéb') return 1
+      if (b === 'Egyéb') return -1
+      if (aIsNum && bIsNum) return na - nb
+      return a.localeCompare(b, 'hu')
+    })
+
+    sortedKeys.forEach(ev => {
       const group = document.createElement('optgroup')
       group.label = ev
       evfolyamok[ev].forEach(kod => {
@@ -188,7 +221,6 @@ async function loadOsztalyok() {
     // URL alapú előválasztás
     const url = getUrlKod()
     if (url) {
-      // Keresés optionok között (case-insensitive)
       const opts = sel.querySelectorAll('option')
       for (const o of opts) {
         if (o.value.toLowerCase() === url.toLowerCase()) {
@@ -199,7 +231,9 @@ async function loadOsztalyok() {
         }
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('Osztályok betöltési hiba:', e)
+  }
 }
 
 function onSelect() {
@@ -293,7 +327,6 @@ function renderAkt(a, k) {
     const percMaradt = Math.max(0, Math.round(toMin(a.vegzes) - nowMin()))
 
     if (a.is_csoport) {
-      // Csoportbontásos óra
       const csoportRows = a.csoportok.map((c,i) => `
         <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);">
           <div style="display:flex;align-items:center;gap:8px;">
@@ -325,7 +358,6 @@ function renderAkt(a, k) {
           </div>
         </div>`
     } else {
-      // Egységes óra
       el.innerHTML = `
         <div class="flex flex-col gap-4 aktiv-card">
           <div>
@@ -393,7 +425,6 @@ function renderLista(orak) {
 
     let body = ''
     if (o.is_csoport) {
-      // Csoportbontásos sor
       const csRows = o.csoportok.map((c,ci) => `
         <div class="flex items-center gap-1.5 flex-wrap">
           <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">${ci+1}.</span>
