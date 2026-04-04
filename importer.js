@@ -1,127 +1,138 @@
-// importer.js – Ticky Importer v6 (gyors, bulk insert)
+// importer.js – Ticky Importer v7 (dependency-free)
 // Futtatás: node importer.js
 // Előfeltétel: setup.sql lefuttatva egyszer a Supabase SQL Editor-ban
 
-import { createClient } from '@supabase/supabase-js'
-import { readFileSync } from 'fs'
-import { config } from 'dotenv'
-import { isRoomToken, isValidClassCode, normalizeToken, splitCompoundValue } from './scripts/osztaly-rules.mjs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-config()
+import {
+  buildExpectedLessons,
+  collectExpectedClassCodes,
+  loadMergedEnv,
+  loadScheduleData,
+} from './scripts/import-source.mjs'
+import { normalizeToken } from './scripts/osztaly-rules.mjs'
 
-const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname)
+const SOURCE_FILE = resolve(ROOT, 'tanárok.js')
+const fileEnv = loadMergedEnv(ROOT)
+
+const SUPABASE_URL = process.env.SUPABASE_URL || fileEnv.SUPABASE_URL || ''
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || fileEnv.SUPABASE_SERVICE_KEY || ''
+
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error('Hiányzó .env: SUPABASE_URL vagy SUPABASE_SERVICE_KEY')
   process.exit(1)
 }
 
-const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false }
-})
+const sleep = ms => new Promise(resolvePromise => setTimeout(resolvePromise, ms))
 
-const NAP = { 'Hétfő':1, 'Kedd':2, 'Szerda':3, 'Csütörtök':4, 'Péntek':5 }
-const ORA = { '07:30':1,'08:20':2,'09:15':3,'10:15':4,'11:10':5,'12:05':6,'12:50':7,'13:40':8 }
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      'Content-Type': 'application/json',
+      ...(options.headers ?? {}),
+    },
+  })
 
-// ─── Segédfüggvények ─────────────────────────────────────
+  const text = await response.text()
+  if (!response.ok) {
+    throw new Error(`Supabase hiba (${response.status}): ${text.slice(0, 300)}`)
+  }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms))
-
-async function countRows(table) {
-  const { count } = await sb.from(table).select('*', { count: 'exact', head: true })
-  return count ?? 0
+  return text ? JSON.parse(text) : null
 }
 
-// ─── TÖRLÉS ──────────────────────────────────────────────
+async function countRows(table) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+    method: 'HEAD',
+    headers: {
+      apikey: SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      Prefer: 'count=exact',
+    },
+  })
+
+  if (!response.ok) return 0
+  return Number(response.headers.get('content-range')?.split('/')[1] ?? 0)
+}
 
 async function deleteAll() {
-  console.log('┌─ TÖRLÉS ───────────────────────────────┐')
-  
-  // 1. kísérlet: RPC TRUNCATE CASCADE
-  const { data, error } = await sb.rpc('truncate_all_data')
-  
+  console.log('┌─ TÖRLÉS ────────────────────────────────┐')
+
+  let error = null
+  try {
+    await supabaseRequest('rpc/truncate_all_data', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    })
+  } catch (rpcError) {
+    error = rpcError
+  }
+
   if (!error) {
     await sleep(600)
     const counts = await Promise.all(
-      ['tanarok','termek','orarendek'].map(async t => ({ t, n: await countRows(t) }))
+      ['tanarok', 'termek', 'orarendek'].map(async table => ({ table, count: await countRows(table) }))
     )
-    const mind0 = counts.every(x => x.n === 0)
-    counts.forEach(x => console.log(`│  ${x.t.padEnd(12)}: ${x.n === 0 ? '✓ üres' : `✗ ${x.n} maradt`}`))
-    if (mind0) { console.log('└────────────────────────────────────────┘\n'); return true }
+    const allEmpty = counts.every(item => item.count === 0)
+    counts.forEach(item => console.log(`│  ${item.table.padEnd(12)}: ${item.count === 0 ? '✓ üres' : `✗ ${item.count} maradt`}`))
+    if (allEmpty) {
+      console.log('└────────────────────────────────────────┘\n')
+      return true
+    }
   } else {
     console.log(`│  RPC hiba: ${error.message}`)
     console.log('│  → Futtasd le a setup.sql-t az SQL Editor-ban!')
   }
 
-  // 2. kísérlet: kézi törlés helyes sorrendben
   console.log('│  Fallback: kézi törlés...')
-  const tablak = ['aktualis_orak','napi_orarend','orak_rendje','orarendek','termek','tanarok']
-  for (const t of tablak) {
-    const n = await countRows(t)
-    if (n === 0) continue
-    await sb.from(t).delete().not('id', 'is', null)
+  const tables = ['aktualis_orak', 'napi_orarend', 'orak_rendje', 'orarendek', 'termek', 'tanarok']
+  for (const table of tables) {
+    const count = await countRows(table)
+    if (count === 0) continue
+    await supabaseRequest(`${table}?id=not.is.null`, {
+      method: 'DELETE',
+      headers: { Prefer: 'return=minimal' },
+    })
     await sleep(200)
-    const maradt = await countRows(t)
-    console.log(`│  ${t.padEnd(18)}: ${maradt === 0 ? '✓' : `✗ ${maradt} maradt`}`)
+    const remaining = await countRows(table)
+    console.log(`│  ${table.padEnd(18)}: ${remaining === 0 ? '✓' : `✗ ${remaining} maradt`}`)
   }
   console.log('└────────────────────────────────────────┘\n')
   return true
 }
 
-// ─── JS FÁJL BEOLVASÁS ───────────────────────────────────
-
-function loadData(file) {
-  const txt = readFileSync(file, 'utf-8')
-  const start = txt.indexOf('SCHEDULE_DATA')
-  if (start < 0) throw new Error('SCHEDULE_DATA nem található')
-  
-  const a = txt.indexOf('[', start)
-  let d = 0, e = -1
-  for (let i = a; i < txt.length; i++) {
-    if (txt[i] === '[') d++
-    else if (txt[i] === ']' && --d === 0) { e = i; break }
-  }
-  
-  const entries = []
-  const bRe = /\{([^}]+)\}/g
-  const kRe = /(\w+)\s*:\s*['"]([^'"]*)['"]/g
-  let b
-  while ((b = bRe.exec(txt.slice(a, e+1))) !== null) {
-    const o = {}; let k
-    kRe.lastIndex = 0
-    while ((k = kRe.exec(b[1])) !== null) o[k[1]] = k[2]
-    if (o.teacher && o.room && o.day) entries.push(o)
-  }
-  return entries
-}
-
-// ─── SLASH SZÉTBONTÁS ────────────────────────────────────
-
-
-// ─── BULK INSERT ─────────────────────────────────────────
-
 async function bulkInsert(table, rows, batchSize = 200) {
-  let ok = 0
+  let inserted = 0
   for (let i = 0; i < rows.length; i += batchSize) {
-    const { error } = await sb.from(table).insert(rows.slice(i, i + batchSize))
-    if (error) console.log(`\n  ! ${table} insert hiba (batch ${i}): ${error.message}`)
-    else ok += Math.min(batchSize, rows.length - i)
-    process.stdout.write(`\r  → ${ok}/${rows.length} (${table})   `)
+    await supabaseRequest(table, {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify(rows.slice(i, i + batchSize)),
+    })
+    inserted += Math.min(batchSize, rows.length - i)
+    process.stdout.write(`\r  → ${inserted}/${rows.length} (${table})   `)
   }
   console.log()
-  return ok
+  return inserted
 }
 
-// ─── FŐ FOLYAMAT ─────────────────────────────────────────
+async function fetchTable(table, select) {
+  return supabaseRequest(`${table}?select=${encodeURIComponent(select)}&limit=10000`)
+}
 
 async function run() {
   console.log('╔══════════════════════════════════════════╗')
-  console.log('║    Ticky Importer v6 – Bulk & Fast       ║')
+  console.log('║    Ticky Importer v7 – Dependency-free  ║')
   console.log('╚══════════════════════════════════════════╝\n')
-  
-  // 1. Törlés
+
   await deleteAll()
-  
-  // 1.5 Várakozás – ellenőrizheted Supabase-ben a törlést
+
   console.log('⏳ Várakozás 10 másodpercet (ellenőrizheted Supabase-ben)...')
   for (let i = 10; i > 0; i--) {
     process.stdout.write(`\r   Folytatás ${i} másodperc múlva... `)
@@ -129,109 +140,94 @@ async function run() {
   }
   console.log('\r   Indítás!                          \n')
 
-  // 2. Adatok beolvasása
-  console.log('┌─ ADATOK ───────────────────────────────────')
-  const entries = loadData('./tanárok.js')
+  console.log('┌─ ADATOK ─────────────────────────────────')
+  const entries = loadScheduleData(SOURCE_FILE)
+  const expectedLessons = buildExpectedLessons(entries)
+  const expectedClasses = collectExpectedClassCodes(expectedLessons)
   console.log(`│  ${entries.length} bejegyzés beolvasva`)
-  
-  // 3. Összes egyedi tanár és terem kinyerése
-  const tanarSet = new Set()
-  const teremSet = new Set()
-  
-  for (const e of entries) {
-    tanarSet.add(e.teacher)
-    splitCompoundValue(e.room).map(normalizeToken).filter(isRoomToken).forEach(r => teremSet.add(r))
-  }
-  
-  console.log(`│  ${tanarSet.size} egyedi tanár`)
-  console.log(`│  ${teremSet.size} egyedi terem`)
-  console.log('└────────────────────────────────────────────\n')
-  
-  // 4. Tanárok bulk insert
-  console.log('┌─ TANÁROK INSERT ───────────────────────────')
-  const tanarRows = [...tanarSet].map(nev => ({ rovid_nev: nev }))
-  await bulkInsert('tanarok', tanarRows, 100)
-  
-  // 5. Termek bulk insert
-  console.log('┌─ TERMEK INSERT ────────────────────────────')
-  const teremRows = [...teremSet].map(szam => ({ terem_szam: szam }))
-  await bulkInsert('termek', teremRows, 100)
-  
-  // 6. ID-k lekérése (egyszer, nem egyenként)
-  console.log('┌─ ID-K LEKÉRÉSE ────────────────────────────')
-  
-  const { data: tanarData } = await sb.from('tanarok').select('id, rovid_nev').limit(10000)
-  const { data: teremData } = await sb.from('termek').select('id, terem_szam').limit(10000)
-  
-  const tanarMap = Object.fromEntries(tanarData.map(x => [x.rovid_nev, x.id]))
-  const teremMap = Object.fromEntries(teremData.map(x => [x.terem_szam, x.id]))
-  
-  console.log(`│  ${Object.keys(tanarMap).length} tanár ID betöltve`)
-  console.log(`│  ${Object.keys(teremMap).length} terem ID betöltve`)
-  console.log('└────────────────────────────────────────────\n')
-  
-  // 7. Órarend sorok összeállítása
-  console.log('┌─ ÓRAREND SOROK ÖSSZEÁLLÍTÁSA ──────────────')
-  const oraRows = []
-  const hibak = []
-  
-  for (const e of entries) {
-    const nap = NAP[e.day]
-    if (!nap) { hibak.push(`Ismeretlen nap: ${e.day}`); continue }
-    
-    const tanarId = tanarMap[e.teacher]
-    if (!tanarId) { hibak.push(`Nem találom: ${e.teacher}`); continue }
-    
-    const termek = splitCompoundValue(e.room).map(normalizeToken).filter(isRoomToken)
-    const osztalyok = splitCompoundValue(e.class).map(normalizeToken).filter(isValidClassCode)
+  console.log(`│  ${expectedClasses.length} várt osztály`)
 
-    if (!osztalyok.length) {
-      hibak.push(`Nincs érvényes osztály: ${e.class}`)
+  const teacherSet = new Set(expectedLessons.map(item => item.teacher))
+  const roomSet = new Set(expectedLessons.map(item => item.room))
+
+  console.log(`│  ${teacherSet.size} egyedi tanár`)
+  console.log(`│  ${roomSet.size} egyedi terem`)
+  console.log('└──────────────────────────────────────────\n')
+
+  console.log('┌─ TANÁROK INSERT ─────────────────────────')
+  const teacherRows = [...teacherSet].map(name => ({ rovid_nev: name }))
+  await bulkInsert('tanarok', teacherRows, 100)
+
+  console.log('┌─ TERMEK INSERT ──────────────────────────')
+  const roomRows = [...roomSet].map(roomNumber => ({ terem_szam: roomNumber }))
+  await bulkInsert('termek', roomRows, 100)
+
+  console.log('┌─ ID-K LEKÉRÉSE ──────────────────────────')
+  const [teacherData, roomData] = await Promise.all([
+    fetchTable('tanarok', 'id,rovid_nev'),
+    fetchTable('termek', 'id,terem_szam'),
+  ])
+
+  const teacherMap = Object.fromEntries(teacherData.map(item => [normalizeToken(item.rovid_nev), item.id]))
+  const roomMap = Object.fromEntries(roomData.map(item => [normalizeToken(item.terem_szam), item.id]))
+
+  console.log(`│  ${Object.keys(teacherMap).length} tanár ID betöltve`)
+  console.log(`│  ${Object.keys(roomMap).length} terem ID betöltve`)
+  console.log('└──────────────────────────────────────────\n')
+
+  console.log('┌─ ÓRAREND SOROK ÖSSZEÁLLÍTÁSA ────────────')
+  const lessonRows = []
+  const errors = []
+
+  for (const lesson of expectedLessons) {
+    const teacherId = teacherMap[normalizeToken(lesson.teacher)]
+    if (!teacherId) {
+      errors.push(`Nem találom: ${lesson.teacher}`)
       continue
     }
-    
-    for (const teremSzam of termek) {
-      const teremId = teremMap[teremSzam]
-      if (!teremId) { hibak.push(`Nincs terem ID: ${teremSzam}`); continue }
-      
-      for (const osztaly of osztalyok) {
-        oraRows.push({
-          terem_id:    teremId,
-          tanar_id:    tanarId,
-          osztaly,
-          tantargy:    e.subject,
-          het_napja:   nap,
-          ora_sorszam: ORA[e.start] ?? null,
-          kezdes:      e.start,
-          vegzes:      e.end,
-          aktiv:       true,
-        })
-      }
+
+    const roomId = roomMap[normalizeToken(lesson.room)]
+    if (!roomId) {
+      errors.push(`Nincs terem ID: ${lesson.room}`)
+      continue
     }
+
+    lessonRows.push({
+      terem_id: roomId,
+      tanar_id: teacherId,
+      osztaly: lesson.osztaly,
+      tantargy: lesson.tantargy,
+      het_napja: lesson.het_napja,
+      ora_sorszam: lesson.ora_sorszam,
+      kezdes: lesson.kezdes,
+      vegzes: lesson.vegzes,
+      aktiv: true,
+    })
   }
-  
-  console.log(`│  ${oraRows.length} órarend sor előkészítve`)
-  console.log('└────────────────────────────────────────────\n')
-  
-  // 8. Órarend bulk insert
-  console.log('┌─ ÓRARENDEK INSERT ─────────────────────────')
-  const feltoltott = await bulkInsert('orarendek', oraRows, 200)
-  console.log('└────────────────────────────────────────────\n')
-  
-  // 9. Összefoglaló
+
+  console.log(`│  ${lessonRows.length} órarend sor előkészítve`)
+  console.log('└──────────────────────────────────────────\n')
+
+  console.log('┌─ ÓRARENDEK INSERT ───────────────────────')
+  const insertedLessons = await bulkInsert('orarendek', lessonRows, 200)
+  console.log('└──────────────────────────────────────────\n')
+
   console.log('╔══════════════════════════════════════════╗')
-  console.log('║              IMPORT KÉSZ ✓               ║')
+  console.log('║              IMPORT KÉSZ ✓              ║')
   console.log('╠══════════════════════════════════════════╣')
-  console.log(`║  Tanárok       : ${String(tanarSet.size).padEnd(22)}║`)
-  console.log(`║  Termek        : ${String(teremSet.size).padEnd(22)}║`)
-  console.log(`║  Órarend sorok : ${String(feltoltott).padEnd(22)}║`)
-  console.log(`║  Hibák         : ${String(hibak.length).padEnd(22)}║`)
+  console.log(`║  Tanárok       : ${String(teacherSet.size).padEnd(22)}║`)
+  console.log(`║  Termek        : ${String(roomSet.size).padEnd(22)}║`)
+  console.log(`║  Órarend sorok : ${String(insertedLessons).padEnd(22)}║`)
+  console.log(`║  Hibák         : ${String(errors.length).padEnd(22)}║`)
   console.log('╚══════════════════════════════════════════╝')
-  
-  if (hibak.length > 0) {
+
+  if (errors.length > 0) {
     console.log('\nHibák:')
-    hibak.slice(0, 15).forEach(h => console.log(`  ! ${h}`))
+    errors.slice(0, 15).forEach(error => console.log(`  ! ${error}`))
   }
 }
 
-run().catch(e => { console.error('KRITIKUS HIBA:', e.message); process.exit(1) })
+run().catch(error => {
+  console.error('KRITIKUS HIBA:', error.message)
+  process.exit(1)
+})
