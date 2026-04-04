@@ -11,32 +11,27 @@ function _osz_normalize(string $v): string {
 function _osz_is_room(string $v): bool {
     $compact = preg_replace('/\s+/u', '', _osz_normalize($v)) ?? '';
     if ($compact === '') return false;
-    // Ha van benne pont, aláhúzás vagy a szám 30-nál kisebb, az OSZTÁLY
-    if (preg_match('/[._]/', $compact)) return false;
+    // Ha van benne pont, perjel vagy alsóvonal, az OSZTÁLY
+    if (preg_match('/[._\/]/', $compact)) return false;
     if (preg_match('/^\d+$/', $compact)) return (int)$compact > 30;
     return preg_match('/^(?:K\d{1,4}|T\d{1,2}|M\d{1,3}|KT)$/iu', $compact) === 1;
 }
 
 function _osz_split_and_collect(string $raw, array &$codes): void {
-    // 1. Ha vessző van benne, azt mindig szétvágjuk
     if (str_contains($raw, ',')) {
         foreach (explode(',', $raw) as $part) _osz_split_and_collect($part, $codes);
         return;
     }
-
-    // 2. SPECIÁLIS: Ha "szám/szám" (pl 1/9), azt EGYBEN hagyjuk, nem vágjuk szét!
+    // 1/9 formátum egyben tartása
     if (preg_match('/^\d+\/\d+/', trim($raw))) {
         $c = _osz_normalize($raw);
         if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
         return;
     }
-
-    // 3. Ha egyéb perjel van (pl 9.a/9.b), azt szétvágjuk
     if (str_contains($raw, '/')) {
         foreach (explode('/', $raw) as $part) _osz_split_and_collect($part, $codes);
         return;
     }
-
     $c = _osz_normalize($raw);
     if ($c !== '' && !_osz_is_room($c)) {
         $codes[mb_strtolower($c, 'UTF-8')] = $c;
@@ -44,7 +39,6 @@ function _osz_split_and_collect(string $raw, array &$codes): void {
 }
 
 $codes = [];
-// Adatok Supabase-ből
 $db_classes = sb_get('orarendek', ['select' => 'osztaly']);
 if ($db_classes) {
     foreach ($db_classes as $row) {
@@ -52,35 +46,39 @@ if ($db_classes) {
     }
 }
 
-// Adatok a JS fájlból (próbáljuk mindkét néven, hátha az ékezet a baj)
-$js_files = [__DIR__ . '/../tanárok.js', __DIR__ . '/../tanarok.js'];
-foreach($js_files as $js_path) {
-    if (is_file($js_path)) {
-        $contents = file_get_contents($js_path);
-        preg_match_all("/\bclass\s*:\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
-        foreach ($matches[1] as $raw) {
-            _osz_split_and_collect($raw, $codes);
-        }
-    }
+$js_path = __DIR__ . '/../tanárok.js';
+if (is_file($js_path)) {
+    $contents = file_get_contents($js_path);
+    preg_match_all("/\bclass\s*:\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
+    foreach ($matches[1] as $raw) _osz_split_and_collect($raw, $codes);
 }
 
 $result = array_values($codes);
 
-// RENDEZÉS FIX
+// SPECIÁLIS RENDEZÉS ÉS KATEGORIZÁLÁS
 usort($result, function($a, $b) {
-    $ga = 999; $gb = 999;
+    $get_grade = function($name) {
+        $upper = strtoupper($name);
+        
+        // 1. SZABÁLY: Ha benne van a "HT" (akár HT, akár HT_), menjen az Egyébbe (999)
+        if (str_contains($upper, 'HT')) return 999;
+        
+        // 2. SZABÁLY: Ha van benne alsóvonal (pl. 13.c_du), menjen az Egyébbe (999)
+        if (str_contains($name, '_')) return 999;
+        
+        // 3. NORMÁL BESOROLÁS (9.f, 1/9, 10.b)
+        // Ha számmal kezdődik és pont követi (9.f)
+        if (preg_match('/^(\d+)\./', $name, $m)) return (int)$m[1];
+        // Ha perjel után van a szám (1/9 -> 9)
+        if (preg_match('/\/(\d+)/', $name, $m)) return (int)$m[1];
+        // Ha csak simán számmal kezdődik
+        if (preg_match('/^(\d+)/', $name, $m)) return (int)$m[1];
+        
+        return 999; // Minden más "Egyéb"
+    };
 
-    // Évfolyam kinyerése (HT_13 -> 13, 1/9 -> 9, 9.f -> 9)
-    auto_detect:
-    if (preg_match('/(\d+)\./', $a, $m)) $ga = (int)$m[1];
-    elseif (preg_match('/\/(\d+)/', $a, $m)) $ga = (int)$m[1];
-    elseif (preg_match('/_(\d+)/', $a, $m)) $ga = (int)$m[1];
-    elseif (preg_match('/^(\d+)/', $a, $m)) $ga = (int)$m[1];
-
-    if (preg_match('/(\d+)\./', $b, $m)) $gb = (int)$m[1];
-    elseif (preg_match('/\/(\d+)/', $b, $m)) $gb = (int)$m[1];
-    elseif (preg_match('/_(\d+)/', $b, $m)) $gb = (int)$m[1];
-    elseif (preg_match('/^(\d+)/', $b, $m)) $gb = (int)$m[1];
+    $ga = $get_grade($a);
+    $gb = $get_grade($b);
 
     if ($ga !== $gb) return $ga <=> $gb;
     return strnatcasecmp($a, $b);
