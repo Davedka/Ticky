@@ -3,22 +3,31 @@
 
 function osztaly_normalize_code(string $value): string {
     $v = trim($value);
-    return preg_replace('/\\s+/u', ' ', $v) ?? $v;
+    return preg_replace('/\s+/u', ' ', $v) ?? $v;
 }
 
 function osztaly_is_valid_code(string $value): bool {
     $v = osztaly_normalize_code($value);
     if ($v === '') return false;
-    
-    // VÁLTOZTATÁS: Kivettük a szigorú 10,11,12 szűrést.
-    // Csak a tisztán számokat (pl. terem 204) szűrjük ki, ami 30-nál nagyobb. 
-    // Így az 1/9 vagy a 13.e gond nélkül átmegy!
-    if (preg_match('/^\\d{1,4}$/', $v) && (int)$v > 30) return false; 
-    
+    // Csak a 30-nál nagyobb tiszta számokat szűrjük ki (termek)
+    if (preg_match('/^\d+$/', $v) && (int)$v > 30) return false; 
     return true;
 }
 
 function osztaly_sort_compare(string $left, string $right): int {
+    // Kényszerített "Egyéb" kódok (ezek a lista végére kerülnek)
+    $egyeb_mintak = ['ht_', '1/8'];
+    
+    $left_is_egyeb = false;
+    foreach($egyeb_mintak as $m) if(str_contains(mb_strtolower($left), $m)) $left_is_egyeb = true;
+    
+    $right_is_egyeb = false;
+    foreach($egyeb_mintak as $m) if(str_contains(mb_strtolower($right), $m)) $right_is_egyeb = true;
+
+    if ($left_is_egyeb && !$right_is_egyeb) return 1;
+    if (!$left_is_egyeb && $right_is_egyeb) return -1;
+
+    // Normál évfolyam alapú rendezés (9, 10, 11, 12, 13)
     preg_match('/^(\d+)/', $left, $m1);
     preg_match('/^(\d+)/', $right, $m2);
     
