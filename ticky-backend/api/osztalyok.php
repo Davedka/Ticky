@@ -3,20 +3,22 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
+handle_cors();
+
 function _osz_normalize(string $v): string {
     $v = trim($v);
     return $v === '' ? '' : (preg_replace('/\s+/u', ' ', $v) ?? $v);
 }
 
-// Terem szűrés: ami ide beesik, az NEM jelenik meg az osztálylistában
+// Terem szűrés: a 30-nál nagyobb tiszta számok és a speciális kódok termek
 function _osz_is_room(string $v): bool {
     $compact = preg_replace('/\s+/u', '', _osz_normalize($v)) ?? '';
     if ($compact === '') return false;
-    // Ha van benne pont vagy alsóvonal, az tuti OSZTÁLY
+    // Ha van benne pont vagy alsóvonal, az biztosan OSZTÁLY
     if (str_contains($compact, '.') || str_contains($compact, '_')) return false;
     // Ha tiszta szám és 30 felett van, az terem
     if (preg_match('/^\d+$/', $compact)) return (int)$compact > 30;
-    // Speciális teremkódok (K102, T2, stb.)
+    // Speciális teremkódok
     return preg_match('/^(?:K\d{1,4}|T\d{1,2}|M\d{1,3}|KT)$/iu', $compact) === 1;
 }
 
@@ -25,7 +27,6 @@ function _osz_split_and_collect(string $raw, array &$codes): void {
         foreach (explode(',', $raw) as $part) _osz_split_and_collect($part, $codes);
         return;
     }
-    // Perjeles osztályok (pl 1/9) kezelése egyben
     if (preg_match('/^\d+\/\d+/', trim($raw))) {
         $c = _osz_normalize($raw);
         if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
@@ -42,14 +43,16 @@ function _osz_split_and_collect(string $raw, array &$codes): void {
 }
 
 $codes = [];
-// 1. Adatbázis (Supabase)
+
+// 1. Adatok begyűjtése Supabase-ből
 $db_classes = sb_get('orarendek', ['select' => 'osztaly']);
 if ($db_classes) {
     foreach ($db_classes as $row) {
         if (!empty($row['osztaly'])) _osz_split_and_collect($row['osztaly'], $codes);
     }
 }
-// 2. JS Fallback (tanárok.js)
+
+// 2. Adatok begyűjtése tanárok.js-ből
 $js_path = __DIR__ . '/../tanárok.js';
 if (is_file($js_path)) {
     $contents = file_get_contents($js_path);
@@ -59,23 +62,22 @@ if (is_file($js_path)) {
 
 $result = array_values($codes);
 
-// --- SZIGORÚ SORREND ÉS KATEGORIZÁLÁS ---
+// 3. Szigorú sorrendezés
 usort($result, function($a, $b) {
     $get_grade = function($name) {
         $upper = strtoupper($name);
         
-        // 1. SZABÁLY (Legmagasabb prioritás): HT vagy Alsóvonal -> EGYÉB (999)
-        // Ez elkapja a 13.c_du-t is, hiába van benne a 13-as szám!
+        // PRIORITÁS: HT vagy alulvonás (_) esetén rögtön "Egyéb" (999)
         if (str_contains($upper, 'HT') || str_contains($name, '_')) {
             return 999;
         }
         
-        // 2. SZABÁLY: Normál évfolyam keresés (9.f, 13.c, 1/9)
-        if (preg_match('/^(\d+)\./', $name, $m)) return (int)$m[1]; // "9.f" -> 9
-        if (preg_match('/\/(\d+)/', $name, $m))  return (int)$m[1]; // "1/9" -> 9
-        if (preg_match('/^(\d+)/', $name, $m))   return (int)$m[1]; // "9f" -> 9 (pont nélkül is)
+        // Normál évfolyam keresés (9.f, 13.c, 1/11, stb.)
+        if (preg_match('/^(\d+)\./', $name, $m)) return (int)$m[1];
+        if (preg_match('/\/(\d+)/', $name, $m))  return (int)$m[1];
+        if (preg_match('/^(\d+)/', $name, $m))   return (int)$m[1];
         
-        return 999; // Bármi más -> Egyéb
+        return 999;
     };
 
     $ga = $get_grade($a);
