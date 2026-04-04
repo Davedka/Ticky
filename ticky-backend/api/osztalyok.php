@@ -1,51 +1,31 @@
 <?php
+// api/osztalyok.php
+// GET /api/osztalyok – összes egyedi osztály kód
+
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/osztaly_helpers.php';
 
 handle_cors();
 
-function osztaly_sort_compare(string $left, string $right): int
-{
-    $left = trim($left);
-    $right = trim($right);
-
-    $left_match = [];
-    $right_match = [];
-    $left_has_grade = preg_match('/^(\d+)\.(.+)$/u', $left, $left_match) === 1;
-    $right_has_grade = preg_match('/^(\d+)\.(.+)$/u', $right, $right_match) === 1;
-
-    if ($left_has_grade && $right_has_grade) {
-        $grade_compare = (int) $left_match[1] <=> (int) $right_match[1];
-        if ($grade_compare !== 0) {
-            return $grade_compare;
-        }
-
-        return strnatcasecmp($left_match[2], $right_match[2]);
-    }
-
-    return strnatcasecmp($left, $right);
-}
-
 $rows = sb_get('orarendek', [
     'select' => 'osztaly',
-    'aktiv' => 'eq.true',
-    'order' => 'osztaly.asc',
+    'aktiv'  => 'eq.true',
+    'order'  => 'osztaly.asc',
 ]);
 
-$classes = [];
+$codes = [];
 foreach ($rows as $row) {
-    $class_code = trim((string) ($row['osztaly'] ?? ''));
-    if ($class_code === '') {
-        continue;
+    $code = osztaly_normalize_code((string) ($row['osztaly'] ?? ''));
+    if (osztaly_is_valid_code($code)) {
+        $codes[osztaly_lower($code)] = $code;
     }
-
-    $classes[$class_code] = true;
 }
 
-$class_list = array_keys($classes);
-usort($class_list, 'osztaly_sort_compare');
+$list = array_values($codes);
+usort($list, 'osztaly_sort_compare');
 
 json_response([
-    'osztalyok' => $class_list,
-    'count' => count($class_list),
+    'osztalyok' => $list,
+    'count'     => count($list),
 ]);
