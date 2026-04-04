@@ -1,22 +1,22 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php'; // Ellenőrizd, hogy az elérési út nálad is ez-e!
+// api/osztalyok.php
+require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
 function _osz_normalize(string $v): string {
     $v = trim($v);
-    return $v === '' ? '' : (preg_replace('/\\s+/u', ' ', $v) ?? $v);
+    return $v === '' ? '' : (preg_replace('/\s+/u', ' ', $v) ?? $v);
 }
 
 function _osz_is_room(string $v): bool {
-    $compact = preg_replace('/\\s+/u', '', _osz_normalize($v)) ?? '';
+    $compact = preg_replace('/\s+/u', '', _osz_normalize($v)) ?? '';
     if ($compact === '') return false;
     
-    // VÁLTOZTATÁS: Ha van benne pont, kötőjel, vagy perjel (pl. 1/9, 10.A), az biztosan osztály!
+    // Ha van benne pont, aláhúzás vagy perjel, az osztály.
     if (str_contains($compact, '.') || str_contains($compact, '/') || str_contains($compact, '_')) return false;
     
-    // Termek szűrése
-    if (preg_match('/^\\d{1,4}$/', $compact) === 1) return true;
-    return preg_match('/^(?:K\\d{1,4}|T\\d{1,2}|M\\d{1,3}|KT)$/iu', $compact) === 1;
+    if (preg_match('/^\d{1,4}$/', $compact) === 1) return true;
+    return preg_match('/^(?:K\d{1,4}|T\d{1,2}|M\d{1,3}|KT)$/iu', $compact) === 1;
 }
 
 function _osz_split_and_collect(string $raw, array &$codes): void {
@@ -25,7 +25,7 @@ function _osz_split_and_collect(string $raw, array &$codes): void {
         return;
     }
     if (str_contains($raw, '/')) {
-        // VÁLTOZTATÁS: Kivétel a perjelre, hogy az 1/9 Déri egyben maradjon!
+        // Ha számmal kezdődik a perjel előtt (pl 1/9), egyben hagyjuk
         if (preg_match('/^\d+\/\d+/', trim($raw))) {
             $c = _osz_normalize($raw);
             if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
@@ -42,7 +42,7 @@ function _osz_split_and_collect(string $raw, array &$codes): void {
 
 $codes = [];
 
-// Adatbázisból (Supabase)
+// 1. Adatok begyűjtése
 $db_classes = sb_get('orarendek', ['select' => 'osztaly']);
 if ($db_classes) {
     foreach ($db_classes as $row) {
@@ -50,11 +50,10 @@ if ($db_classes) {
     }
 }
 
-// JS fájlból (tanárok.js)
-$js_path = __DIR__ . '/../tanárok.js'; // Ellenőrizd a mappaszerkezetet!
+$js_path = __DIR__ . '/../tanárok.js';
 if (is_file($js_path)) {
     $contents = file_get_contents($js_path);
-    preg_match_all("/\\bclass\\s*:\\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
+    preg_match_all("/\bclass\s*:\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
     foreach ($matches[1] as $raw) {
         _osz_split_and_collect($raw, $codes);
     }
@@ -62,14 +61,28 @@ if (is_file($js_path)) {
 
 $result = array_values($codes);
 
-// VÁLTOZTATÁS: Sorrendezés 9-től a végéig
+// 2. Intelligens rendezés
 usort($result, function($a, $b) {
+    $lowA = mb_strtolower($a, 'UTF-8');
+    $lowB = mb_strtolower($b, 'UTF-8');
+
+    // PRIORITÁS: A HT_ kezdetűek mindig a legvégére kerüljenek (Egyéb kategória)
+    $isHtA = str_contains($lowA, 'ht_');
+    $isHtB = str_contains($lowB, 'ht_');
+
+    if ($isHtA && !$isHtB) return 1;
+    if (!$isHtA && $isHtB) return -1;
+
+    // Évfolyam szerinti rendezés (9, 10, 11...)
     preg_match('/^(\d+)/', $a, $ma);
     preg_match('/^(\d+)/', $b, $mb);
-    $ga = isset($ma[1]) ? (int)$ma[1] : 999; // Ha nincs szám az elején, megy a végére (Egyéb)
+    
+    $ga = isset($ma[1]) ? (int)$ma[1] : 999; 
     $gb = isset($mb[1]) ? (int)$mb[1] : 999;
     
     if ($ga !== $gb) return $ga <=> $gb;
+    
+    // Ha azonos évfolyam vagy mindkettő "Egyéb", akkor ABC rend
     return strnatcasecmp($a, $b);
 });
 
