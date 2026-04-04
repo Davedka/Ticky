@@ -173,6 +173,156 @@ function ticky_source_class_codes(): array
     return $cache;
 }
 
+function ticky_source_expected_lessons(): array
+{
+    static $cache = null;
+    if (is_array($cache)) {
+        return $cache;
+    }
+
+    $lessons = [];
+    foreach (ticky_source_load_schedule_entries() as $entry) {
+        $day = ticky_source_day_to_index((string) ($entry['day'] ?? ''));
+        if ($day === null) {
+            continue;
+        }
+
+        $class_codes = array_values(array_filter(
+            ticky_source_split_compound_value((string) ($entry['class'] ?? '')),
+            'osztaly_is_valid_code'
+        ));
+        if ($class_codes === []) {
+            continue;
+        }
+
+        $room_codes = array_values(array_filter(
+            ticky_source_split_compound_value((string) ($entry['room'] ?? '')),
+            'osztaly_is_room_like_code'
+        ));
+        if ($room_codes === []) {
+            $room_codes = [ticky_source_normalize_token((string) ($entry['room'] ?? '?'))];
+        }
+
+        $teacher = ticky_source_normalize_token((string) ($entry['teacher'] ?? '?'));
+        $subject = ticky_source_normalize_token((string) ($entry['subject'] ?? ''));
+        $start = substr(ticky_source_normalize_token((string) ($entry['start'] ?? '')), 0, 5);
+        $end = substr(ticky_source_normalize_token((string) ($entry['end'] ?? '')), 0, 5);
+        $period = ticky_source_period_number($start);
+
+        foreach ($room_codes as $room) {
+            foreach ($class_codes as $class_code) {
+                $lessons[] = [
+                    'terem' => $room,
+                    'tanar' => $teacher,
+                    'tanar_nev' => null,
+                    'osztaly' => $class_code,
+                    'tantargy' => $subject,
+                    'het_napja' => $day,
+                    'ora_sorszam' => $period,
+                    'kezdes' => $start,
+                    'vegzes' => $end,
+                ];
+            }
+        }
+    }
+
+    $cache = $lessons;
+    return $cache;
+}
+
+function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?array
+{
+    $class_code = ticky_source_resolve_class_code($requested_code);
+    if ($class_code === null) {
+        return null;
+    }
+
+    $grouped = [];
+    $class_lower = osztaly_lower($class_code);
+
+    foreach (ticky_source_expected_lessons() as $lesson) {
+        if ((int) ($lesson['het_napja'] ?? 0) !== $day) {
+            continue;
+        }
+
+        if (osztaly_lower((string) ($lesson['osztaly'] ?? '')) !== $class_lower) {
+            continue;
+        }
+
+        $start = (string) ($lesson['kezdes'] ?? '');
+        $end = (string) ($lesson['vegzes'] ?? '');
+        $key = $start . '_' . $end;
+
+        if (!isset($grouped[$key])) {
+            $grouped[$key] = [
+                'kezdes' => $start,
+                'vegzes' => $end,
+                'ora_sorszam' => $lesson['ora_sorszam'] ?? null,
+                'csoportok' => [],
+            ];
+        }
+
+        $already_exists = false;
+        foreach ($grouped[$key]['csoportok'] as $group) {
+            if (
+                $group['terem'] === $lesson['terem']
+                && $group['tanar'] === $lesson['tanar']
+                && $group['tantargy'] === $lesson['tantargy']
+            ) {
+                $already_exists = true;
+                break;
+            }
+        }
+
+        if (!$already_exists) {
+            $grouped[$key]['csoportok'][] = [
+                'terem' => (string) ($lesson['terem'] ?? '?'),
+                'tanar' => (string) ($lesson['tanar'] ?? '?'),
+                'tanar_nev' => null,
+                'tantargy' => (string) ($lesson['tantargy'] ?? ''),
+            ];
+        }
+    }
+
+    $lessons = [];
+    foreach ($grouped as $lesson) {
+        $rooms = [];
+        $teacher_codes = [];
+        $subjects = [];
+
+        foreach ($lesson['csoportok'] as $group) {
+            if (!in_array($group['terem'], $rooms, true)) {
+                $rooms[] = $group['terem'];
+            }
+            if (!in_array($group['tanar'], $teacher_codes, true)) {
+                $teacher_codes[] = $group['tanar'];
+            }
+            if ($group['tantargy'] !== '' && !in_array($group['tantargy'], $subjects, true)) {
+                $subjects[] = $group['tantargy'];
+            }
+        }
+
+        $lessons[] = [
+            'kezdes' => $lesson['kezdes'],
+            'vegzes' => $lesson['vegzes'],
+            'ora_sorszam' => $lesson['ora_sorszam'],
+            'is_csoport' => count($lesson['csoportok']) > 1,
+            'terem' => implode(' / ', $rooms),
+            'tanar' => implode(' / ', $teacher_codes),
+            'tanar_nev' => null,
+            'tantargy' => implode(' / ', $subjects),
+            'csoportok' => $lesson['csoportok'],
+        ];
+    }
+
+    usort($lessons, static fn(array $left, array $right): int => strcmp($left['kezdes'], $right['kezdes']));
+
+    return [
+        'osztaly' => $class_code,
+        'orak' => $lessons,
+    ];
+}
+
 function ticky_source_resolve_class_code(string $requested_code): ?string
 {
     $requested_code = osztaly_normalize_code($requested_code);
@@ -189,4 +339,3 @@ function ticky_source_resolve_class_code(string $requested_code): ?string
 
     return null;
 }
-
