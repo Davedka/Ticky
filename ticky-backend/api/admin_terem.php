@@ -7,39 +7,62 @@ header('Content-Type: application/json');
 
 if (!is_admin()) {
     http_response_code(403);
-    echo json_encode(['error' => 'Permission denied']);
+    echo json_encode(['error' => 'Nincs admin jogosultság!']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$parts = explode('/', rtrim($uri, '/'));
-$terem_szam = end($parts);
 
-if (($method === 'POST' || $method === 'PATCH' || $method === 'PUT') && $terem_szam) {
+// A routertől kapjuk meg a számot a GET-en keresztül
+$terem_szam = $_GET['szam'] ?? null;
+
+if (!$terem_szam) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Nem kaptam terem számot a routertől!']);
+    exit;
+}
+
+if ($method === 'POST' || $method === 'PATCH' || $method === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
-    $updateData = [];
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo json_encode(['error' => 'Hibás JSON formátum a kérésben!']);
+        exit;
+    }
 
-    // Kényszerítsük az emeletet számmá, ha létezik
+    $updateData = [];
     if (isset($input['emelet'])) {
-        $updateData['emelet'] = intval($input['emelet']);
+        $updateData['emelet'] = is_numeric($input['emelet']) ? intval($input['emelet']) : $input['emelet'];
+    }
+    if (isset($input['nev'])) {
+        $updateData['nev'] = $input['nev'];
     }
 
     if (!empty($updateData)) {
-        // A szűrésnél a terem számát stringként küldjük (biztos, ami biztos)
-        $res = sb_update('termek', $updateData, ['szam' => 'eq.' . (string)$terem_szam]);
+        // SUPABASE HÍVÁS (A legutóbbi cURL alapú configoddal)
+        $res = sb_update('termek', $updateData, ['szam' => 'eq.' . $terem_szam]);
 
         if ($res['success']) {
-            echo json_encode(['success' => true, 'message' => 'Frissítve!']);
+            echo json_encode(['success' => true, 'message' => 'Sikeres módosítás!']);
         } else {
             http_response_code(400);
-            // Itt most már látni fogod a PONTOS hibaüzenetet a válaszban!
+            // EZT NÉZD MEG A BÖNGÉSZŐBEN, HA HIBA VAN:
             echo json_encode([
-                'error' => 'API hiba történt',
-                'debug_info' => $res['error'],
-                'details' => $res['details'] ?? 'Nincs részlet'
+                'error' => 'Supabase hiba történt',
+                'raw_error' => $res['error'] ?? 'Ismeretlen hiba',
+                'sent_data' => $updateData,
+                'target_room' => $terem_szam
             ]);
         }
+    } else {
+        echo json_encode(['error' => 'Nem érkezett módosítandó adat (pl. emelet)!']);
     }
+    exit;
+}
+
+// GET kérés kiszolgálása
+if ($method === 'GET') {
+    $data = sb_get('termek', ['szam' => 'eq.' . $terem_szam]);
+    echo json_encode($data[0] ?? ['error' => 'A terem nem található az adatbázisban.']);
     exit;
 }
