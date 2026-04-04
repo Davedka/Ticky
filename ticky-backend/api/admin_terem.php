@@ -2,45 +2,67 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-// CORS és JSON fejléc
 handle_cors();
 header('Content-Type: application/json');
 
-// 1. Jogosultság ellenőrzése (Ugyanaz, ami a tanárnál működik)
-// Feltételezve, hogy a helpers.php-ban van egy is_admin() vagy hasonló függvényed
+// 1. Jogosultság ellenőrzése
 if (!is_admin()) {
     http_response_code(403);
-    echo json_encode(['error' => 'Nincs jogosultságod a termek szerkesztéséhez.']);
+    echo json_encode(['error' => 'Nincs admin jogosultságod a művelethez.']);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-$input = json_decode(file_get_contents('php://input'), true);
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Útvonalból kinyerjük a terem számát (pl. /api/admin/terem/102)
-$path_parts = explode('/', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$terem_szam = end($path_parts);
+// Terem szám kinyerése (pl. /api/admin/terem/102 -> 102)
+$parts = explode('/', trim($uri, '/'));
+$terem_szam = end($parts);
 
-if ($method === 'POST' || $method === 'PUT') {
-    // Terem adatainak frissítése a Supabase-ben
-    if (!$terem_szam) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Hiányzó terem azonosító.']);
-        exit;
+// Csak POST vagy PATCH metódust fogadunk el a módosításhoz
+if (($method === 'POST' || $method === 'PATCH' || $method === 'PUT') && $terem_szam) {
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    $dataToUpdate = [];
+    
+    // Emelet frissítése
+    if (isset($input['emelet'])) {
+        $dataToUpdate['emelet'] = (int)$input['emelet'];
+    }
+    
+    // Terem név frissítése (opcionális)
+    if (isset($input['nev'])) {
+        $dataToUpdate['nev'] = $input['nev'];
     }
 
-    // Itt hívjuk meg a Supabase-t a frissítéshez
-    // Példa: update_terem_adatok($terem_szam, $input);
-    
-    echo json_encode(['success' => true, 'message' => "A(z) $terem_szam terem frissítve!"]);
+    if (!empty($dataToUpdate)) {
+        // A szűrés formátuma a Supabase REST API-hoz: eq.ERTEK
+        $filters = ['szam' => 'eq.' . $terem_szam];
+        
+        // Frissítés indítása a Service Key-el (megkerüli az RLS korlátokat)
+        $success = sb_update('termek', $dataToUpdate, $filters, 'service');
+
+        if ($success) {
+            echo json_encode([
+                'success' => true, 
+                'message' => "A(z) $terem_szam számú terem adatai sikeresen frissítve lettek."
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Szerver hiba: Nem sikerült kommunikálni az adatbázissal.']);
+        }
+    } else {
+        echo json_encode(['error' => 'Nem érkezett módosítandó adat a kérésben.']);
+    }
     exit;
 }
 
-if ($method === 'GET') {
-    // Egy konkrét terem adatainak lekérése szerkesztéshez
-    echo json_encode(['terem' => $terem_szam, 'status' => 'adatok betöltve']);
+// Ha csak sima lekérdezés történik (GET)
+if ($method === 'GET' && $terem_szam) {
+    $data = sb_get('termek', ['szam' => 'eq.' . $terem_szam]);
+    echo json_encode($data[0] ?? ['error' => 'Terem nem található']);
     exit;
 }
 
 http_response_code(405);
-echo json_encode(['error' => 'Nem támogatott metódus.']);
+echo json_encode(['error' => 'Nem támogatott HTTP metódus.']);
