@@ -32,7 +32,7 @@ $groups = [
 ];
 
 // Ezeket kényszerítjük az "Egyéb" kategóriába (kisbetűvel nézzük)
-$force_egyeb_patterns = ['ht_', '1/8'];
+$force_egyeb_patterns = ['ht_', '1/9'];
 
 $final_list = array_values($codes);
 usort($final_list, 'strnatcasecmp'); // Alap rendezés
