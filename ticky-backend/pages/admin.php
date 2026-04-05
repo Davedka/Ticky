@@ -1,7 +1,6 @@
 <?php
 // pages/admin.php
 
-
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
@@ -194,7 +193,6 @@ private_response_headers();
   </aside>
 
   <main class="content">
-    <!-- DASHBOARD -->
     <section class="section active" id="section-dashboard">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Dashboard</h1>
       <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px;">Rendszer állapot áttekintés</p>
@@ -225,7 +223,6 @@ private_response_headers();
       </div>
     </section>
 
-    <!-- TANÁROK -->
     <section class="section" id="section-tanarok">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Tanárok</h1>
       <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Teljes nevek hozzáadása a tanár kódokhoz</p>
@@ -251,7 +248,6 @@ private_response_headers();
       </div>
     </section>
 
-    <!-- TERMEK -->
     <section class="section" id="section-termek">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Termek</h1>
       <div class="card" style="padding:14px 20px;margin-bottom:16px;">
@@ -279,7 +275,6 @@ private_response_headers();
       </div>
     </section>
 
-    <!-- FELHASZNÁLÓK -->
     <section class="section" id="section-felhasznalok">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Felhasználók</h1>
       <div class="card">
@@ -550,7 +545,7 @@ async function autoDetectAll() {
       d.ok?ok++:err++
     } catch(e){err++}
   }
-  toast(`✅ ${ok} terem frissítve${err?', '+err+' hiba':'`},'ok')
+  toast(`✅ ${ok} terem frissítve${err ? ', ' + err + ' hiba' : ''}`, 'ok')
   loadTermek()
 }
 
@@ -650,6 +645,7 @@ async function savePw() {
 document.getElementById('pw-modal')?.addEventListener('click',e=>{
   if(e.target===document.getElementById('pw-modal'))closePwModal()
 })
+
 loadDashboard()
 </script>
 <?php endif; ?>
