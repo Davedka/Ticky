@@ -12,3 +12,8 @@ Options -Indexes
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+
+<Files "index.php">
+    Allow from all
+</Files>
