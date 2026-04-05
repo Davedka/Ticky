@@ -4,3 +4,11 @@ Options -Indexes
     Order allow,deny
     Deny from all
 </Files>
+
+RewriteEngine On
+Options -Indexes
+
+<FilesMatch "^\.|\.json$|config/|utils/">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
