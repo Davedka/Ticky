@@ -13,7 +13,10 @@ Options -Indexes
     Deny from all
 </FilesMatch>
 
-
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
 <Files "index.php">
     Allow from all
 </Files>
