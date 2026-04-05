@@ -263,6 +263,15 @@ if ($params !== false) {
     require __DIR__.'/api/napirend.php'; exit;
 }
 
+if ($uri === '/login') { require __DIR__.'/pages/login.php'; exit; }
+if ($uri === '/api/auth/login')  { require __DIR__.'/api/auth/login.php'; exit; }
+if ($uri === '/api/auth/logout') { require __DIR__.'/api/auth/logout.php'; exit; }
+if ($uri === '/api/admin/felhasznalok') { require __DIR__.'/api/admin_felhasznalok.php'; exit; }
+$params = match_route('/api/admin/felhasznalo/{id}', $uri);
+if ($uri === '/api/admin/felhasznalo' || $params !== false) {
+    if ($params !== false) $_GET['id'] = $params['id'];
+    require __DIR__.'/api/admin_felhasznalo.php'; exit;
+}
 if ($uri === '/admin')          { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 
