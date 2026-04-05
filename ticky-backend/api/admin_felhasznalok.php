@@ -9,7 +9,16 @@ require_once __DIR__ . '/../utils/helpers.php';
 handle_cors(['GET', 'OPTIONS'], ['Content-Type', 'X-Ticky-Admin']);
 private_response_headers();
 
-if (!admin_is_authenticated()) {
+// ── Auth – ugyanaz mint admin.php (ticky_auth cookie) ───────────────
+function _check_admin_auth(): bool {
+    $admin_pw = trim((string) (getenv('ADMIN_PASSWORD') ?: ($_ENV['ADMIN_PASSWORD'] ?? '')));
+    if (empty($admin_pw)) return false;
+    $expected = hash_hmac('sha256', 'ticky_admin_' . $admin_pw, $admin_pw);
+    $cookie   = $_COOKIE['ticky_auth'] ?? '';
+    return $cookie !== '' && hash_equals($expected, $cookie);
+}
+
+if (!_check_admin_auth()) {
     json_error('Hozzáférés megtagadva', 401);
 }
 
@@ -32,7 +41,6 @@ if ($raw === false) {
 }
 
 $rows = json_decode($raw, true) ?? [];
-
 json_response([
     'felhasznalok' => $rows,
     'count'        => count($rows),
