@@ -2,6 +2,10 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('X-XSS-Protection: 1; mode=block');
@@ -14,34 +18,34 @@ handle_cors();
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ─── BIZTONSÁGI BLOKKLISTA ────────────────────────────────────────────
-// Megakadályozza hogy konfig/utils/api PHP fájlok közvetlenül elérhetők legyenek
+
 $blocked_patterns = [
     '#^/config/#i',
     '#^/utils/#i',
-    '#\.php$#i',      // PHP fájlok közvetlen elérése tiltott (az index.php kivételével)
-    '#^/\.#',         // .env, .htaccess stb.
+    '#\.php$#i',      
+    '#^/\.#',         
     '#^/composer#i',
     '#^/vendor/#i',
+    '#\.json$#i',
+    '#\.log$#i',
 ];
 
 foreach ($blocked_patterns as $pattern) {
-    if ($uri !== '/' && preg_match($pattern, $uri)) {
+
+    if ($uri !== '/' && $uri !== '/index.php' && preg_match($pattern, $uri)) {
         http_response_code(404);
         exit('Not found');
     }
 }
 
-// ─── Statikus fájlok (favicon, képek, js, css) ───────────────────────
-// CSAK akkor engedjük át ha a kiterjesztés engedélyezett
-$allowed_static_exts = ['png', 'ico', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'css', 'woff', 'woff2', 'ttf'];
+
+$allowed_static_exts = ['png', 'ico', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'css', 'woff', 'woff2', 'ttf', 'js'];
 $file = __DIR__ . $uri;
-if (file_exists($file) && is_file($file)) {
+if ($uri !== '/' && file_exists($file) && is_file($file)) {
     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
     if (in_array($ext, $allowed_static_exts, true)) {
-        return false; // webszerver szolgálja ki
+        return false; 
     }
-    // Ha nem engedélyezett kiterjesztés → 404
     http_response_code(404);
     exit('Not found');
 }
@@ -202,8 +206,10 @@ function toggleMenu(){
 }
 document.addEventListener('click',function(e){
   if(!e.target.closest('#mobile-menu')&&!e.target.closest('#hamburger')){
-    document.getElementById('mobile-menu').classList.remove('open');
-    document.getElementById('hamburger').classList.remove('open');
+    const m = document.getElementById('mobile-menu');
+    const h = document.getElementById('hamburger');
+    if(m) m.classList.remove('open');
+    if(h) h.classList.remove('open');
   }
 });
 </script>
@@ -213,9 +219,7 @@ document.addEventListener('click',function(e){
     exit;
 }
 
-// ─── ROUTES ──────────────────────────────────────────────────────────
 if ($uri === '/api/ping') { json_response(['status'=>'ok','time'=>date('Y-m-d H:i:s')]); }
-
 if ($uri === '/termek') { require __DIR__.'/pages/termek.php'; exit; }
 
 $params = match_route('/tanar/{kod}', $uri);
@@ -295,7 +299,6 @@ if ($params !== false) {
     require __DIR__.'/api/admin_terem.php'; exit;
 }
 
-// ─── 404 ─────────────────────────────────────────────────────────────
 http_response_code(404);
 echo '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>404</title><link rel="icon" type="image/png" href="/favicon.png"><style>body{background:#060f1e;color:rgba(255,255,255,.5);font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}h1{color:white;font-size:48px;}a{color:#f0c76b;text-decoration:none;}</style></head><body><h1>404</h1><p>Az oldal nem található</p><a href="/">← Vissza</a></body></html>';
 exit;
