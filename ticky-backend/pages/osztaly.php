@@ -79,7 +79,7 @@ async function init() {
   }
 }
 
-// Csoportosítási logika javítása (1/9 és társai -> Egyéb)
+// Csoportosítási logika javítása (13._du és társai -> Egyéb)
 function renderGroups(list) {
   const container = document.getElementById('groups-container');
   if(!container) return;
@@ -90,9 +90,9 @@ function renderGroups(list) {
     let gradeLabel = 'Egyéb';
     
     // Csak akkor rakjuk évfolyamba, ha ponttal kezdődik a szám után (pl. 10.A)
-    // és a szám nagyobb mint 1 (1. évfolyam nem létezik a kérésed szerint)
+    // ÉS nem tartalmaz alulvonást (mert az alulvonásosak az Egyéb-be mennek)
     const match = name.match(/^(\d+)\./);
-    if (match) {
+    if (match && !name.includes('_')) {
         const grade = parseInt(match[1]);
         if (grade > 1) {
             gradeLabel = grade + '. évfolyam';
