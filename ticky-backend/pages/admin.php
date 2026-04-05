@@ -1,9 +1,11 @@
-
 <?php
-// pages/admin.php
+// pages/admin.php – FIXED: private_response_headers() called before ANY output
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+
+// ── Biztonsági fejlécek LEGELSŐ – header() csak output előtt mehet! ──
+private_response_headers();
 
 $admin_pw  = trim((string) (getenv('ADMIN_PASSWORD') ?: ($_ENV['ADMIN_PASSWORD'] ?? '')));
 $no_pw_set = $admin_pw === '';
@@ -28,7 +30,6 @@ if (isset($_GET['logout'])) {
 $login_error = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
     sleep(1);
-
     $input = trim($_POST['pw']);
     if (!$no_pw_set && hash_equals($admin_pw, $input)) {
         $isSecure = ticky_is_https();
@@ -39,8 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
         $login_error = true;
     }
 }
-
-private_response_headers();
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -143,14 +142,13 @@ private_response_headers();
         <div style="text-align:center;padding:8px 0;">
           <span style="font-size:36px;display:block;margin-bottom:12px;">⚠️</span>
           <p style="font-size:14px;font-weight:600;color:#f0c76b;margin-bottom:8px;">Nincs jelszó beállítva</p>
-          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Add hozzá az <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.65);">ADMIN_PASSWORD</span> env változót a Render dashboardon.</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Add hozzá az <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.65);">ADMIN_PASSWORD</span> env változót.</p>
         </div>
       <?php else: ?>
         <form method="POST" action="/admin" autocomplete="off">
-          <input type="hidden" name="_csrf" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
           <div style="margin-bottom:16px;">
             <label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:8px;">Jelszó</label>
-            <input type="password" name="pw" class="inp" placeholder="Admin jelszó…" autofocus autocomplete="current-password" style="<?= $login_error?'border-color:rgba(232,51,74,.5);':'' ?>">
+            <input type="password" name="pw" class="inp" placeholder="Admin jelszó…" autofocus autocomplete="current-password" style="<?= $login_error ? 'border-color:rgba(232,51,74,.5);' : '' ?>">
           </div>
           <?php if ($login_error): ?>
             <div style="font-size:12px;color:#ff6b82;margin-bottom:12px;">❌ Hibás jelszó</div>
@@ -194,14 +192,13 @@ private_response_headers();
   </aside>
 
   <main class="content">
+    <!-- DASHBOARD -->
     <section class="section active" id="section-dashboard">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Dashboard</h1>
       <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px;">Rendszer állapot áttekintés</p>
       <div class="stat-grid" id="stat-grid">
-        <div class="stat-box skel" style="height:80px;"></div>
-        <div class="stat-box skel" style="height:80px;"></div>
-        <div class="stat-box skel" style="height:80px;"></div>
-        <div class="stat-box skel" style="height:80px;"></div>
+        <div class="stat-box skel" style="height:80px;"></div><div class="stat-box skel" style="height:80px;"></div>
+        <div class="stat-box skel" style="height:80px;"></div><div class="stat-box skel" style="height:80px;"></div>
       </div>
       <div class="card">
         <div class="card-title">🔌 Rendszer státusz</div>
@@ -213,8 +210,7 @@ private_response_headers();
         </div>
       </div>
       <div class="card">
-        <div class="card-title">
-          📅 Mai foglalt termek
+        <div class="card-title">📅 Mai foglalt termek
           <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="dash-ri"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
             Frissít
@@ -224,6 +220,7 @@ private_response_headers();
       </div>
     </section>
 
+    <!-- TANÁROK -->
     <section class="section" id="section-tanarok">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Tanárok</h1>
       <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Teljes nevek hozzáadása a tanár kódokhoz</p>
@@ -237,18 +234,16 @@ private_response_headers();
         <div id="edit-msg" style="display:none;font-size:12px;margin-top:8px;color:#00c896;"></div>
       </div>
       <div class="card">
-        <div class="card-title">
-          👩‍🏫 Tanárlista
-          <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="tanar-count">–</span>
-        </div>
+        <div class="card-title">👩‍🏫 Tanárlista <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="tanar-count">–</span></div>
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="search" id="tanar-search" class="inp inp-sm" placeholder="Keresés kód vagy név alapján…" oninput="filterTanarok()">
+          <input type="search" id="tanar-search" class="inp inp-sm" placeholder="Keresés…" oninput="filterTanarok()">
         </div>
         <div id="tanar-table"><div class="skel" style="height:280px;border-radius:10px;"></div></div>
       </div>
     </section>
 
+    <!-- TERMEK -->
     <section class="section" id="section-termek">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Termek</h1>
       <div class="card" style="padding:14px 20px;margin-bottom:16px;">
@@ -261,8 +256,7 @@ private_response_headers();
         </div>
       </div>
       <div class="card">
-        <div class="card-title">
-          🏫 Termek listája
+        <div class="card-title">🏫 Termek listája
           <div style="display:flex;align-items:center;gap:10px;">
             <button class="btn btn-gold btn-sm" onclick="autoDetectAll()">⚡ Auto-detektálás mind</button>
             <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="terem-count">–</span>
@@ -276,8 +270,10 @@ private_response_headers();
       </div>
     </section>
 
+    <!-- FELHASZNÁLÓK -->
     <section class="section" id="section-felhasznalok">
       <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Felhasználók</h1>
+      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Bejelentkezési fiókok – a /login oldalon tudnak belépni</p>
       <div class="card">
         <div class="card-title">➕ Új felhasználó</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -307,8 +303,7 @@ private_response_headers();
         <div id="new-user-msg" style="display:none;font-size:12px;margin-top:8px;"></div>
       </div>
       <div class="card">
-        <div class="card-title">
-          👤 Felhasználók
+        <div class="card-title">👤 Felhasználók
           <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="user-count">–</span>
         </div>
         <div class="search-wrap">
@@ -317,8 +312,9 @@ private_response_headers();
         </div>
         <div id="user-table"><div class="skel" style="height:180px;border-radius:10px;"></div></div>
       </div>
-      <div id="pw-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(4,9,15,.8);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
-        <div style="background:#0d1f3a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px;width:100%;max-width:360px;">
+      <!-- Jelszó csere modal -->
+      <div id="pw-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(4,9,15,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+        <div style="background:#0d1f3a;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:24px;width:100%;max-width:360px;margin:16px;">
           <h3 style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:16px;">Jelszó csere</h3>
           <input type="hidden" id="pw-modal-id">
           <div style="margin-bottom:12px;">
@@ -337,315 +333,139 @@ private_response_headers();
 </div>
 
 <script>
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
-function esc(v) {
-  return String(v ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-// ── Épület detektálás ─────────────────────────────────────────────────
 function detectEpulet(szam) {
-  const s = szam.toUpperCase()
-  if (s.startsWith('K')) {
-    const num = s.slice(1)
-    if (['1','2','3'].includes(num)||num==='T') return {epulet:'Kollégium',emelet:0,tag:'tag-purple',emoji:'🏠'}
-    if (num.startsWith('1')) return {epulet:'Kollégium',emelet:1,tag:'tag-purple',emoji:'🏠'}
-    if (num.startsWith('2')) return {epulet:'Kollégium',emelet:2,tag:'tag-purple',emoji:'🏠'}
-    if (num.startsWith('3')) return {epulet:'Kollégium',emelet:3,tag:'tag-purple',emoji:'🏠'}
-    return {epulet:'Kollégium',emelet:0,tag:'tag-purple',emoji:'🏠'}
-  }
-  if (s.startsWith('M')) return {epulet:'Műhely folyosó',emelet:0,tag:'tag-orange',emoji:'🔧'}
-  if (s.startsWith('T')||s==='KT') return {epulet:'Tornacsarnok',emelet:0,tag:'tag-green',emoji:'🏋️'}
+  const s=szam.toUpperCase()
+  if(s.startsWith('K')){const num=s.slice(1);if(['1','2','3'].includes(num)||num==='T')return{epulet:'Kollégium',emelet:0,tag:'tag-purple',emoji:'🏠'};if(num.startsWith('1'))return{epulet:'Kollégium',emelet:1,tag:'tag-purple',emoji:'🏠'};if(num.startsWith('2'))return{epulet:'Kollégium',emelet:2,tag:'tag-purple',emoji:'🏠'};if(num.startsWith('3'))return{epulet:'Kollégium',emelet:3,tag:'tag-purple',emoji:'🏠'};return{epulet:'Kollégium',emelet:0,tag:'tag-purple',emoji:'🏠'}}
+  if(s.startsWith('M'))return{epulet:'Műhely',emelet:0,tag:'tag-orange',emoji:'🔧'}
+  if(s.startsWith('T')||s==='KT')return{epulet:'Tornacsarnok',emelet:0,tag:'tag-green',emoji:'🏋️'}
   const n=parseInt(s)
-  if (!isNaN(n)) {
-    if (n>=1&&n<=99)   return {epulet:'Főépület',emelet:0,tag:'tag-blue',emoji:'🏫'}
-    if (n>=100&&n<=199) return {epulet:'Főépület',emelet:1,tag:'tag-blue',emoji:'🏫'}
-    if (n>=200&&n<=299) return {epulet:'Főépület',emelet:2,tag:'tag-blue',emoji:'🏫'}
-    if (n>=300&&n<=399) return {epulet:'Főépület',emelet:3,tag:'tag-blue',emoji:'🏫'}
-  }
-  return {epulet:'Ismeretlen',emelet:null,tag:'tag-gray',emoji:'❓'}
-}
-function emeletLabel(e) {
-  if (e===null||e===undefined) return '–'
-  return e===0?'Földszint':e+'. emelet'
+  if(!isNaN(n)){if(n>=1&&n<=99)return{epulet:'Főépület',emelet:0,tag:'tag-blue',emoji:'🏫'};if(n>=100&&n<=199)return{epulet:'Főépület',emelet:1,tag:'tag-blue',emoji:'🏫'};if(n>=200&&n<=299)return{epulet:'Főépület',emelet:2,tag:'tag-blue',emoji:'🏫'};if(n>=300&&n<=399)return{epulet:'Főépület',emelet:3,tag:'tag-blue',emoji:'🏫'}}
+  return{epulet:'Ismeretlen',emelet:null,tag:'tag-gray',emoji:'❓'}
 }
 
-// ── Óra ──────────────────────────────────────────────────────────────
 setInterval(()=>{document.getElementById('nav-time').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000)
 
-// ── Sidebar ───────────────────────────────────────────────────────────
-function showSection(id) {
+function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
   document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'))
   document.getElementById('section-'+id).classList.add('active')
   document.getElementById('sb-'+id)?.classList.add('active')
-  if(id==='dashboard') loadDashboard()
-  if(id==='tanarok') loadTanarok()
-  if(id==='termek') loadTermek()
-  if(id==='felhasznalok') loadFelhasznalok()
+  if(id==='dashboard')loadDashboard()
+  if(id==='tanarok')loadTanarok()
+  if(id==='termek')loadTermek()
+  if(id==='felhasznalok')loadFelhasznalok()
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────
-function toast(msg,type='ok',dur=3000) {
-  const t=document.createElement('div'); t.className=`toast ${type}`
-  t.textContent=msg  
-  document.body.appendChild(t); setTimeout(()=>t.remove(),dur)
+function toast(msg,type='ok',dur=3000){
+  const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg
+  document.body.appendChild(t);setTimeout(()=>t.remove(),dur)
 }
 
-function adminFetch(url, opts={}) {
-  return fetch(url, {
-    ...opts,
-    headers: { 'Content-Type': 'application/json', 'X-Ticky-Admin': '1', ...(opts.headers||{}) }
-  })
+function adminFetch(url,opts={}){
+  return fetch(url,{...opts,headers:{'Content-Type':'application/json','X-Ticky-Admin':'1',...(opts.headers||{})}})
 }
 
-// ── DASHBOARD ────────────────────────────────────────────────────────
-async function loadDashboard() {
-  const ic=document.getElementById('dash-ri'); ic?.classList.add('spinning')
-  try {
-    const [td,tnd,ta]=await Promise.all([
-      fetch('/api/termek').then(r=>r.json()),
-      fetch('/api/tanarok').then(r=>r.json()),
-      fetch('/api/termek?allapot=1').then(r=>r.json()),
-    ])
-    const fo=(ta.termek||[]).filter(t=>t.allapot==='foglalt').length
-    const sz=(ta.termek||[]).filter(t=>t.allapot==='szabad').length
-    const nap=ta.nap
-    document.getElementById('stat-grid').innerHTML=`
-      <div class="stat-box gold"><div class="stat-label">Termek</div><div class="stat-val">${esc(td.count||0)}</div><div class="stat-sub">regisztrált terem</div></div>
-      <div class="stat-box"><div class="stat-label">Tanárok</div><div class="stat-val">${esc(tnd.count||0)}</div><div class="stat-sub">tanár kód</div></div>
-      <div class="stat-box red"><div class="stat-label">Foglalt most</div><div class="stat-val">${nap===0?'–':esc(fo)}</div><div class="stat-sub">${nap===0?'hétvége':'aktív óra'}</div></div>
-      <div class="stat-box green"><div class="stat-label">Szabad most</div><div class="stat-val">${nap===0?'–':esc(sz)}</div><div class="stat-sub">${nap===0?'hétvége':'elérhető'}</div></div>`
-    document.getElementById('sys-status').innerHTML=`
-      <div class="status-row"><span class="status-label">API Backend</span><span class="status-badge badge-ok"><span class="badge-dot pulse" style="background:#00c896;"></span> Online</span></div>
-      <div class="status-row"><span class="status-label">Supabase DB</span><span class="status-badge ${td.count>0?'badge-ok':'badge-warn'}"><span class="badge-dot" style="background:${td.count>0?'#00c896':'#f0c76b'};"></span> ${td.count>0?'Kapcsolódva':'Ellenőrizd'}</span></div>
-      <div class="status-row"><span class="status-label">Időzóna</span><span class="tag tag-gold">Europe/Budapest</span></div>
-      <div class="status-row"><span class="status-label">Mai nap</span><span class="status-badge ${nap===0?'badge-warn':'badge-ok'}"><span class="badge-dot" style="background:${nap===0?'#f0c76b':'#00c896'};"></span>${esc(['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'][new Date().getDay()])}</span></div>`
+// DASHBOARD
+async function loadDashboard(){
+  const ic=document.getElementById('dash-ri');ic?.classList.add('spinning')
+  try{
+    const[td,tnd,ta]=await Promise.all([fetch('/api/termek').then(r=>r.json()),fetch('/api/tanarok').then(r=>r.json()),fetch('/api/termek?allapot=1').then(r=>r.json())])
+    const fo=(ta.termek||[]).filter(t=>t.allapot==='foglalt').length,sz=(ta.termek||[]).filter(t=>t.allapot==='szabad').length,nap=ta.nap
+    document.getElementById('stat-grid').innerHTML=`<div class="stat-box gold"><div class="stat-label">Termek</div><div class="stat-val">${td.count||0}</div><div class="stat-sub">regisztrált terem</div></div><div class="stat-box"><div class="stat-label">Tanárok</div><div class="stat-val">${tnd.count||0}</div><div class="stat-sub">tanár kód</div></div><div class="stat-box red"><div class="stat-label">Foglalt most</div><div class="stat-val">${nap===0?'–':fo}</div><div class="stat-sub">${nap===0?'hétvége':'aktív óra'}</div></div><div class="stat-box green"><div class="stat-label">Szabad most</div><div class="stat-val">${nap===0?'–':sz}</div><div class="stat-sub">${nap===0?'hétvége':'elérhető'}</div></div>`
+    document.getElementById('sys-status').innerHTML=`<div class="status-row"><span class="status-label">API Backend</span><span class="status-badge badge-ok"><span class="badge-dot pulse" style="background:#00c896;"></span> Online</span></div><div class="status-row"><span class="status-label">Supabase DB</span><span class="status-badge ${td.count>0?'badge-ok':'badge-warn'}"><span class="badge-dot" style="background:${td.count>0?'#00c896':'#f0c76b'};"></span> ${td.count>0?'Kapcsolódva':'Ellenőrizd'}</span></div><div class="status-row"><span class="status-label">Időzóna</span><span class="tag tag-gold">Europe/Budapest</span></div><div class="status-row"><span class="status-label">Mai nap</span><span class="status-badge ${nap===0?'badge-warn':'badge-ok'}"><span class="badge-dot" style="background:${nap===0?'#f0c76b':'#00c896'};"></span>${esc(['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'][new Date().getDay()])}</span></div>`
     const fo2=(ta.termek||[]).filter(t=>t.allapot==='foglalt')
-    document.getElementById('mai-list').innerHTML=nap===0
-      ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">🌙 Hétvége</div>`
-      :!fo2.length
-        ?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">✅ Jelenleg nincs foglalt terem</div>`
-        :`<table class="data-table"><thead><tr><th>Terem</th><th>Tanár</th><th>Osztály</th><th>Tantárgy</th><th>Időpont</th></tr></thead><tbody>${fo2.map(t=>`<tr>
-            <td><a href="/terem/${esc(t.terem_szam)}" target="_blank" rel="noopener" style="color:#f0c76b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;">${esc(t.terem_szam)}</a></td>
-            <td>${esc(t.aktualis?.tanar||'–')}</td>
-            <td>${esc(t.aktualis?.osztaly||'–')}</td>
-            <td>${esc(t.aktualis?.tantargy||'–')}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.4);">${esc(t.aktualis?.kezdes||'')}–${esc(t.aktualis?.vegzes||'')}</td>
-          </tr>`).join('')}</tbody></table>`
-  } catch(e){toast('Betöltési hiba','err')}
+    document.getElementById('mai-list').innerHTML=nap===0?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">🌙 Hétvége</div>`:!fo2.length?`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">✅ Jelenleg nincs foglalt terem</div>`:`<table class="data-table"><thead><tr><th>Terem</th><th>Tanár</th><th>Osztály</th><th>Tantárgy</th><th>Időpont</th></tr></thead><tbody>${fo2.map(t=>`<tr><td><a href="/terem/${esc(t.terem_szam)}" target="_blank" style="color:#f0c76b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;">${esc(t.terem_szam)}</a></td><td>${esc(t.aktualis?.tanar||'–')}</td><td>${esc(t.aktualis?.osztaly||'–')}</td><td>${esc(t.aktualis?.tantargy||'–')}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.4);">${esc(t.aktualis?.kezdes||'')}–${esc(t.aktualis?.vegzes||'')}</td></tr>`).join('')}</tbody></table>`
+  }catch(e){toast('Betöltési hiba','err')}
   ic?.classList.remove('spinning')
 }
 
-// ── TANÁROK ──────────────────────────────────────────────────────────
+// TANÁROK
 let allTanarok=[]
-async function loadTanarok() {
-  try {
-    const d=await fetch('/api/tanarok').then(r=>r.json())
-    allTanarok=d.tanarok||[]
-    document.getElementById('tanar-count').textContent=allTanarok.length+' tanár'
-    renderTanarok(allTanarok)
-  } catch(e){toast('Betöltési hiba','err')}
+async function loadTanarok(){
+  try{const d=await fetch('/api/tanarok').then(r=>r.json());allTanarok=d.tanarok||[];document.getElementById('tanar-count').textContent=allTanarok.length+' tanár';renderTanarok(allTanarok)}catch(e){toast('Betöltési hiba','err')}
 }
-function filterTanarok() {
-  const q=document.getElementById('tanar-search').value.toLowerCase()
-  renderTanarok(q?allTanarok.filter(t=>(t.rovid_nev+' '+(t.nev||'')).toLowerCase().includes(q)):allTanarok)
-}
-function renderTanarok(list) {
+function filterTanarok(){const q=document.getElementById('tanar-search').value.toLowerCase();renderTanarok(q?allTanarok.filter(t=>(t.rovid_nev+' '+(t.nev||'')).toLowerCase().includes(q)):allTanarok)}
+function renderTanarok(list){
   if(!list.length){document.getElementById('tanar-table').innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">Nincs találat</div>`;return}
-
-  document.getElementById('tanar-table').innerHTML=`<table class="data-table"><thead><tr><th>Kód</th><th>Teljes név</th><th></th></tr></thead><tbody>${list.map(t=>`<tr>
-    <td><span class="tag tag-blue">${esc(t.rovid_nev)}</span></td>
-    <td style="color:${t.nev?'rgba(255,255,255,.85)':'rgba(255,255,255,.25)'};">${esc(t.nev)||'– nincs megadva –'}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="editTanar(${JSON.stringify(t.rovid_nev)},${JSON.stringify(t.nev||'')})">✏️</button></td>
-  </tr>`).join('')}</tbody></table>`
+  document.getElementById('tanar-table').innerHTML=`<table class="data-table"><thead><tr><th>Kód</th><th>Teljes név</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td><span class="tag tag-blue">${esc(t.rovid_nev)}</span></td><td style="color:${t.nev?'rgba(255,255,255,.85)':'rgba(255,255,255,.25)'};">${t.nev?esc(t.nev):'– nincs megadva –'}</td><td><button class="btn btn-ghost btn-sm" onclick="editTanar(${JSON.stringify(t.rovid_nev)},${JSON.stringify(t.nev||'')})">✏️</button></td></tr>`).join('')}</tbody></table>`
 }
-function editTanar(kod,nev) {
-  document.getElementById('edit-kod').value=kod
-  document.getElementById('edit-nev').value=nev
-  document.getElementById('edit-nev').focus()
-  window.scrollTo({top:0,behavior:'smooth'})
-}
-async function saveTanarNev() {
-  const kod=document.getElementById('edit-kod').value.trim().toUpperCase()
-  const nev=document.getElementById('edit-nev').value.trim()
+function editTanar(kod,nev){document.getElementById('edit-kod').value=kod;document.getElementById('edit-nev').value=nev;document.getElementById('edit-nev').focus();window.scrollTo({top:0,behavior:'smooth'})}
+async function saveTanarNev(){
+  const kod=document.getElementById('edit-kod').value.trim().toUpperCase(),nev=document.getElementById('edit-nev').value.trim()
   if(!kod){toast('Add meg a tanár kódot!','err');return}
-  try {
-    const res=await adminFetch('/api/admin/tanar',{method:'POST',body:JSON.stringify({kod,nev})})
-    const d=await res.json()
-    if(d.ok){
-      toast(`✅ ${esc(kod)} elmentve`,'ok')
-      const m=document.getElementById('edit-msg'); m.style.display='block'; m.textContent='✓ Elmentve'
-      setTimeout(()=>m.style.display='none',2500)
-      loadTanarok()
-    } else toast(esc(d.error)||'Hiba','err')
-  } catch(e){toast('API hiba','err')}
+  try{const res=await adminFetch('/api/admin/tanar',{method:'POST',body:JSON.stringify({kod,nev})});const d=await res.json();if(d.ok){toast(`✅ ${esc(kod)} elmentve`);const m=document.getElementById('edit-msg');m.style.display='block';m.textContent='✓ Elmentve';setTimeout(()=>m.style.display='none',2500);loadTanarok()}else toast(esc(d.error||'Hiba'),'err')}catch(e){toast('API hiba','err')}
 }
 
-// ── TERMEK ───────────────────────────────────────────────────────────
+// TERMEK
 let allTermek=[]
-async function loadTermek() {
-  try {
-    const d=await fetch('/api/termek').then(r=>r.json())
-    allTermek=d.termek||[]
-    document.getElementById('terem-count').textContent=allTermek.length+' terem'
-    renderTermek(allTermek)
-  } catch(e){toast('Betöltési hiba','err')}
+async function loadTermek(){
+  try{const d=await fetch('/api/termek').then(r=>r.json());allTermek=d.termek||[];document.getElementById('terem-count').textContent=allTermek.length+' terem';renderTermek(allTermek)}catch(e){toast('Betöltési hiba','err')}
 }
-function filterTermek() {
-  const q=document.getElementById('terem-search').value.toLowerCase()
-  renderTermek(q?allTermek.filter(t=>t.terem_szam.toLowerCase().includes(q)):allTermek)
-}
-function renderTermek(list) {
+function filterTermek(){const q=document.getElementById('terem-search').value.toLowerCase();renderTermek(q?allTermek.filter(t=>t.terem_szam.toLowerCase().includes(q)):allTermek)}
+function renderTermek(list){
   if(!list.length){document.getElementById('terem-table').innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">Nincs találat</div>`;return}
-  document.getElementById('terem-table').innerHTML=`
-    <table class="data-table"><thead><tr><th>Terem</th><th>Épület</th><th>Emelet (DB)</th><th>Linkek</th></tr></thead>
-    <tbody>${list.map(t=>{
-      const det=detectEpulet(t.terem_szam)
-      const tagStyle=det.tag==='tag-orange'?'background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);':''
-      const szamEsc=esc(t.terem_szam)
-      return `<tr>
-        <td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">${szamEsc}</td>
-        <td><span class="tag ${det.tag!=='tag-orange'?det.tag:''}" style="${tagStyle}">${det.emoji} ${esc(det.epulet)}</span></td>
-        <td>
-          <input type="number" min="0" max="5"
-            value="${t.emelet!==null&&t.emelet!==undefined?Number(t.emelet):''}"
-            placeholder="${det.emelet!==null?det.emelet:'–'}"
-            class="inp inp-sm" style="width:72px;"
-            onblur="saveEmelet(${JSON.stringify(t.terem_szam)},this.value)"
-            onkeydown="if(event.key==='Enter')this.blur()">
-        </td>
-        <td style="display:flex;gap:6px;">
-          <a href="/terem/${szamEsc}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🚪</a>
-          <a href="/terem/${szamEsc}/nap" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">📅</a>
-        </td>
-      </tr>`
-    }).join('')}</tbody></table>`
+  document.getElementById('terem-table').innerHTML=`<table class="data-table"><thead><tr><th>Terem</th><th>Épület</th><th>Emelet (DB)</th><th>Linkek</th></tr></thead><tbody>${list.map(t=>{const det=detectEpulet(t.terem_szam);const tagStyle=det.tag==='tag-orange'?'background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);':'';return`<tr><td style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">${esc(t.terem_szam)}</td><td><span class="tag ${det.tag!=='tag-orange'?det.tag:''}" style="${tagStyle}">${det.emoji} ${esc(det.epulet)}</span></td><td><input type="number" min="0" max="5" value="${t.emelet!==null&&t.emelet!==undefined?Number(t.emelet):''}" placeholder="${det.emelet!==null?det.emelet:'–'}" class="inp inp-sm" style="width:72px;" onblur="saveEmelet(${JSON.stringify(t.terem_szam)},this.value)" onkeydown="if(event.key==='Enter')this.blur()"></td><td style="display:flex;gap:6px;"><a href="/terem/${esc(t.terem_szam)}" target="_blank" class="btn btn-ghost btn-sm">🚪</a><a href="/terem/${esc(t.terem_szam)}/nap" target="_blank" class="btn btn-ghost btn-sm">📅</a></td></tr>`}).join('')}</tbody></table>`
 }
-async function saveEmelet(szam,val) {
+async function saveEmelet(szam,val){
   const emelet=val===''?null:parseInt(val)
-  try {
-    const res=await adminFetch(`/api/admin/terem/${encodeURIComponent(szam)}`,{method:'PATCH',body:JSON.stringify({emelet})})
-    const d=await res.json()
-    if(d.ok) toast(`✅ ${esc(szam)} – ${emelet!==null?emelet+'. emelet':'auto'}`)
-    else toast(esc(d.error)||'Hiba','err')
-  } catch(e){toast('API hiba','err')}
+  try{const res=await adminFetch(`/api/admin/terem/${encodeURIComponent(szam)}`,{method:'PATCH',body:JSON.stringify({emelet})});const d=await res.json();if(d.ok)toast(`✅ ${esc(szam)} – ${emelet!==null?emelet+'. emelet':'auto'}`);else toast(esc(d.error||'Hiba'),'err')}catch(e){toast('API hiba','err')}
 }
-async function autoDetectAll() {
+async function autoDetectAll(){
   if(!allTermek.length){toast('Előbb töltsd be a termeket','info');return}
-  toast('⚡ Auto-detektálás fut…','info',5000)
-  let ok=0,err=0
-  for(const t of allTermek) {
-    if(t.emelet!==null) continue
-    const det=detectEpulet(t.terem_szam)
-    if(det.emelet===null) continue
-    try {
-      const res=await adminFetch(`/api/admin/terem/${encodeURIComponent(t.terem_szam)}`,{method:'PATCH',body:JSON.stringify({emelet:det.emelet})})
-      const d=await res.json()
-      d.ok?ok++:err++
-    } catch(e){err++}
-  }
-  toast(`✅ ${ok} terem frissítve${err ? ', ' + err + ' hiba' : ''}`, 'ok')
+  toast('⚡ Auto-detektálás fut…','info',5000);let ok=0,err=0
+  for(const t of allTermek){if(t.emelet!==null)continue;const det=detectEpulet(t.terem_szam);if(det.emelet===null)continue;try{const res=await adminFetch(`/api/admin/terem/${encodeURIComponent(t.terem_szam)}`,{method:'PATCH',body:JSON.stringify({emelet:det.emelet})});const d=await res.json();d.ok?ok++:err++}catch(e){err++}}
+  toast(`✅ ${ok} terem frissítve${err?', '+err+' hiba':''}`)
   loadTermek()
 }
 
-// ── FELHASZNÁLÓK ─────────────────────────────────────────────────────
+// FELHASZNÁLÓK
 let allFelhasznalok=[]
-async function loadFelhasznalok() {
-  try {
-    const res=await adminFetch('/api/admin/felhasznalok')
-    const d=await res.json()
-    allFelhasznalok=d.felhasznalok||[]
-    document.getElementById('user-count').textContent=allFelhasznalok.length+' fő'
-    renderFelhasznalok(allFelhasznalok)
-  } catch(e){toast('Betöltési hiba','err')}
+async function loadFelhasznalok(){
+  try{const res=await adminFetch('/api/admin/felhasznalok');const d=await res.json();allFelhasznalok=d.felhasznalok||[];document.getElementById('user-count').textContent=allFelhasznalok.length+' fő';renderFelhasznalok(allFelhasznalok)}catch(e){toast('Betöltési hiba','err')}
 }
-function filterFelhasznalok() {
-  const q=document.getElementById('user-search').value.toLowerCase()
-  renderFelhasznalok(q?allFelhasznalok.filter(u=>(u.felhasznalonev+' '+(u.nev||'')).toLowerCase().includes(q)):allFelhasznalok)
-}
-function renderFelhasznalok(list) {
+function filterFelhasznalok(){const q=document.getElementById('user-search').value.toLowerCase();renderFelhasznalok(q?allFelhasznalok.filter(u=>(u.felhasznalonev+' '+(u.nev||'')).toLowerCase().includes(q)):allFelhasznalok)}
+function renderFelhasznalok(list){
   const el=document.getElementById('user-table')
-  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">Nincs felhasználó</div>`;return}
-
-  el.innerHTML=`<table class="data-table"><thead><tr><th>Felhasználónév</th><th>Teljes név</th><th>Szerep</th><th>Aktív</th><th>Létrehozva</th><th></th></tr></thead>
-    <tbody>${list.map(u=>`<tr>
-      <td style="font-family:'DM Mono',monospace;">${esc(u.felhasznalonev)}</td>
-      <td>${esc(u.nev||'–')}</td>
-      <td><span class="tag ${u.szerep==='admin'?'tag-gold':'tag-blue'}">${u.szerep==='admin'?'⚙️ Admin':'👤 User'}</span></td>
-      <td>
-        <button onclick="toggleAktiv(${JSON.stringify(u.id)},${!u.aktiv})" class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px;${u.aktiv?'color:#4ade80;border-color:rgba(74,222,128,.3);':'color:#ff6b82;border-color:rgba(255,107,130,.3);'}">
-          ${u.aktiv?'✓ Aktív':'✗ Inaktív'}
-        </button>
-      </td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);">${u.letrehozva?new Date(u.letrehozva).toLocaleDateString('hu-HU'):'–'}</td>
-      <td style="display:flex;gap:5px;">
-        <button class="btn btn-ghost btn-sm" onclick="openPwModal(${JSON.stringify(u.id)})">🔑</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteFelhasznalo(${JSON.stringify(u.id)},${JSON.stringify(u.felhasznalonev)})" style="color:#ff6b82;">🗑️</button>
-      </td>
-    </tr>`).join('')}</tbody></table>`
+  if(!list.length){el.innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,.35);">Nincs felhasználó. Hozz létre egyet fent!</div>`;return}
+  el.innerHTML=`<table class="data-table"><thead><tr><th>Felhasználónév</th><th>Teljes név</th><th>Szerep</th><th>Aktív</th><th>Létrehozva</th><th></th></tr></thead><tbody>${list.map(u=>`<tr>
+    <td style="font-family:'DM Mono',monospace;">${esc(u.felhasznalonev)}</td>
+    <td>${esc(u.nev||'–')}</td>
+    <td><span class="tag ${u.szerep==='admin'?'tag-gold':'tag-blue'}">${u.szerep==='admin'?'⚙️ Admin':'👤 User'}</span></td>
+    <td><button onclick="toggleAktiv(${JSON.stringify(u.id)},${!u.aktiv})" class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px;${u.aktiv?'color:#4ade80;border-color:rgba(74,222,128,.3);':'color:#ff6b82;border-color:rgba(255,107,130,.3);'}">${u.aktiv?'✓ Aktív':'✗ Inaktív'}</button></td>
+    <td style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);">${u.letrehozva?new Date(u.letrehozva).toLocaleDateString('hu-HU'):'–'}</td>
+    <td style="display:flex;gap:5px;">
+      <button class="btn btn-ghost btn-sm" onclick="openPwModal(${JSON.stringify(u.id)})" title="Jelszó csere">🔑</button>
+      <button class="btn btn-ghost btn-sm" onclick="deleteFelhasznalo(${JSON.stringify(u.id)},${JSON.stringify(u.felhasznalonev)})" style="color:#ff6b82;" title="Törlés">🗑️</button>
+    </td>
+  </tr>`).join('')}</tbody></table>`
 }
-async function createFelhasznalo() {
-  const fnev=document.getElementById('new-fnev').value.trim()
-  const nev=document.getElementById('new-nev').value.trim()
-  const pw=document.getElementById('new-pw').value
-  const szerep=document.getElementById('new-szerep').value
-  const msg=document.getElementById('new-user-msg')
+async function createFelhasznalo(){
+  const fnev=document.getElementById('new-fnev').value.trim(),nev=document.getElementById('new-nev').value.trim(),pw=document.getElementById('new-pw').value,szerep=document.getElementById('new-szerep').value,msg=document.getElementById('new-user-msg')
   if(!fnev||!pw){msg.style.display='block';msg.style.color='#ff6b82';msg.textContent='❌ Felhasználónév és jelszó kötelező';return}
-  try {
+  try{
     const res=await adminFetch('/api/admin/felhasznalo',{method:'POST',body:JSON.stringify({felhasznalonev:fnev,nev,jelszo:pw,szerep})})
     const d=await res.json()
-    if(d.ok){
-      toast('✅ '+esc(fnev)+' létrehozva')
-      document.getElementById('new-fnev').value=''
-      document.getElementById('new-nev').value=''
-      document.getElementById('new-pw').value=''
-      msg.style.display='none'
-      loadFelhasznalok()
-    }else{msg.style.display='block';msg.style.color='#ff6b82';msg.textContent='❌ '+esc(d.error||'Hiba')}
+    if(d.ok){toast('✅ '+esc(fnev)+' létrehozva');document.getElementById('new-fnev').value='';document.getElementById('new-nev').value='';document.getElementById('new-pw').value='';msg.style.display='none';loadFelhasznalok()}
+    else{msg.style.display='block';msg.style.color='#ff6b82';msg.textContent='❌ '+esc(d.error||'Hiba')}
   }catch(e){toast('API hiba','err')}
 }
-async function toggleAktiv(id,aktiv) {
-  try {
-    const res=await adminFetch('/api/admin/felhasznalo/'+id,{method:'PATCH',body:JSON.stringify({aktiv})})
-    const d=await res.json()
-    if(d.ok){toast(aktiv?'✅ Aktiválva':'⛔ Deaktiválva');loadFelhasznalok()}
-    else toast(esc(d.error||'Hiba'),'err')
-  }catch(e){toast('API hiba','err')}
+async function toggleAktiv(id,aktiv){
+  try{const res=await adminFetch('/api/admin/felhasznalo/'+id,{method:'PATCH',body:JSON.stringify({aktiv})});const d=await res.json();if(d.ok){toast(aktiv?'✅ Aktiválva':'⛔ Deaktiválva');loadFelhasznalok()}else toast(esc(d.error||'Hiba'),'err')}catch(e){toast('API hiba','err')}
 }
-async function deleteFelhasznalo(id,fnev) {
+async function deleteFelhasznalo(id,fnev){
   if(!confirm(fnev+' törlése? Ez nem visszavonható.'))return
-  try {
-    const res=await adminFetch('/api/admin/felhasznalo/'+id,{method:'DELETE'})
-    const d=await res.json()
-    if(d.ok){toast('🗑️ '+esc(fnev)+' törölve');loadFelhasznalok()}
-    else toast(esc(d.error||'Hiba'),'err')
-  }catch(e){toast('API hiba','err')}
+  try{const res=await adminFetch('/api/admin/felhasznalo/'+id,{method:'DELETE'});const d=await res.json();if(d.ok){toast('🗑️ '+esc(fnev)+' törölve');loadFelhasznalok()}else toast(esc(d.error||'Hiba'),'err')}catch(e){toast('API hiba','err')}
 }
-function openPwModal(id) {
-  document.getElementById('pw-modal-id').value=id
-  document.getElementById('pw-modal-pw').value=''
-  document.getElementById('pw-modal-msg').style.display='none'
-  document.getElementById('pw-modal').style.display='flex'
-  setTimeout(()=>document.getElementById('pw-modal-pw').focus(),60)
-}
+function openPwModal(id){document.getElementById('pw-modal-id').value=id;document.getElementById('pw-modal-pw').value='';document.getElementById('pw-modal-msg').style.display='none';document.getElementById('pw-modal').style.display='flex';setTimeout(()=>document.getElementById('pw-modal-pw').focus(),60)}
 function closePwModal(){document.getElementById('pw-modal').style.display='none'}
-async function savePw() {
-  const id=document.getElementById('pw-modal-id').value
-  const pw=document.getElementById('pw-modal-pw').value
-  const msg=document.getElementById('pw-modal-msg')
+async function savePw(){
+  const id=document.getElementById('pw-modal-id').value,pw=document.getElementById('pw-modal-pw').value,msg=document.getElementById('pw-modal-msg')
   if(pw.length<6){msg.style.display='block';msg.textContent='Legalább 6 karakter';return}
-  try {
-    const res=await adminFetch('/api/admin/felhasznalo/'+id,{method:'PATCH',body:JSON.stringify({jelszo:pw})})
-    const d=await res.json()
-    if(d.ok){toast('✅ Jelszó frissítve');closePwModal()}
-    else{msg.style.display='block';msg.textContent=esc(d.error||'Hiba')}
-  }catch(e){msg.style.display='block';msg.textContent='API hiba'}
+  try{const res=await adminFetch('/api/admin/felhasznalo/'+id,{method:'PATCH',body:JSON.stringify({jelszo:pw})});const d=await res.json();if(d.ok){toast('✅ Jelszó frissítve');closePwModal()}else{msg.style.display='block';msg.textContent=esc(d.error||'Hiba')}}catch(e){msg.style.display='block';msg.textContent='API hiba'}
 }
-document.getElementById('pw-modal')?.addEventListener('click',e=>{
-  if(e.target===document.getElementById('pw-modal'))closePwModal()
-})
+document.getElementById('pw-modal')?.addEventListener('click',e=>{if(e.target===document.getElementById('pw-modal'))closePwModal()})
 
 loadDashboard()
 </script>
