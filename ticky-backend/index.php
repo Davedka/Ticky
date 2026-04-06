@@ -273,6 +273,12 @@ if ($uri === '/api/admin/felhasznalo' || $params !== false) {
     require __DIR__.'/api/admin_felhasznalo.php'; exit;
 }
 if ($uri === '/admin')          { require __DIR__.'/pages/admin.php'; exit; }
+if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/szunetek.php'; exit; }
+ 
+$params = match_route('/api/admin/szunetek/{id}', $uri);
+if ($params !== false) {
+    require __DIR__.'/api/szunetek.php'; exit;
+}
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
 $params = match_route('/api/admin/szunet/{id}', $uri);
