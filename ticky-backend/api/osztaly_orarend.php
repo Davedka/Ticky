@@ -1,11 +1,12 @@
 <?php
 // api/osztaly_orarend.php
 // GET /api/osztaly/{kod}/orarend
-// Visszaadja az osztály mai órarendjét, csoportbontással.
-// Ha Supabase-ben nincs adat → tanárok.js fallback.
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/osztaly_helpers.php';
+require_once __DIR__ . '/../utils/ticky_source.php';
+require_once __DIR__ . '/../utils/szunet.php';
 
 handle_cors();
 
@@ -24,6 +25,7 @@ if ($kod === '' || !preg_match('/^[\p{L}\p{N}\s._\/-]{1,64}$/u', $kod)) {
 
 $nap = mai_nap();
 
+// ─── Hétvége ─────────────────────────────────────────────────────────
 if ($nap === 0) {
     json_response([
         'osztaly' => $kod,
@@ -32,7 +34,18 @@ if ($nap === 0) {
     ]);
 }
 
-// ─── 1. Lekérés: összes mai óra ehhez az osztályhoz ──────────────────
+// ─── Szünet ellenőrzés ────────────────────────────────────────────────
+$sz = aktiv_szunet();
+if ($sz !== null) {
+    json_response([
+        'osztaly' => $kod,
+        'orak'    => [],
+        'szunet'  => true,
+        'uzenet'  => $sz['nev'] . ' – nincs tanítás (' . $sz['start'] . ' – ' . $sz['end'] . ')',
+    ]);
+}
+
+// ─── Supabase lekérés ────────────────────────────────────────────────
 $orak_raw = sb_get('orarendek', [
     'osztaly'   => 'eq.' . $kod,
     'het_napja' => 'eq.' . $nap,
@@ -41,7 +54,7 @@ $orak_raw = sb_get('orarendek', [
     'order'     => 'kezdes.asc,ora_sorszam.asc',
 ]);
 
-// ─── 2. Ha nincs Supabase adat → tanárok.js fallback ─────────────────
+// ─── Ha nincs Supabase adat → tanárok.js fallback ────────────────────
 if (empty($orak_raw)) {
     $ticky_source_file = __DIR__ . '/../utils/ticky_source.php';
     if (is_file($ticky_source_file)) {
@@ -81,17 +94,16 @@ if (empty($orak_raw)) {
                 }
             }
         } catch (\Throwable $e) {
-            // ticky_source nem elérhető, folytatjuk
+            // fallback failed, continue
         }
     }
-    // Se Supabase, se ticky_source → üres napirend (nem 404, hogy a frontend ne törjön)
     json_response([
         'osztaly' => $kod,
         'orak'    => [],
     ]);
 }
 
-// ─── 3. Tanárnevek ────────────────────────────────────────────────────
+// ─── Tanárnevek ──────────────────────────────────────────────────────
 $tanar_map = [];
 $ids = array_unique(array_column($orak_raw, 'tanar_id'));
 foreach (sb_get('tanarok', [
@@ -101,7 +113,7 @@ foreach (sb_get('tanarok', [
     $tanar_map[$t['id']] = $t;
 }
 
-// ─── 4. Termek ────────────────────────────────────────────────────────
+// ─── Termek ──────────────────────────────────────────────────────────
 $terem_map = [];
 $ids = array_unique(array_column($orak_raw, 'terem_id'));
 foreach (sb_get('termek', [
@@ -111,7 +123,7 @@ foreach (sb_get('termek', [
     $terem_map[$t['id']] = $t['terem_szam'];
 }
 
-// ─── 5. Csoportosítás: azonos kezdes+vegzes = csoportbontásos óra ────
+// ─── Csoportosítás ───────────────────────────────────────────────────
 $map = [];
 foreach ($orak_raw as $o) {
     $key   = $o['kezdes'] . '_' . $o['vegzes'];
@@ -141,7 +153,7 @@ foreach ($orak_raw as $o) {
     ];
 }
 
-// ─── 6. Összesítés + rendezés ─────────────────────────────────────────
+// ─── Összesítés ──────────────────────────────────────────────────────
 $orak = [];
 foreach ($map as $o) {
     $cs         = $o['csoportok'];
