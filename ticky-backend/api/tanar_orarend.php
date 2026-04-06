@@ -1,7 +1,6 @@
 <?php
 // api/tanar_orarend.php
-// GET /api/tanar/{kod}/orarend  → adott tanár mai napirendje
-// GET /api/tanar/{kod}/orarend?nap=heten → egész heti napirend
+// GET /api/tanar/{kod}/orarend
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
@@ -9,129 +8,102 @@ require_once __DIR__ . '/../utils/szunet.php';
 
 handle_cors();
 
-// index.php beállítja $_GET['kod']
-$tanar_kod = strtoupper(trim(urldecode((string) ($_GET['kod'] ?? ''))));
-if ($tanar_kod === '') {
-    $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $params = match_route('/api/tanar/{kod}/orarend', $uri);
-    if ($params !== false) $tanar_kod = strtoupper(trim(urldecode($params['kod'])));
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$params = match_route('/api/tanar/{kod}/orarend', $uri);
+
+if ($params === false || empty($params['kod'])) {
+    json_error('Hiányzó tanár kód', 400);
 }
-if ($tanar_kod === '') { json_error('Hiányzó tanár kód', 400); }
-$nap_param = $_GET['nap'] ?? null;
-$het_egeszben = ($nap_param === 'heten');
 
+$kod = strtoupper(urldecode($params['kod']));
+if (!preg_match('/^[\p{L}\p{N}._-]{1,32}$/u', $kod)) {
+    json_error('Érvénytelen tanár kód', 400);
+}
 
-// ── Szünet check ─────────────────────────────────────────────────────
+$nap = mai_nap();
+
+// Hétvége
+if ($nap === 0) {
+    json_response(['tanar_nev' => null, 'orak' => [], 'uzenet' => 'Hétvége – nincs tanítás']);
+}
+
+// Szünet ellenőrzés (Supabase-ből)
 $sz = aktiv_szunet();
-if ($sz !== null && !$het_egeszben) {
+if ($sz !== null) {
     json_response([
-        'kod'    => $tanar_kod,
-        'orak'   => [],
-        'szunet' => $sz['nev'],
-        'uzenet' => '🌙 ' . $sz['nev'] . ' – nincs tanítás (' . $sz['kezdet'] . ' – ' . $sz['vege'] . ')',
+        'tanar_nev' => null,
+        'orak'      => [],
+        'szunet'    => true,
+        'uzenet'    => $sz['nev'] . ' – nincs tanítás (' . $sz['kezdet'] . ' – ' . $sz['vege'] . ')',
     ]);
 }
 
-// ─── Tanár ID lekérése ────────────────────────────────
-$tanarok = sb_get('tanarok', [
-    'rovid_nev' => 'eq.' . $tanar_kod,
-    'select'    => 'id,rovid_nev,nev',
+// Tanár keresés
+$tanarok = sb_get('tanarok', ['rovid_nev' => 'eq.' . $kod, 'select' => 'id,rovid_nev,nev']);
+if (empty($tanarok)) {
+    json_error('Tanár nem található: ' . $kod, 404);
+}
+
+$tanar    = $tanarok[0];
+$tanar_id = $tanar['id'];
+
+// Órarend lekérés
+$orak_raw = sb_get('orarendek', [
+    'tanar_id'  => 'eq.' . $tanar_id,
+    'het_napja' => 'eq.' . $nap,
+    'aktiv'     => 'eq.true',
+    'select'    => 'ora_sorszam,kezdes,vegzes,osztaly,tantargy,termek(terem_szam)',
+    'order'     => 'kezdes.asc,ora_sorszam.asc',
 ]);
 
-if (empty($tanarok)) {
-    json_error('Tanár nem található: ' . $tanar_kod, 404);
-}
+// Csoportosítás: azonos időszak = csoportbontásos óra
+$csoportok_map = [];
+foreach ($orak_raw as $ora) {
+    $terem   = $ora['termek']['terem_szam'] ?? '?';
+    $osztaly = $ora['osztaly']              ?? '?';
+    $kezdes  = $ora['kezdes']               ?? '';
+    $vegzes  = $ora['vegzes']               ?? '';
+    $key     = $kezdes . '_' . $vegzes;
 
-$tanar = $tanarok[0];
-
-// ─── Órarendek lekérése ───────────────────────────────
-$ora_params = [
-    'tanar_id' => 'eq.' . $tanar['id'],
-    'aktiv'    => 'eq.true',
-    'select'   => 'osztaly,tantargy,kezdes,vegzes,ora_sorszam,het_napja,terem_id',
-    'order'    => 'het_napja.asc,kezdes.asc',
-];
-
-if ($het_egeszben) {
-    $ora_params['het_napja'] = 'in.(1,2,3,4,5)';
-} else {
-    $nap = ($nap_param !== null) ? (int)$nap_param : mai_nap();
-    if ($nap < 1 || $nap > 5) {
-        json_response([
-            'tanar'    => $tanar_kod,
-            'tanar_nev'=> $tanar['nev'],
-            'nap'      => $nap,
-            'uzenet'   => 'Nincs tanítás (hétvége)',
-            'orak'     => [],
-        ]);
-    }
-    $ora_params['het_napja'] = 'eq.' . $nap;
-}
-
-$orak = sb_get('orarendek', $ora_params);
-
-// ─── Termek nevei ─────────────────────────────────────
-$terem_map = [];
-if (!empty($orak)) {
-    $terem_ids = array_unique(array_column($orak, 'terem_id'));
-    $termek    = sb_get('termek', [
-        'id'     => 'in.(' . implode(',', $terem_ids) . ')',
-        'select' => 'id,terem_szam',
-    ]);
-    foreach ($termek as $t) $terem_map[$t['id']] = $t['terem_szam'];
-}
-
-// ─── Válasz összeállítása ─────────────────────────────
-$NAP_NEVEK = [1=>'Hétfő',2=>'Kedd',3=>'Szerda',4=>'Csütörtök',5=>'Péntek'];
-$ido       = aktualis_ido();
-
-if ($het_egeszben) {
-    $het = [];
-    foreach ($orak as $o) {
-        $d = $o['het_napja'];
-        $het[$d][] = [
-            'ora_sorszam' => $o['ora_sorszam'],
-            'terem'       => $terem_map[$o['terem_id']] ?? '?',
-            'osztaly'     => $o['osztaly'],
-            'tantargy'    => $o['tantargy'],
-            'kezdes'      => substr($o['kezdes'], 0, 5),
-            'vegzes'      => substr($o['vegzes'], 0, 5),
+    if (!isset($csoportok_map[$key])) {
+        $csoportok_map[$key] = [
+            'kezdes'      => $kezdes,
+            'vegzes'      => $vegzes,
+            'ora_sorszam' => $ora['ora_sorszam'] ?? null,
+            'tantargy'    => $ora['tantargy']    ?? '',
+            'csoportok'   => [],
         ];
     }
-    $napok = [];
-    for ($d = 1; $d <= 5; $d++) {
-        $napok[] = [
-            'nap'      => $d,
-            'nap_neve' => $NAP_NEVEK[$d],
-            'orak'     => $het[$d] ?? [],
-        ];
+
+    $mar_van = false;
+    foreach ($csoportok_map[$key]['csoportok'] as $c) {
+        if ($c['terem'] === $terem && $c['osztaly'] === $osztaly) { $mar_van = true; break; }
     }
-    json_response([
-        'tanar'     => $tanar_kod,
-        'tanar_nev' => $tanar['nev'],
-        'het'       => $napok,
-    ]);
-} else {
-    $result = [];
-    foreach ($orak as $o) {
-        $k = substr($o['kezdes'], 0, 5);
-        $v = substr($o['vegzes'], 0, 5);
-        $result[] = [
-            'ora_sorszam' => $o['ora_sorszam'],
-            'terem'       => $terem_map[$o['terem_id']] ?? '?',
-            'osztaly'     => $o['osztaly'],
-            'tantargy'    => $o['tantargy'],
-            'kezdes'      => $k,
-            'vegzes'      => $v,
-            'folyamatban' => ($ido >= $k && $ido <= $v),
-        ];
+    if (!$mar_van) {
+        $csoportok_map[$key]['csoportok'][] = ['terem' => $terem, 'osztaly' => $osztaly];
     }
-    json_response([
-        'tanar'     => $tanar_kod,
-        'tanar_nev' => $tanar['nev'],
-        'nap'       => $nap ?? mai_nap(),
-        'nap_neve'  => $NAP_NEVEK[$nap ?? mai_nap()] ?? '',
-        'ido'       => $ido,
-        'orak'      => $result,
-    ]);
 }
+
+$orak = [];
+foreach ($csoportok_map as $o) {
+    $cs = $o['csoportok'];
+    $termek_lista = $osztalyok_lista = [];
+    foreach ($cs as $c) {
+        if (!in_array($c['terem'],   $termek_lista,   true)) $termek_lista[]   = $c['terem'];
+        if (!in_array($c['osztaly'], $osztalyok_lista, true)) $osztalyok_lista[] = $c['osztaly'];
+    }
+    $orak[] = [
+        'kezdes'      => $o['kezdes'],
+        'vegzes'      => $o['vegzes'],
+        'ora_sorszam' => $o['ora_sorszam'],
+        'tantargy'    => $o['tantargy'],
+        'is_csoport'  => count($cs) > 1,
+        'terem'       => implode(' / ', $termek_lista),
+        'osztaly'     => implode(', ', $osztalyok_lista),
+        'csoportok'   => $cs,
+    ];
+}
+
+usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
+
+json_response(['tanar_nev' => $tanar['nev'] ?? null, 'orak' => $orak]);
