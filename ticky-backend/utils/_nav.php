@@ -10,6 +10,24 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
         ['href'=>'/qr',      'label'=>'QR',      'key'=>'qr'],
         ['href'=>'/kijelzo', 'label'=>'Kijelző', 'key'=>'kijelzo'],
     ];
+
+    // Admin URL a secret path alapján
+    $admin_href = function_exists('admin_path_value') ? admin_path_value() : '/admin';
+
+    // Szünet detektálás
+    $SZUNETEK = [
+        ['nev' => 'Őszi szünet',    'start' => '2025-10-27', 'end' => '2025-10-31'],
+        ['nev' => 'Téli szünet',    'start' => '2025-12-22', 'end' => '2026-01-02'],
+        ['nev' => 'Tavaszi szünet', 'start' => '2026-04-02', 'end' => '2026-04-13'],
+    ];
+    $ma = date('Y-m-d');
+    $aktiv_szunet = null;
+    foreach ($SZUNETEK as $sz) {
+        if ($ma >= $sz['start'] && $ma <= $sz['end']) {
+            $aktiv_szunet = $sz;
+            break;
+        }
+    }
     ?>
 <style>
 /* ── SHARED NAV ── */
@@ -30,6 +48,8 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
 .tn-link.gold{color:rgba(200,151,42,.8);border:1px solid rgba(200,151,42,.2);}
 .tn-link.gold:hover{color:#f0c76b;background:rgba(200,151,42,.1);}
 .tn-right{display:flex;align-items:center;gap:6px;}
+/* Szünet badge */
+.szunet-nav-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(200,151,42,.2);color:#f0c76b;border:1px solid rgba(200,151,42,.3);white-space:nowrap;}
 /* Hamburger */
 .tn-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);}
 .tn-hamburger span{width:18px;height:2px;background:rgba(255,255,255,.7);border-radius:2px;transition:all .25s;}
@@ -60,6 +80,7 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
   .ticky-sidebar{display:none;}
   .tn-links{display:none;}
   .tn-hamburger{display:flex;}
+  .szunet-nav-badge{display:none;}
 }
 @media(min-width:641px){
   .tn-mobile{display:none!important;}
@@ -85,14 +106,17 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
       <span class="tn-sep">·</span>
       <span class="tn-cim"><?= htmlspecialchars($cim) ?></span>
     <?php endif; ?>
+    <?php if ($aktiv_szunet): ?>
+      <span class="szunet-nav-badge">🌙 <?= htmlspecialchars($aktiv_szunet['nev']) ?></span>
+    <?php endif; ?>
   </div>
 
   <div class="tn-right">
     <div class="tn-links">
       <?php foreach ($links as $l): ?>
-        <a href="<?= $l['href'] ?>" class="tn-link<?= $aktiv===$l['key']?' active':'' ?>"><?= $l['label'] ?></a>
+        <a href="<?= htmlspecialchars($l['href']) ?>" class="tn-link<?= $aktiv===$l['key']?' active':'' ?>"><?= htmlspecialchars($l['label']) ?></a>
       <?php endforeach; ?>
-      <a href="/admin" class="tn-link gold">⚙️ Admin</a>
+      <a href="<?= htmlspecialchars($admin_href) ?>" class="tn-link gold">⚙️ Admin</a>
     </div>
     <div class="tn-hamburger" id="tn-hamburger" onclick="tnToggle()">
       <span></span><span></span><span></span>
@@ -103,11 +127,14 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
 <!-- Mobile menu -->
 <div class="tn-mobile" id="tn-mobile">
   <?php foreach ($links as $l): ?>
-    <a href="<?= $l['href'] ?>"<?= $aktiv===$l['key']?' class="active"':'' ?>><?= $l['label'] ?></a>
+    <a href="<?= htmlspecialchars($l['href']) ?>"<?= $aktiv===$l['key']?' class="active"':'' ?>><?= htmlspecialchars($l['label']) ?></a>
   <?php endforeach; ?>
+  <?php if ($aktiv_szunet): ?>
+    <div style="padding:10px 14px;font-size:13px;color:#f0c76b;font-weight:600;">🌙 <?= htmlspecialchars($aktiv_szunet['nev']) ?> – most szünet van</div>
+  <?php endif; ?>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
-  <a href="/admin" class="mm-gold">⚙️ Admin</a>
+  <a href="<?= htmlspecialchars($admin_href) ?>" class="mm-gold">⚙️ Admin</a>
 </div>
 
 <script>
