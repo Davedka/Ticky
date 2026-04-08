@@ -65,63 +65,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
   .spinning{animation:spin .7s linear infinite;}
   .skel{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:8px;}
   @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
-  .navbar{position:sticky;top:0;z-index:100;height:64px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,9,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07);}
-  .layout{display:flex;min-height:calc(100vh - 64px);position:relative;z-index:10;}
-  .sidebar{width:220px;flex-shrink:0;padding:20px 12px;border-right:1px solid rgba(255,255,255,.07);background:rgba(4,9,15,.4);}
-  .sb-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:4px;width:100%;background:transparent;font-family:'DM Sans',sans-serif;text-align:left;}
-  .sb-btn:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);}
-  .sb-btn.active{background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.25);color:#f0c76b;}
-  .content{flex:1;padding:28px;overflow-y:auto;}
+  .navbar{position:sticky;top:0;z-index:100;height:70px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,9,15,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+  .layout{display:flex;min-height:calc(100vh - 70px);position:relative;z-index:10;}
+  .sidebar{width:240px;flex-shrink:0;padding:24px 16px;border-right:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(4,9,15,.6),rgba(4,9,15,.4));backdrop-filter:blur(8px);}
+  .sb-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1);border:1px solid transparent;margin-bottom:8px;width:100%;background:transparent;font-family:'DM Sans',sans-serif;text-align:left;}
+  .sb-btn:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);border-color:rgba(200,151,42,.2);}
+  .sb-btn.active{background:rgba(200,151,42,.15);border-color:rgba(200,151,42,.4);color:#f0c76b;box-shadow:0 0 12px rgba(200,151,42,.15);}
+  .content{flex:1;padding:36px 40px;overflow-y:auto;}
   .section{display:none;} .section.active{display:block;}
-  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 24px;margin-bottom:20px;}
-  .card-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
-  .stat-box{border-radius:12px;padding:16px 18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);}
-  .stat-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;}
-  .stat-val{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:white;line-height:1;}
-  .stat-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px;}
-  .stat-box.green{background:rgba(0,200,150,.07);border-color:rgba(0,200,150,.2);} .stat-box.green .stat-val{color:#00c896;}
-  .stat-box.red{background:rgba(232,51,74,.07);border-color:rgba(232,51,74,.2);} .stat-box.red .stat-val{color:#ff6b82;}
-  .stat-box.gold{background:rgba(200,151,42,.07);border-color:rgba(200,151,42,.2);} .stat-box.gold .stat-val{color:#f0c76b;}
-  .status-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+  .card{background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;margin-bottom:24px;transition:all .3s;backdrop-filter:blur(8px);}
+  .card:hover{border-color:rgba(200,151,42,.2);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));}
+  .card-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:white;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+  .stat-box{border-radius:16px;padding:24px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.01));backdrop-filter:blur(8px);transition:all .3s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden;}
+  .stat-box::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,151,42,.1),rgba(200,151,42,.05));opacity:0;transition:opacity .3s;}
+  .stat-box:hover{border-color:rgba(200,151,42,.3);background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));transform:translateY(-2px);}
+  .stat-box:hover::before{opacity:1;}
+  .stat-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;}
+  .stat-val{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:white;line-height:1;}
+  .stat-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;}
+  .stat-box.green{background:linear-gradient(135deg,rgba(0,200,150,.1),rgba(0,200,150,.03));border-color:rgba(0,200,150,.25);} .stat-box.green .stat-val{color:#00c896;}
+  .stat-box.red{background:linear-gradient(135deg,rgba(232,51,74,.1),rgba(232,51,74,.03));border-color:rgba(232,51,74,.25);} .stat-box.red .stat-val{color:#ff6b82;}
+  .stat-box.gold{background:linear-gradient(135deg,rgba(200,151,42,.1),rgba(200,151,42,.03));border-color:rgba(200,151,42,.25);} .stat-box.gold .stat-val{color:#f0c76b;}
+  .status-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);}
   .status-row:last-child{border-bottom:none;}
-  .status-label{font-size:14px;font-weight:500;color:rgba(255,255,255,.7);}
-  .status-badge{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
-  .badge-ok{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:#00c896;}
-  .badge-warn{background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;}
+  .status-label{font-size:14px;font-weight:500;color:rgba(255,255,255,.75);}
+  .status-badge{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+  .badge-ok{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.35);color:#00c896;}
+  .badge-warn{background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.35);color:#f0c76b;}
   .badge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .data-table{width:100%;border-collapse:collapse;}
-  .data-table th{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap;}
-  .data-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:rgba(255,255,255,.75);vertical-align:middle;}
+  .data-table th{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);padding:14px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap;}
+  .data-table td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;color:rgba(255,255,255,.8);vertical-align:middle;}
   .data-table tr:last-child td{border-bottom:none;}
-  .data-table tr:hover td{background:rgba(255,255,255,.025);}
-  .inp{width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:white;font-family:'DM Sans',sans-serif;font-size:14px;transition:border-color .2s;}
-  .inp::placeholder{color:rgba(255,255,255,.3);}
-  .inp:focus{outline:none;border-color:rgba(200,151,42,.5);background:rgba(255,255,255,.07);}
-  .inp-sm{padding:7px 12px;font-size:13px;}
-  .btn{padding:9px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:6px;}
-  .btn-gold{background:linear-gradient(135deg,#c8972a,#a07020);color:white;}
-  .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,151,42,.3);}
-  .btn-ghost{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);}
-  .btn-ghost:hover{background:rgba(255,255,255,.12);color:white;}
-  .btn-sm{padding:6px 14px;font-size:12px;border-radius:7px;}
-  .search-wrap{position:relative;margin-bottom:14px;}
-  .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);pointer-events:none;}
-  .search-wrap input{padding-left:36px;}
+  .data-table tr:hover td{background:rgba(200,151,42,.04);}
+  .inp{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:white;font-family:'DM Sans',sans-serif;font-size:14px;transition:all .2s cubic-bezier(.22,1,.36,1);}
+  .inp::placeholder{color:rgba(255,255,255,.35);}
+  .inp:focus{outline:none;border-color:rgba(200,151,42,.5);background:rgba(255,255,255,.07);box-shadow:0 0 0 3px rgba(200,151,42,.08);}
+  .inp-sm{padding:9px 12px;font-size:13px;}
+  .btn{padding:10px 20px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1);border:none;display:inline-flex;align-items:center;gap:6px;}
+  .btn-gold{background:linear-gradient(135deg,#c8972a,#a07020);color:white;box-shadow:0 4px 12px rgba(200,151,42,.2);}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,151,42,.35);}
+  .btn-gold:active{transform:translateY(0);}
+  .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.75);}
+  .btn-ghost:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.95);border-color:rgba(200,151,42,.25);}
+  .btn-sm{padding:8px 14px;font-size:12px;border-radius:9px;}
+  .search-wrap{position:relative;margin-bottom:16px;}
+  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);pointer-events:none;}
+  .search-wrap input{padding-left:40px;}
   input[type=search]::-webkit-search-cancel-button{display:none;}
-  .tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;}
-  .tag-blue{background:rgba(26,74,138,.3);color:#7eb8f7;border:1px solid rgba(26,74,138,.4);}
-  .tag-gold{background:rgba(200,151,42,.2);color:#f0c76b;border:1px solid rgba(200,151,42,.3);}
-  .tag-green{background:rgba(0,200,150,.15);color:#00c896;border:1px solid rgba(0,200,150,.3);}
-  .tag-red{background:rgba(232,51,74,.15);color:#ff6b82;border:1px solid rgba(232,51,74,.3);}
-  .tag-purple{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);}
-  .tag-gray{background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.1);}
-  .toast{position:fixed;bottom:24px;right:24px;z-index:500;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;backdrop-filter:blur(16px);animation:toastIn .3s cubic-bezier(.22,1,.36,1);box-shadow:0 8px 32px rgba(0,0,0,.4);}
-  @keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .tag{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;backdrop-filter:blur(4px);}
+  .tag-blue{background:rgba(26,74,138,.25);color:#7eb8f7;border:1px solid rgba(26,74,138,.35);}
+  .tag-gold{background:rgba(200,151,42,.2);color:#f0c76b;border:1px solid rgba(200,151,42,.35);}
+  .tag-green{background:rgba(0,200,150,.15);color:#00c896;border:1px solid rgba(0,200,150,.35);}
+  .tag-red{background:rgba(232,51,74,.15);color:#ff6b82;border:1px solid rgba(232,51,74,.35);}
+  .tag-purple{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.35);}
+  .tag-gray{background:rgba(255,255,255,.05);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.1);}
+  .toast{position:fixed;bottom:28px;right:28px;z-index:500;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;backdrop-filter:blur(16px);animation:toastIn .3s cubic-bezier(.22,1,.36,1);box-shadow:0 12px 40px rgba(0,0,0,.5);}
+  @keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   .toast.ok{background:rgba(0,200,150,.2);border:1px solid rgba(0,200,150,.4);color:#00c896;}
   .toast.err{background:rgba(232,51,74,.2);border:1px solid rgba(232,51,74,.4);color:#ff6b82;}
   .toast.info{background:rgba(200,151,42,.2);border:1px solid rgba(200,151,42,.4);color:#f0c76b;}
-  @media(max-width:768px){.sidebar{display:none;}.content{padding:16px;}}
+  select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;background-color:rgba(255,255,255,.04);}
+  @media(max-width:768px){.sidebar{display:none;}.content{padding:24px;}}
 </style>
 </head>
 <body>
@@ -137,25 +143,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
       </a>
       <p style="font-size:13px;color:rgba(255,255,255,.4);margin-top:8px;">Admin Panel</p>
     </div>
-    <div class="card" style="padding:32px;">
+    <div class="card" style="padding:40px;">
       <?php if ($no_pw_set): ?>
-        <div style="text-align:center;padding:8px 0;">
-          <span style="font-size:36px;display:block;margin-bottom:12px;">⚠️</span>
-          <p style="font-size:14px;font-weight:600;color:#f0c76b;margin-bottom:8px;">Nincs jelszó beállítva</p>
-          <p style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;">Add hozzá az <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.65);">ADMIN_PASSWORD</span> env változót.</p>
+        <div style="text-align:center;padding:16px 0;">
+          <span style="font-size:48px;display:block;margin-bottom:16px;animation:bounce 2s infinite;">⚠️</span>
+          <p style="font-size:16px;font-weight:600;color:#f0c76b;margin-bottom:12px;">Nincs jelszó beállítva</p>
+          <p style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.8;">Add hozzá az <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.6);">ADMIN_PASSWORD</span> env változót.</p>
         </div>
+        <style>@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}</style>
       <?php else: ?>
         <form method="POST" action="/admin" autocomplete="off">
-          <div style="margin-bottom:16px;">
-            <label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:8px;">Jelszó</label>
+          <div style="margin-bottom:20px;">
+            <label style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Jelszó</label>
             <input type="password" name="pw" class="inp" placeholder="Admin jelszó…" autofocus autocomplete="current-password" style="<?= $login_error ? 'border-color:rgba(232,51,74,.5);' : '' ?>">
           </div>
           <?php if ($login_error): ?>
-            <div style="font-size:12px;color:#ff6b82;margin-bottom:12px;">❌ Hibás jelszó</div>
+            <div style="font-size:13px;color:#ff6b82;margin-bottom:16px;display:flex;align-items:center;gap:6px;">❌ Hibás jelszó</div>
           <?php endif; ?>
-          <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:12px;font-size:14px;">Belépés →</button>
+          <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:14px;font-size:15px;">Belépés →</button>
         </form>
-        <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.2);">Jelszó: <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.3);">ADMIN_PASSWORD</span> env var</p>
+        <p style="text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.25);">Jelszó: <span style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.35);">ADMIN_PASSWORD</span> env var</p>
       <?php endif; ?>
     </div>
     <p style="text-align:center;margin-top:14px;"><a href="/" style="font-size:12px;color:rgba(255,255,255,.3);">← Vissza a főoldalra</a></p>
@@ -164,46 +171,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
 
 <?php else: ?>
 <nav class="navbar">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <a href="/" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;">
-      <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 8px #c8972a;display:inline-block;"></span>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <a href="/" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;text-decoration:none;">
+      <span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#c8972a;box-shadow:0 0 10px #c8972a;display:inline-block;"></span>
       Ticky
     </a>
-    <span style="color:rgba(255,255,255,.2);">·</span>
-    <span style="font-size:13px;color:rgba(255,255,255,.45);">Admin</span>
+    <span style="color:rgba(255,255,255,.15);">·</span>
+    <span style="font-size:14px;color:rgba(255,255,255,.45);font-weight:500;">Admin Panel</span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span style="font-size:12px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;" id="nav-time">–</span>
-    <a href="/admin?logout=1" class="btn btn-ghost btn-sm">Kilépés</a>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;letter-spacing:.05em;" id="nav-time">–</span>
+    <a href="/admin?logout=1" class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);">Kilépés</a>
   </div>
 </nav>
 
 <div class="layout">
   <aside class="sidebar">
-    <button class="sb-btn active" onclick="showSection('dashboard')" id="sb-dashboard"><span>📊</span> Dashboard</button>
-    <button class="sb-btn" onclick="showSection('tanarok')" id="sb-tanarok"><span>👩‍🏫</span> Tanárok</button>
-    <button class="sb-btn" onclick="showSection('termek')" id="sb-termek"><span>🏫</span> Termek</button>
-    <button class="sb-btn" onclick="showSection('felhasznalok')" id="sb-felhasznalok"><span>👤</span> Felhasználók</button>
-    <button class="sb-btn" onclick="showSection('szunetek')" id="sb-szunetek"><span>🌙</span> Szünetek</button>
-    <div style="border-top:1px solid rgba(255,255,255,.07);margin-top:16px;padding-top:16px;">
-      <a href="/termek" class="sb-btn" style="display:flex;"><span>🏠</span> Termek live</a>
-      <a href="/kijelzo" class="sb-btn" style="display:flex;"><span>📺</span> Kijelző</a>
-      <a href="/qr" class="sb-btn" style="display:flex;"><span>🖨️</span> QR generátor</a>
+    <div style="margin-bottom:8px;">
+      <button class="sb-btn active" onclick="showSection('dashboard')" id="sb-dashboard"><span>📊</span> Dashboard</button>
+      <button class="sb-btn" onclick="showSection('tanarok')" id="sb-tanarok"><span>👩‍🏫</span> Tanárok</button>
+      <button class="sb-btn" onclick="showSection('termek')" id="sb-termek"><span>🏫</span> Teremek</button>
+      <button class="sb-btn" onclick="showSection('felhasznalok')" id="sb-felhasznalok"><span>👤</span> Felhasználók</button>
+      <button class="sb-btn" onclick="showSection('szunetek')" id="sb-szunetek"><span>🌙</span> Szünetek</button>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.08);margin:16px 0;padding:16px 0;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.25);padding:0 16px;margin-bottom:12px;">Nézetek</div>
+      <a href="/termek" class="sb-btn"><span>🏠</span> Teremek live</a>
+      <a href="/kijelzo" class="sb-btn"><span>📺</span> Kijelző</a>
+      <a href="/qr" class="sb-btn"><span>🖨️</span> QR generátor</a>
     </div>
   </aside>
 
   <main class="content">
     <!-- DASHBOARD -->
     <section class="section active" id="section-dashboard">
-      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Dashboard</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px;">Rendszer állapot áttekintés</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px;">Dashboard</h1>
+      <p style="font-size:14px;color:rgba(255,255,255,.45);margin-bottom:32px;">Rendszer állapot és mai tevékenység áttekintése</p>
       <div class="stat-grid" id="stat-grid">
         <div class="stat-box skel" style="height:80px;"></div><div class="stat-box skel" style="height:80px;"></div>
         <div class="stat-box skel" style="height:80px;"></div><div class="stat-box skel" style="height:80px;"></div>
       </div>
       <div class="card">
         <div class="card-title">🔌 Rendszer státusz</div>
-        <div id="sys-status">
+        <div id="sys-status" style="padding:0;">
           <div class="status-row"><span class="status-label">API Backend</span><span class="skel" style="width:80px;height:24px;border-radius:20px;display:inline-block;"></span></div>
           <div class="status-row"><span class="status-label">Supabase DB</span><span class="skel" style="width:80px;height:24px;border-radius:20px;display:inline-block;"></span></div>
           <div class="status-row"><span class="status-label">Időzóna</span><span class="tag tag-gold">Europe/Budapest</span></div>
@@ -211,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
         </div>
       </div>
       <div class="card">
-        <div class="card-title">📅 Mai foglalt termek
+        <div class="card-title">📅 Aktuális foglaltsági állapot
           <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="dash-ri"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
             Frissít
@@ -223,100 +233,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
 
     <!-- TANÁROK -->
     <section class="section" id="section-tanarok">
-      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Tanárok</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Teljes nevek hozzáadása a tanár kódokhoz</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px;">Tanárok</h1>
+      <p style="font-size:14px;color:rgba(255,255,255,.45);margin-bottom:32px;">Tanárkódok és teljes nevek kezelése</p>
       <div class="card">
-        <div class="card-title">✏️ Név szerkesztése</div>
-        <div style="display:grid;grid-template-columns:140px 1fr auto;gap:8px;align-items:center;">
-          <input type="text" id="edit-kod" class="inp inp-sm" placeholder="Kód (ÁSZJ)" style="text-transform:uppercase;font-family:'DM Mono',monospace;">
-          <input type="text" id="edit-nev" class="inp inp-sm" placeholder="Teljes név (pl. Kovács János)">
+        <div class="card-title">✏️ Tanár nevének szerkesztése</div>
+        <div style="display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:flex-end;">
+          <div>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Tanár kód</label>
+            <input type="text" id="edit-kod" class="inp inp-sm" placeholder="ÁSZJ" style="text-transform:uppercase;font-family:'DM Mono',monospace;">
+          </div>
+          <div>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Teljes név</label>
+            <input type="text" id="edit-nev" class="inp inp-sm" placeholder="Pl. Kovács János">
+          </div>
           <button class="btn btn-gold btn-sm" onclick="saveTanarNev()">Mentés</button>
         </div>
-        <div id="edit-msg" style="display:none;font-size:12px;margin-top:8px;color:#00c896;"></div>
+        <div id="edit-msg" style="display:none;font-size:12px;margin-top:12px;color:#00c896;"></div>
       </div>
       <div class="card">
         <div class="card-title">👩‍🏫 Tanárlista <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="tanar-count">–</span></div>
-        <div class="search-wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="search" id="tanar-search" class="inp inp-sm" placeholder="Keresés…" oninput="filterTanarok()">
+        <div style="margin-bottom:16px;">
+          <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="search" id="tanar-search" class="inp inp-sm" placeholder="Keresés tanár kód vagy név alapján…" oninput="filterTanarok()">
+          </div>
         </div>
-        <div id="tanar-table"><div class="skel" style="height:280px;border-radius:10px;"></div></div>
+        <div id="tanar-table"><div class="skel" style="height:280px;border-radius:12px;"></div></div>
       </div>
     </section>
 
     <!-- TERMEK -->
     <section class="section" id="section-termek">
-      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Termek</h1>
-      <div class="card" style="padding:14px 20px;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="font-size:12px;color:rgba(255,255,255,.35);font-weight:600;margin-right:4px;">Épületek:</span>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px;">Teremek</h1>
+      <p style="font-size:14px;color:rgba(255,255,255,.45);margin-bottom:32px;">Teremek regisztrációja és kezelése</p>
+      <div class="card" style="padding:16px 24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:12px;color:rgba(255,255,255,.4);font-weight:600;margin-right:4px;">Épületek:</span>
           <span class="tag tag-blue">🏫 Főépület</span>
           <span class="tag tag-purple">🏠 Kollégium</span>
-          <span class="tag" style="background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);">🔧 Műhely</span>
+          <span class="tag" style="background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.35);">🔧 Műhely</span>
           <span class="tag tag-green">🏋️ Torna</span>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">🏫 Termek listája
-          <div style="display:flex;align-items:center;gap:10px;">
-            <button class="btn btn-gold btn-sm" onclick="autoDetectAll()">⚡ Auto-detektálás mind</button>
+        <div class="card-title">🏫 Teremek listája
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="btn btn-gold btn-sm" onclick="autoDetectAll()">⚡ Auto-detektálás</button>
             <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="terem-count">–</span>
           </div>
         </div>
-        <div class="search-wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="search" id="terem-search" class="inp inp-sm" placeholder="Keresés…" oninput="filterTermek()">
+        <div style="margin-bottom:16px;">
+          <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="search" id="terem-search" class="inp inp-sm" placeholder="Keresés terem száma alapján…" oninput="filterTermek()">
+          </div>
         </div>
-        <div id="terem-table"><div class="skel" style="height:300px;border-radius:10px;"></div></div>
+        <div id="terem-table"><div class="skel" style="height:300px;border-radius:12px;"></div></div>
       </div>
     </section>
 
     <!-- FELHASZNÁLÓK -->
     <section class="section" id="section-felhasznalok">
-      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Felhasználók</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Bejelentkezési fiókok – a /login oldalon tudnak belépni</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px;">Felhasználók</h1>
+      <p style="font-size:14px;color:rgba(255,255,255,.45);margin-bottom:32px;">Bejelentkezési fiókok és jogosultságok kezelése</p>
       <div class="card">
-        <div class="card-title">➕ Új felhasználó</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div class="card-title">➕ Új felhasználó létrehozása</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Felhasználónév *</label>
-            <input type="text" id="new-fnev" class="inp inp-sm" placeholder="pl. kovacs.peter" style="font-family:'DM Mono',monospace;" autocomplete="off">
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Felhasználónév *</label>
+            <input type="text" id="new-fnev" class="inp inp-sm" placeholder="kovacs.peter" style="font-family:'DM Mono',monospace;" autocomplete="off">
           </div>
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Teljes név</label>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Teljes név</label>
             <input type="text" id="new-nev" class="inp inp-sm" placeholder="Kovács Péter">
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:flex-end;">
+        <div style="display:grid;grid-template-columns:1fr 120px 100px auto;gap:12px;align-items:flex-end;">
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Jelszó * (min 6 kar.)</label>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Jelszó * (min 6 kar.)</label>
             <input type="password" id="new-pw" class="inp inp-sm" placeholder="••••••••" autocomplete="new-password">
           </div>
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Szerep</label>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Szerep</label>
             <select id="new-szerep" class="inp inp-sm" style="cursor:pointer;">
               <option value="user" style="background:#0b2e59;">👤 User</option>
               <option value="admin" style="background:#0b2e59;">⚙️ Admin</option>
             </select>
           </div>
-          <button class="btn btn-gold btn-sm" onclick="createFelhasznalo()">Létrehozás</button>
+          <button class="btn btn-gold btn-sm" onclick="createFelhasznalo()">Hozzáadás</button>
         </div>
-        <div id="new-user-msg" style="display:none;font-size:12px;margin-top:8px;"></div>
+        <div id="new-user-msg" style="display:none;font-size:12px;margin-top:12px;"></div>
       </div>
       <div class="card">
         <div class="card-title">👤 Felhasználók
           <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="user-count">–</span>
         </div>
-        <div class="search-wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="search" id="user-search" class="inp inp-sm" placeholder="Keresés…" oninput="filterFelhasznalok()">
+        <div style="margin-bottom:16px;">
+          <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="search" id="user-search" class="inp inp-sm" placeholder="Keresés felhasználónév vagy név alapján…" oninput="filterFelhasznalok()">
+          </div>
         </div>
-        <div id="user-table"><div class="skel" style="height:180px;border-radius:10px;"></div></div>
+        <div id="user-table"><div class="skel" style="height:200px;border-radius:12px;"></div></div>
       </div>
       <!-- Jelszó csere modal -->
-      <div id="pw-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(4,9,15,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
-        <div style="background:#0d1f3a;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:24px;width:100%;max-width:360px;margin:16px;">
-          <h3 style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:16px;">Jelszó csere</h3>
+      <div id="pw-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(4,9,15,.95);backdrop-filter:blur(12px);align-items:center;justify-content:center;">
+        <div style="background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:32px;width:100%;max-width:400px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+          <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:20px;">Jelszó csere</h3>
           <input type="hidden" id="pw-modal-id">
           <div style="margin-bottom:12px;">
             <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Új jelszó (min 6 kar.)</label>
@@ -333,44 +356,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
 
     <!-- SZÜNETEK -->
     <section class="section" id="section-szunetek">
-      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;">Szünetek</h1>
-      <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px;">Szünet idején a tanár- és osztálynézet „Szünet van" üzenetet mutat</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px;">Szünetek</h1>
+      <p style="font-size:14px;color:rgba(255,255,255,.45);margin-bottom:32px;">Szünet időszakok beállítása és kezelése</p>
 
       <!-- Aktív szünet banner -->
-      <div id="aktiv-szunet-banner" style="display:none;margin-bottom:16px;padding:14px 20px;border-radius:12px;background:rgba(200,151,42,.12);border:1px solid rgba(200,151,42,.3);color:#f0c76b;font-weight:600;font-size:14px;"></div>
+      <div id="aktiv-szunet-banner" style="display:none;margin-bottom:24px;padding:18px 24px;border-radius:14px;background:linear-gradient(135deg,rgba(200,151,42,.15),rgba(200,151,42,.05));border:1px solid rgba(200,151,42,.35);border-left:3px solid rgba(200,151,42,.8);color:#f0c76b;font-weight:600;font-size:14px;backdrop-filter:blur(8px);"></div>
 
       <!-- Új szünet -->
       <div class="card">
         <div class="card-title">➕ Új szünet hozzáadása</div>
-        <div style="display:grid;grid-template-columns:1fr 140px 140px auto;gap:8px;align-items:flex-end;">
+        <div style="display:grid;grid-template-columns:1fr 150px 150px auto;gap:12px;align-items:flex-end;">
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Szünet neve *</label>
-            <input type="text" id="sz-nev" class="inp inp-sm" placeholder="pl. Tavaszi szünet">
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Szünet neve *</label>
+            <input type="text" id="sz-nev" class="inp inp-sm" placeholder="Pl. Tavaszi szünet">
           </div>
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Kezdet *</label>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Kezdet *</label>
             <input type="date" id="sz-kezdet" class="inp inp-sm" style="color-scheme:dark;">
           </div>
           <div>
-            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Vége *</label>
+            <label style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Vége *</label>
             <input type="date" id="sz-vege" class="inp inp-sm" style="color-scheme:dark;">
           </div>
           <button class="btn btn-gold btn-sm" onclick="createSzunet()">Hozzáadás</button>
         </div>
-        <div id="sz-msg" style="display:none;font-size:12px;margin-top:8px;"></div>
+        <div id="sz-msg" style="display:none;font-size:12px;margin-top:12px;"></div>
       </div>
 
       <!-- Szünetek listája -->
       <div class="card">
         <div class="card-title">📅 Beállított szünetek <span style="font-size:12px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:400;" id="sz-count">–</span></div>
-        <div id="sz-table"><div class="skel" style="height:160px;border-radius:10px;"></div></div>
-        <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:12px;">💡 A szünetek mentése a Supabase <code style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.4);">szunetek</code> táblában történik.</p>
+        <div id="sz-table"><div class="skel" style="height:180px;border-radius:12px;"></div></div>
+        <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:16px;">💡 A szünetek a Supabase <code style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.45);">szunetek</code> táblában tárolódnak.</p>
       </div>
 
       <!-- Szerkesztő modal -->
-      <div id="sz-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(4,9,15,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
-        <div style="background:#0d1f3a;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:24px;width:100%;max-width:440px;margin:16px;">
-          <h3 style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:16px;">Szünet szerkesztése</h3>
+      <div id="sz-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(4,9,15,.95);backdrop-filter:blur(12px);align-items:center;justify-content:center;">
+        <div style="background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:32px;width:100%;max-width:480px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+          <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:20px;">Szünet szerkesztése</h3>
           <input type="hidden" id="sz-modal-id">
           <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
             <div>
