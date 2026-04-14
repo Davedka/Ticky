@@ -1,3 +1,11 @@
+<?php
+require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/_nav.php';
+
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$route_match = match_route('/osztaly/{kod}', $uri);
+$selected_kod = $route_match ? urldecode($route_match['kod']) : null;
+?>
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -62,21 +70,14 @@
 </style>
 </head>
 <body>
-<div class="top-line"></div>
-
-<div class="ticky-sidebar">
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
-  <div class="tsb-divider"></div>
-  <a href="/support" class="tsb-item" data-label="Support">✉️</a>
-  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
-</div>
+<?php ticky_nav('osztaly', $selected_kod ?: 'Osztály kereső'); ?>
 
 <div class="mobile-bottom-bar">
   <a href="/" class="mbb-item"><span class="mbb-icon">🏠</span>Főoldal</a>
   <a href="/termek" class="mbb-item"><span class="mbb-icon">🏫</span>Termek</a>
   <a href="/tanar" class="mbb-item"><span class="mbb-icon">👩‍🏫</span>Tanár</a>
   <a href="/osztaly" class="mbb-item active"><span class="mbb-icon">🎒</span>Osztály</a>
-  <a href="/admin" class="mbb-item"><span class="mbb-icon">⚙️</span>Admin</a>
+
 </div>
 
 <div class="relative z-10 flex flex-col items-center px-4 pt-6 sm:pt-8 pb-16">
@@ -165,8 +166,10 @@ async function loadOsztalyok() {
     // Évfolyamok csoportosítása
     const evfolyamok = {}
     list.forEach(kod => {
+      // _du, _ff stb. → Egyéb; különben évfolyam alapján
       const m = kod.match(/^(\d+)\./)
-      const ev = m ? m[1] + '. évfolyam' : 'Egyéb'
+      const hasUnderscore = kod.includes('_')
+      const ev = (m && !hasUnderscore) ? m[1] + '. évfolyam' : 'Egyéb'
       if (!evfolyamok[ev]) evfolyamok[ev] = []
       evfolyamok[ev].push(kod)
     })
