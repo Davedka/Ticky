@@ -137,7 +137,7 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
       <?php foreach ($links as $l): ?>
         <a href="<?= $l['href'] ?>" class="tn-link<?= $aktiv===$l['key']?' active':'' ?>"><?= $l['label'] ?></a>
       <?php endforeach; ?>
-      <a href="/admin" class="tn-link gold">⚙️ Admin</a>
+      <?php if (admin_can_see_ui()): ?><a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="tn-link gold">⚙️ Admin</a><?php endif; ?>
     </div>
     <div class="tn-hamburger" id="tn-hamburger" onclick="tnToggle()"><span></span><span></span><span></span></div>
   </div>
@@ -148,7 +148,7 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
   <?php endforeach; ?>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
-  <a href="/admin" class="mm-gold">⚙️ Admin</a>
+  <?php if (admin_can_see_ui()): ?><a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="mm-gold">⚙️ Admin</a><?php endif; ?>
 </div>
 <script>
 function tnToggle(){const m=document.getElementById('tn-mobile'),h=document.getElementById('tn-hamburger');const o=m.classList.toggle('open');h.classList.toggle('open',o);}

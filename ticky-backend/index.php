@@ -187,7 +187,9 @@ if ($uri === '/') {
     <a href="/osztaly" class="nav-link">Osztály</a>
     <a href="/qr"      class="nav-link">QR</a>
     <a href="/kijelzo" class="nav-link">Kijelző</a>
-    <a href="/admin"   class="nav-link gold">⚙️ Admin</a>
+    <?php if (admin_can_see_ui()): ?>
+    <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="nav-link gold">⚙️ Admin</a>
+    <?php endif; ?>
   </div>
   <!-- Hamburger (mobile) -->
   <div class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -204,7 +206,9 @@ if ($uri === '/') {
   <a href="/kijelzo">📺 Kijelző</a>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
-  <a href="/admin" class="mm-gold">⚙️ Admin panel</a>
+  <?php if (admin_can_see_ui()): ?>
+  <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="mm-gold">⚙️ Admin panel</a>
+  <?php endif; ?>
 </div>
 
 <!-- Főtartalom -->
@@ -301,7 +305,14 @@ if (match_route('/api/tanar/{kod}/orarend',$uri)!==false) { require __DIR__.'/ap
 if (match_route('/api/osztaly/{kod}/orarend',$uri)!==false) { require __DIR__.'/api/osztaly_orarend.php'; exit; }
 if (match_route('/api/terem/{szam}',$uri)!==false) { require __DIR__.'/api/terem.php'; exit; }
 if (match_route('/api/napirend/{szam}',$uri)!==false) { require __DIR__.'/api/napirend.php'; exit; }
-if ($uri === '/admin') { require __DIR__.'/pages/admin.php'; exit; }
+if ($uri === '/login') { require __DIR__.'/pages/login.php'; exit; }
+if ($uri === '/api/auth/login') { require __DIR__.'/api/auth/login.php'; exit; }
+if ($uri === '/api/auth/logout') { require __DIR__.'/api/auth/logout.php'; exit; }
+if ($uri === '/api/admin/felhasznalok') { require __DIR__.'/api/admin_felhasznalok.php'; exit; }
+if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
+if ($uri === '/api/admin/szunet' || match_route('/api/admin/szunet/{id}', $uri)!==false) { require __DIR__.'/api/admin_szunet.php'; exit; }
+if ($uri === '/api/admin/felhasznalo' || match_route('/api/admin/felhasznalo/{id}', $uri)!==false) { require __DIR__.'/api/admin_felhasznalo.php'; exit; }
+if ($uri === '/admin' || admin_path_matches_request($uri)) { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if (match_route('/api/admin/terem/{szam}',$uri)!==false) { require __DIR__.'/api/admin_terem.php'; exit; }
 
