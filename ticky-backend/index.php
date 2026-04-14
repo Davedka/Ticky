@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
+require_once __DIR__ . '/utils/_nav.php';
 
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
@@ -111,7 +112,9 @@ if ($uri === '/') {
     <a href="/osztaly" class="nav-link">Osztály</a>
     <a href="/qr"      class="nav-link">QR</a>
     <a href="/kijelzo" class="nav-link">Kijelző</a>
+    <?php if (ticky_is_admin_authed()): ?>
     <a href="/admin"   class="nav-link gold">⚙️ Admin</a>
+    <?php endif; ?>
   </div>
   <div class="hamburger" id="hamburger" onclick="toggleMenu()">
     <span></span><span></span><span></span>
@@ -126,7 +129,9 @@ if ($uri === '/') {
   <a href="/kijelzo">📺 Kijelző</a>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
+  <?php if (ticky_is_admin_authed()): ?>
   <a href="/admin" class="mm-gold">⚙️ Admin panel</a>
+  <?php endif; ?>
 </div>
 
 <div class="main">
@@ -273,12 +278,6 @@ if ($uri === '/api/admin/felhasznalo' || $params !== false) {
     require __DIR__.'/api/admin_felhasznalo.php'; exit;
 }
 if ($uri === '/admin')          { require __DIR__.'/pages/admin.php'; exit; }
-if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/szunetek.php'; exit; }
- 
-$params = match_route('/api/admin/szunetek/{id}', $uri);
-if ($params !== false) {
-    require __DIR__.'/api/szunetek.php'; exit;
-}
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
 $params = match_route('/api/admin/szunet/{id}', $uri);
