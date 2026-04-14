@@ -1,14 +1,15 @@
 <?php
-// pages/login.php
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
 private_response_headers();
 
-// Ha már be van jelentkezve, redirect
-$session = $_COOKIE['ticky_user_session'] ?? '';
-if ($session !== '') {
-    // Gyors ellenőrzés – ha érvényes, főoldalra
+if (ticky_is_admin_authed()) {
+    header('Location: ' . admin_url());
+    exit;
+}
+
+if (ticky_current_user() !== null) {
     header('Location: /termek');
     exit;
 }
@@ -73,13 +74,13 @@ if ($session !== '') {
 
 <script>
 const fnevEl = document.getElementById('fnev')
-const pwEl   = document.getElementById('pw')
-const btn    = document.getElementById('login-btn')
-const errEl  = document.getElementById('login-err')
+const pwEl = document.getElementById('pw')
+const btn = document.getElementById('login-btn')
+const errEl = document.getElementById('login-err')
 
 async function doLogin() {
   const fnev = fnevEl.value.trim()
-  const pw   = pwEl.value
+  const pw = pwEl.value
   errEl.style.display = 'none'
 
   if (!fnev || !pw) {
@@ -100,15 +101,14 @@ async function doLogin() {
     const d = await res.json()
 
     if (d.ok) {
-      // Sikeres bejelentkezés → főoldalra
-      window.location.href = '/termek'
+      window.location.href = d.redirect || '/termek'
     } else {
       errEl.textContent = d.error || 'Hibás felhasználónév vagy jelszó'
       errEl.style.display = 'block'
       pwEl.value = ''
       pwEl.focus()
     }
-  } catch (e) {
+  } catch (error) {
     errEl.textContent = 'Szerverhiba. Próbáld újra.'
     errEl.style.display = 'block'
   } finally {
@@ -117,9 +117,8 @@ async function doLogin() {
   }
 }
 
-// Enter billentyű
-pwEl.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() })
-fnevEl.addEventListener('keydown', e => { if (e.key === 'Enter') pwEl.focus() })
+pwEl.addEventListener('keydown', event => { if (event.key === 'Enter') doLogin() })
+fnevEl.addEventListener('keydown', event => { if (event.key === 'Enter') pwEl.focus() })
 </script>
 </body>
 </html>

@@ -100,6 +100,7 @@ function admin_path_value(): string {
 
     $raw = trim((string) (getenv('ADMIN_PATH') ?: ($_ENV['ADMIN_PATH'] ?? '')));
     $raw = trim($raw, " \t\n\r\0\x0B\"'");
+    $raw = preg_replace('/\\\\[nrt]/', '', $raw) ?? $raw;
     if ($raw === '') {
         $path = '/admin';
         return $path;
@@ -260,7 +261,145 @@ function admin_visibility_cookie_is_valid(): bool {
 }
 
 function admin_can_see_ui(): bool {
-    return admin_is_configured() && (admin_is_authenticated() || admin_visibility_cookie_is_valid());
+    return admin_is_authenticated() || admin_visibility_cookie_is_valid() || ticky_current_user_is_admin();
+}
+
+function ticky_user_cookie_name(): string {
+    return 'ticky_user_session';
+}
+
+function ticky_user_cookie_options(int $expires): array {
+    return [
+        'expires' => $expires,
+        'path' => '/',
+        'secure' => ticky_is_https(),
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ];
+}
+
+function ticky_session_signing_key(): string {
+    static $key = null;
+
+    if ($key !== null) {
+        return $key;
+    }
+
+    $parts = array_filter([
+        admin_password(),
+        SUPABASE_SERVICE_KEY,
+        SUPABASE_ANON_KEY,
+        'ticky_user_session',
+    ], static fn($value) => $value !== '');
+
+    $key = implode('|', $parts);
+    return $key === '' ? 'ticky_user_session_fallback' : $key;
+}
+
+function ticky_issue_user_session_token(string $user_id, ?int $expires_at = null): string {
+    $expires_at ??= time() + (12 * 3600);
+    $nonce = bin2hex(random_bytes(32));
+    $payload = $nonce . '|' . $user_id . '|' . $expires_at;
+    $signature = hash_hmac('sha256', $payload, ticky_session_signing_key());
+    return base64_encode($payload) . '.' . $signature;
+}
+
+function ticky_set_user_session(string $user_id): void {
+    $expires_at = time() + (12 * 3600);
+    setcookie(
+        ticky_user_cookie_name(),
+        ticky_issue_user_session_token($user_id, $expires_at),
+        ticky_user_cookie_options($expires_at)
+    );
+}
+
+function ticky_clear_user_session(): void {
+    setcookie(ticky_user_cookie_name(), '', ticky_user_cookie_options(time() - 3600));
+}
+
+function ticky_read_user_session_payload(): ?array {
+    $cookie = trim((string) ($_COOKIE[ticky_user_cookie_name()] ?? ''));
+    if ($cookie === '' || !str_contains($cookie, '.')) {
+        return null;
+    }
+
+    [$payload_b64, $signature] = explode('.', $cookie, 2);
+    if ($payload_b64 === '' || $signature === '') {
+        return null;
+    }
+
+    $payload = base64_decode($payload_b64, true);
+    if ($payload === false) {
+        return null;
+    }
+
+    $expected = hash_hmac('sha256', $payload, ticky_session_signing_key());
+    if (!hash_equals($expected, $signature)) {
+        return null;
+    }
+
+    $parts = explode('|', $payload);
+    if (count($parts) !== 3) {
+        return null;
+    }
+
+    [$nonce, $user_id, $expires_raw] = $parts;
+    if (!preg_match('/^[a-f0-9]{64}$/', $nonce)) {
+        return null;
+    }
+    if (!preg_match('/^[0-9a-f-]{36}$/i', $user_id)) {
+        return null;
+    }
+    if (!ctype_digit($expires_raw)) {
+        return null;
+    }
+
+    $expires_at = (int) $expires_raw;
+    if ($expires_at < time()) {
+        return null;
+    }
+
+    return [
+        'user_id' => $user_id,
+        'expires_at' => $expires_at,
+    ];
+}
+
+function ticky_current_user(): ?array {
+    static $loaded = false;
+    static $user = null;
+
+    if ($loaded) {
+        return $user;
+    }
+    $loaded = true;
+
+    $payload = ticky_read_user_session_payload();
+    if ($payload === null) {
+        return null;
+    }
+
+    $rows = sb_get('felhasznalok', [
+        'id' => 'eq.' . $payload['user_id'],
+        'aktiv' => 'eq.true',
+        'select' => 'id,felhasznalonev,nev,szerep,aktiv',
+    ], 'service');
+
+    if (empty($rows)) {
+        return null;
+    }
+
+    $user = $rows[0];
+    return $user;
+}
+
+function ticky_current_user_is_admin(): bool {
+    $user = ticky_current_user();
+    return is_array($user) && (($user['szerep'] ?? '') === 'admin');
+}
+
+function ticky_is_admin_authed(): bool {
+    return admin_is_authenticated() || ticky_current_user_is_admin();
 }
 
 function require_admin_api_request(array $allowed_methods): void {
@@ -271,11 +410,7 @@ function require_admin_api_request(array $allowed_methods): void {
         json_error('Érvénytelen kérés', 405);
     }
 
-    if (!admin_is_configured()) {
-        json_error('Nem található', 404);
-    }
-
-    if (!admin_is_authenticated()) {
+    if (!ticky_is_admin_authed()) {
         json_error('Hozzáférés megtagadva', 401);
     }
 

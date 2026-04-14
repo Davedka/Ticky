@@ -5,37 +5,7 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-handle_cors();
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_error('Csak POST kérés', 405);
-}
-
-// ── Auth – inline logika, nem a helper-re támaszkodunk ──
-// Pontosan ugyanaz mint admin.php-ban: HMAC-SHA256 a jelszóból
-$admin_pw = trim((string) (getenv('ADMIN_PASSWORD') ?: ($_ENV['ADMIN_PASSWORD'] ?? '')));
-
-if (!empty($admin_pw)) {
-    $expected = hash_hmac('sha256', 'ticky_admin_' . $admin_pw, $admin_pw);
-
-    // 1. Cookie (normál böngészős bejelentkezés)
-    $cookie = $_COOKIE['ticky_auth'] ?? '';
-
-    // 2. Ha nincs cookie, próbáljuk Authorization header-ből
-    if ($cookie === '') {
-        $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (str_starts_with($auth_header, 'Bearer ')) {
-            $cookie = substr($auth_header, 7);
-        }
-    }
-
-    if (!hash_equals($expected, $cookie)) {
-        http_response_code(403);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Nincs jogosultságod – jelentkezz be az admin panelen']);
-        exit;
-    }
-}
+require_admin_api_request(['POST']);
 
 // ── Body ────────────────────────────────────────────
 $raw_body = file_get_contents('php://input') ?: '';

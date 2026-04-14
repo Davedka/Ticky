@@ -1,17 +1,10 @@
 <?php
-// api/auth/logout.php
-// POST /api/auth/logout
-
 require_once __DIR__ . '/../../utils/helpers.php';
+
 handle_cors(['POST', 'OPTIONS']);
 
-$is_https = ticky_is_https();
-setcookie('ticky_user_session', '', [
-    'expires'  => time() - 3600,
-    'path'     => '/',
-    'secure'   => $is_https,
-    'httponly' => true,
-    'samesite' => 'Strict',
-]);
+admin_clear_auth_cookie();
+admin_clear_visibility_cookie();
+ticky_clear_user_session();
 
 json_response(['ok' => true]);

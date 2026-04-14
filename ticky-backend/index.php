@@ -112,8 +112,8 @@ if ($uri === '/') {
     <a href="/osztaly" class="nav-link">Osztály</a>
     <a href="/qr"      class="nav-link">QR</a>
     <a href="/kijelzo" class="nav-link">Kijelző</a>
-    <?php if (ticky_is_admin_authed()): ?>
-    <a href="/admin"   class="nav-link gold">⚙️ Admin</a>
+    <?php if (admin_can_see_ui()): ?>
+    <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="nav-link gold">⚙️ Admin</a>
     <?php endif; ?>
   </div>
   <div class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -129,8 +129,8 @@ if ($uri === '/') {
   <a href="/kijelzo">📺 Kijelző</a>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
-  <?php if (ticky_is_admin_authed()): ?>
-  <a href="/admin" class="mm-gold">⚙️ Admin panel</a>
+  <?php if (admin_can_see_ui()): ?>
+  <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="mm-gold">⚙️ Admin panel</a>
   <?php endif; ?>
 </div>
 
@@ -277,7 +277,7 @@ if ($uri === '/api/admin/felhasznalo' || $params !== false) {
     if ($params !== false) $_GET['id'] = $params['id'];
     require __DIR__.'/api/admin_felhasznalo.php'; exit;
 }
-if ($uri === '/admin')          { require __DIR__.'/pages/admin.php'; exit; }
+if ($uri === '/admin' || admin_path_matches_request($uri)) { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
 $params = match_route('/api/admin/szunet/{id}', $uri);
