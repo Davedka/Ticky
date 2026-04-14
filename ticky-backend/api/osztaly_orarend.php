@@ -1,177 +1,159 @@
 <?php
+// api/osztaly_orarend.php
+// GET /api/osztaly/{kod}/orarend
+// FIX: Nem require-olja az osztaly_helpers.php-t külön – a ticky_source.php
+//      már betölti az osztaly.php-t. Duplikált require → PHP fatal error → betöltési hiba.
+
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/szunet.php';
 
 handle_cors();
 
-function osztaly_valid_code(string $value): bool
-{
-    return preg_match('/^[\p{L}\p{N}.-]{1,32}$/u', $value) === 1;
-}
-
-function osztaly_resolve_code(string $requested_code): ?string
-{
-    $rows = sb_get('orarendek', [
-        'select' => 'osztaly',
-        'aktiv' => 'eq.true',
-        'order' => 'osztaly.asc',
-    ]);
-
-    $requested_normalized = function_exists('mb_strtolower')
-        ? mb_strtolower($requested_code, 'UTF-8')
-        : strtolower($requested_code);
-
-    $classes = [];
-    foreach ($rows as $row) {
-        $class_code = trim((string) ($row['osztaly'] ?? ''));
-        if ($class_code === '') {
-            continue;
-        }
-
-        $classes[$class_code] = true;
-        $normalized_code = function_exists('mb_strtolower')
-            ? mb_strtolower($class_code, 'UTF-8')
-            : strtolower($class_code);
-
-        if ($normalized_code === $requested_normalized) {
-            return $class_code;
-        }
-    }
-
-    if (isset($classes[$requested_code])) {
-        return $requested_code;
-    }
-
-    return null;
-}
-
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $params = match_route('/api/osztaly/{kod}/orarend', $uri);
 
 if ($params === false || empty($params['kod'])) {
     json_error('Hiányzó osztály kód', 400);
 }
 
-$requested_code = trim(urldecode((string) $params['kod']));
-if (!osztaly_valid_code($requested_code)) {
+$kod = trim(urldecode((string) $params['kod']));
+if ($kod === '' || !preg_match('/^[\p{L}\p{N}\s._\/-]{1,64}$/u', $kod)) {
     json_error('Érvénytelen osztály kód', 400);
 }
 
-$class_code = osztaly_resolve_code($requested_code);
-if ($class_code === null) {
-    json_error('Osztály nem található: ' . $requested_code, 404);
+$nap = mai_nap();
+
+// Hétvége
+if ($nap === 0) {
+    json_response(['osztaly' => $kod, 'orak' => [], 'uzenet' => 'Hétvége – nincs tanítás']);
 }
 
-$day = mai_nap();
-if ($day === 0) {
+// Szünet ellenőrzés (Supabase-ből)
+$sz = aktiv_szunet();
+if ($sz !== null) {
     json_response([
-        'osztaly' => $class_code,
-        'orak' => [],
-        'uzenet' => 'Hétvége – nincs tanítás',
+        'osztaly' => $kod,
+        'orak'    => [],
+        'szunet'  => true,
+        'uzenet'  => $sz['nev'] . ' – nincs tanítás (' . $sz['kezdet'] . ' – ' . $sz['vege'] . ')',
     ]);
 }
 
-$lessons_raw = sb_get('orarendek', [
-    'osztaly' => 'ilike.' . $class_code,
-    'het_napja' => 'eq.' . $day,
-    'aktiv' => 'eq.true',
-    'select' => 'ora_sorszam,kezdes,vegzes,tantargy,tanar_id,termek(terem_szam)',
-    'order' => 'kezdes.asc,ora_sorszam.asc',
+// ─── Supabase lekérés ────────────────────────────────────────────────
+$orak_raw = sb_get('orarendek', [
+    'osztaly'   => 'eq.' . $kod,
+    'het_napja' => 'eq.' . $nap,
+    'aktiv'     => 'eq.true',
+    'select'    => 'ora_sorszam,kezdes,vegzes,tantargy,terem_id,tanar_id',
+    'order'     => 'kezdes.asc,ora_sorszam.asc',
 ]);
 
-$teacher_ids = array_values(array_filter(array_unique(array_column($lessons_raw, 'tanar_id'))));
-$teacher_map = [];
-if (!empty($teacher_ids)) {
-    $teachers = sb_get('tanarok', [
-        'id' => 'in.(' . implode(',', $teacher_ids) . ')',
-        'select' => 'id,rovid_nev,nev',
-    ]);
+// ─── Ha nincs Supabase adat → tanárok.js fallback ────────────────────
+if (empty($orak_raw)) {
+    $src = __DIR__ . '/../utils/ticky_source.php';
+    if (is_file($src)) {
+        try {
+            // ticky_source.php betölti az osztaly.php-t (ne töltsük újra!)
+            require_once $src;
+            if (function_exists('ticky_source_class_lessons_for_day')) {
+                $result = ticky_source_class_lessons_for_day($kod, $nap);
+                if ($result !== null) {
+                    $orak = [];
+                    foreach ($result['orak'] ?? [] as $o) {
+                        $cs = $o['csoportok'] ?? [];
+                        $norm_cs = array_map(fn($c) => [
+                            'terem'    => (string) ($c['terem']    ?? '?'),
+                            'tanar'    => (string) ($c['tanar']    ?? '?'),
+                            'tanar_nev'=> $c['tanar_nev'] ?? null,
+                        ], $cs);
+                        $orak[] = [
+                            'kezdes'      => (string) ($o['kezdes']      ?? ''),
+                            'vegzes'      => (string) ($o['vegzes']      ?? ''),
+                            'ora_sorszam' => $o['ora_sorszam'] ?? null,
+                            'tantargy'    => (string) ($o['tantargy']    ?? ''),
+                            'is_csoport'  => $o['is_csoport']  ?? (count($cs) > 1),
+                            'terem'       => (string) ($o['terem']       ?? '?'),
+                            'tanar'       => (string) ($o['tanar']       ?? '?'),
+                            'tanar_nev'   => $o['tanar_nev'] ?? null,
+                            'csoportok'   => $norm_cs,
+                        ];
+                    }
+                    json_response(['osztaly' => $result['osztaly'], 'orak' => $orak]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // ticky_source nem elérhető vagy hiba → üres napirend
+        }
+    }
+    json_response(['osztaly' => $kod, 'orak' => []]);
+}
 
-    foreach ($teachers as $teacher) {
-        $teacher_map[$teacher['id']] = $teacher;
+// ─── Tanárnevek ──────────────────────────────────────────────────────
+$tanar_map = [];
+$ids = array_unique(array_filter(array_column($orak_raw, 'tanar_id')));
+if (!empty($ids)) {
+    foreach (sb_get('tanarok', ['id' => 'in.(' . implode(',', $ids) . ')', 'select' => 'id,rovid_nev,nev']) as $t) {
+        $tanar_map[$t['id']] = $t;
     }
 }
 
-$grouped = [];
-foreach ($lessons_raw as $lesson) {
-    $room = $lesson['termek']['terem_szam'] ?? '?';
-    $teacher = $teacher_map[$lesson['tanar_id']] ?? null;
-    $teacher_code = $teacher['rovid_nev'] ?? '?';
-    $teacher_name = $teacher['nev'] ?? null;
-    $subject = trim((string) ($lesson['tantargy'] ?? ''));
-    $start = substr((string) ($lesson['kezdes'] ?? ''), 0, 5);
-    $end = substr((string) ($lesson['vegzes'] ?? ''), 0, 5);
-    $key = $start . '_' . $end;
-
-    if (!isset($grouped[$key])) {
-        $grouped[$key] = [
-            'kezdes' => $start,
-            'vegzes' => $end,
-            'ora_sorszam' => $lesson['ora_sorszam'] ?? null,
-            'csoportok' => [],
-        ];
-    }
-
-    $already_exists = false;
-    foreach ($grouped[$key]['csoportok'] as $group) {
-        if (
-            $group['terem'] === $room
-            && $group['tanar'] === $teacher_code
-            && $group['tantargy'] === $subject
-        ) {
-            $already_exists = true;
-            break;
-        }
-    }
-
-    if (!$already_exists) {
-        $grouped[$key]['csoportok'][] = [
-            'terem' => $room,
-            'tanar' => $teacher_code,
-            'tanar_nev' => $teacher_name,
-            'tantargy' => $subject,
-        ];
+// ─── Termek ──────────────────────────────────────────────────────────
+$terem_map = [];
+$ids = array_unique(array_filter(array_column($orak_raw, 'terem_id')));
+if (!empty($ids)) {
+    foreach (sb_get('termek', ['id' => 'in.(' . implode(',', $ids) . ')', 'select' => 'id,terem_szam']) as $t) {
+        $terem_map[$t['id']] = $t['terem_szam'];
     }
 }
 
-$lessons = [];
-foreach ($grouped as $lesson) {
-    $rooms = [];
-    $teacher_codes = [];
-    $teacher_names = [];
-    $subjects = [];
+// ─── Csoportosítás ───────────────────────────────────────────────────
+$map = [];
+foreach ($orak_raw as $o) {
+    $key   = $o['kezdes'] . '_' . $o['vegzes'];
+    $tanar = $tanar_map[$o['tanar_id']] ?? null;
+    $terem = $terem_map[$o['terem_id']] ?? '?';
 
-    foreach ($lesson['csoportok'] as $group) {
-        if (!in_array($group['terem'], $rooms, true)) {
-            $rooms[] = $group['terem'];
-        }
-        if (!in_array($group['tanar'], $teacher_codes, true)) {
-            $teacher_codes[] = $group['tanar'];
-        }
-        if (!empty($group['tanar_nev']) && !in_array($group['tanar_nev'], $teacher_names, true)) {
-            $teacher_names[] = $group['tanar_nev'];
-        }
-        if ($group['tantargy'] !== '' && !in_array($group['tantargy'], $subjects, true)) {
-            $subjects[] = $group['tantargy'];
-        }
+    if (!isset($map[$key])) {
+        $map[$key] = [
+            'kezdes'      => $o['kezdes'],
+            'vegzes'      => $o['vegzes'],
+            'ora_sorszam' => $o['ora_sorszam'] ?? null,
+            'tantargy'    => $o['tantargy']    ?? '',
+            'csoportok'   => [],
+        ];
     }
-
-    $lessons[] = [
-        'kezdes' => $lesson['kezdes'],
-        'vegzes' => $lesson['vegzes'],
-        'ora_sorszam' => $lesson['ora_sorszam'],
-        'is_csoport' => count($lesson['csoportok']) > 1,
-        'terem' => implode(' / ', $rooms),
-        'tanar' => implode(' / ', $teacher_codes),
-        'tanar_nev' => implode(' / ', $teacher_names),
-        'tantargy' => implode(' / ', $subjects),
-        'csoportok' => $lesson['csoportok'],
+    foreach ($map[$key]['csoportok'] as $c) {
+        if ($c['terem'] === $terem && $c['tanar'] === ($tanar['rovid_nev'] ?? '?')) continue 2;
+    }
+    $map[$key]['csoportok'][] = [
+        'terem'    => $terem,
+        'tanar'    => $tanar['rovid_nev'] ?? '?',
+        'tanar_nev'=> $tanar['nev']       ?? null,
     ];
 }
 
-usort($lessons, static fn(array $left, array $right): int => strcmp($left['kezdes'], $right['kezdes']));
+$orak = [];
+foreach ($map as $o) {
+    $cs = $o['csoportok'];
+    $termek_lista = $tanarok_lista = [];
+    foreach ($cs as $c) {
+        if (!in_array($c['terem'], $termek_lista,  true)) $termek_lista[]  = $c['terem'];
+        if (!in_array($c['tanar'], $tanarok_lista, true)) $tanarok_lista[] = $c['tanar'];
+    }
+    $orak[] = [
+        'kezdes'      => substr($o['kezdes'], 0, 5),
+        'vegzes'      => substr($o['vegzes'], 0, 5),
+        'ora_sorszam' => $o['ora_sorszam'],
+        'tantargy'    => $o['tantargy'],
+        'is_csoport'  => count($cs) > 1,
+        'terem'       => implode(' / ', $termek_lista),
+        'tanar'       => implode(', ', $tanarok_lista),
+        'tanar_nev'   => count($cs) === 1 ? ($cs[0]['tanar_nev'] ?? null) : null,
+        'csoportok'   => $cs,
+    ];
+}
 
-json_response([
-    'osztaly' => $class_code,
-    'orak' => $lessons,
-]);
+usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
+
+json_response(['osztaly' => $kod, 'orak' => $orak]);

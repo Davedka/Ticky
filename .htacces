@@ -1,0 +1,22 @@
+Options -Indexes
+
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
+
+RewriteEngine On
+Options -Indexes
+
+<FilesMatch "^\.|\.json$|config/|utils/">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+<Files "index.php">
+    Allow from all
+</Files>

@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ticky – Support</title>
-<link rel="icon" type="image/png" href="/favicon.png">
-<link rel="shortcut icon" href="/favicon.ico">
+<link rel="icon" type="image/png" href="/favicon.png?v=<?= filemtime('favicon.png') ?>">
+<link rel="shortcut icon" href="/favicon.ico?v=<?= filemtime('favicon.ico') ?>">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>

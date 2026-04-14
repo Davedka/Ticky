@@ -1,87 +1,108 @@
 <?php
+// api/admin_terem.php
+// PATCH /api/admin/terem/{szam}  { emelet, nev }
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-require_admin_api_request(['PATCH']);
+handle_cors(['PATCH', 'OPTIONS'], ['Content-Type', 'X-Ticky-Admin']);
+private_response_headers();
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// ── Auth ─────────────────────────────────────────────────────────────
+$admin_pw = trim((string) (getenv('ADMIN_PASSWORD') ?: ($_ENV['ADMIN_PASSWORD'] ?? '')));
+if ($admin_pw === '') {
+    json_error('Admin nincs konfigurálva', 500);
+}
+
+$expected = hash_hmac('sha256', 'ticky_admin_' . $admin_pw, $admin_pw);
+$cookie   = $_COOKIE['ticky_auth'] ?? '';
+if ($cookie === '' || !hash_equals($expected, $cookie)) {
+    json_error('Hozzáférés megtagadva', 403);
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'PATCH') {
+    json_error('Csak PATCH kérés', 405);
+}
+
+if ((string) ($_SERVER['HTTP_X_TICKY_ADMIN'] ?? '') !== '1') {
+    json_error('Érvénytelen admin kérés', 400);
+}
+
+// ── Terem szám kinyerése URL-ből ─────────────────────────────────────
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $params = match_route('/api/admin/terem/{szam}', $uri);
+$szam   = $params['szam'] ?? ($_GET['szam'] ?? '');
 
-if ($params === false) {
-    json_error('Érvénytelen kérés', 405);
+if ($szam === '' || $szam === null) {
+    json_error('Hiányzó terem szám', 400);
 }
 
-$terem_szam = strtoupper(trim(urldecode((string) $params['szam'])));
-$body = json_decode(file_get_contents('php://input') ?: '', true);
-if (!is_array($body)) {
-    json_error('Ervenytelen JSON', 400);
-}
-
-if (!preg_match('/^[\p{L}\p{N}._-]{1,32}$/u', $terem_szam)) {
-    json_error('Ervenytelen terem azonosito', 400);
+// ── Body ──────────────────────────────────────────────────────────────
+$input = json_decode(file_get_contents('php://input') ?: '', true);
+if (!is_array($input)) {
+    json_error('Érvénytelen JSON', 400);
 }
 
 $update = [];
-if (array_key_exists('emelet', $body)) {
-    if ($body['emelet'] === null || $body['emelet'] === '') {
+
+if (array_key_exists('emelet', $input)) {
+    if ($input['emelet'] === null || $input['emelet'] === '') {
         $update['emelet'] = null;
     } else {
-        $emelet = filter_var(
-            $body['emelet'],
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 0, 'max_range' => 5]]
-        );
-        if ($emelet === false) {
-            json_error('Ervenytelen emelet', 400);
+        $e = (int) $input['emelet'];
+        if ($e < 0 || $e > 10) {
+            json_error('Érvénytelen emelet érték (0–10)', 400);
         }
-
-        $update['emelet'] = $emelet;
+        $update['emelet'] = $e;
     }
 }
-if (array_key_exists('aktiv', $body)) {
-    $aktiv = filter_var($body['aktiv'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-    if ($aktiv === null) {
-        json_error('Ervenytelen aktiv ertek', 400);
-    }
 
-    $update['aktiv'] = $aktiv;
+if (array_key_exists('nev', $input)) {
+    $update['nev'] = trim((string) $input['nev']) ?: null;
 }
 
 if (empty($update)) {
-    json_error('Nincs mit frissíteni', 400);
+    json_error('Nincs módosítandó adat', 400);
 }
 
-$termek = sb_get('termek', [
-    'terem_szam' => 'eq.' . $terem_szam,
-    'select' => 'id',
-]);
-
-if (empty($termek)) {
-    json_error('Terem nem található: ' . $terem_szam, 404);
-}
-
-$id = $termek[0]['id'];
-$url = SUPABASE_URL . '/rest/v1/termek?id=eq.' . $id;
-$key = SUPABASE_SERVICE_KEY;
+// ── Supabase PATCH ────────────────────────────────────────────────────
+$sb_url = SUPABASE_URL . '/rest/v1/termek?terem_szam=eq.' . urlencode($szam);
+$sb_key = SUPABASE_SERVICE_KEY;
+$payload = json_encode($update, JSON_UNESCAPED_UNICODE);
 
 $ctx = stream_context_create([
     'http' => [
-        'method' => 'PATCH',
-        'header' => implode("\r\n", [
-            'apikey: ' . $key,
-            'Authorization: Bearer ' . $key,
+        'method'        => 'PATCH',
+        'header'        => implode("\r\n", [
+            'apikey: '               . $sb_key,
+            'Authorization: Bearer ' . $sb_key,
             'Content-Type: application/json',
+            'Content-Length: '       . strlen($payload),
             'Prefer: return=minimal',
         ]),
-        'content' => json_encode($update, JSON_UNESCAPED_UNICODE),
-        'timeout' => 5,
+        'content'       => $payload,
+        'timeout'       => 8,
+        'ignore_errors' => true,
     ],
 ]);
 
-$raw = @file_get_contents($url, false, $ctx);
-if ($raw === false) {
-    json_error('Supabase frissítési hiba', 500);
+$result    = @file_get_contents($sb_url, false, $ctx);
+$http_code = 200;
+if (isset($http_response_header)) {
+    foreach ($http_response_header as $h) {
+        if (preg_match('#^HTTP/\S+\s+(\d+)#', $h, $m)) {
+            $http_code = (int) $m[1];
+            break;
+        }
+    }
 }
 
-json_response(['ok' => true, 'terem' => $terem_szam, 'update' => $update]);
+if ($result === false || $http_code >= 400) {
+    json_error('Supabase frissítési hiba (HTTP ' . $http_code . ')', 500);
+}
+
+json_response([
+    'ok'    => true,
+    'szam'  => $szam,
+    'update' => $update,
+]);
