@@ -155,5 +155,6 @@ foreach ($map as $o) {
 }
 
 usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
+$orak = merge_consecutive_orak($orak);
 
 json_response(['osztaly' => $kod, 'orak' => $orak]);
