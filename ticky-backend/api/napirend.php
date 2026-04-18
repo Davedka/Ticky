@@ -66,7 +66,7 @@ if ($het_egeszben) {
         $het[$d][]=['ora_sorszam'=>$o['ora_sorszam'],'tanar'=>$tr['rovid_nev']??'?','tanar_nev'=>$tr['nev']??null,'osztaly'=>$o['osztaly'],'tantargy'=>$o['tantargy'],'kezdes'=>substr($o['kezdes'],0,5),'vegzes'=>substr($o['vegzes'],0,5)];
     }
     $napok=[];
-    for ($d=1;$d<=5;$d++) $napok[]=['nap'=>$d,'nap_neve'=>$NAP_NEVEK[$d],'orak'=>$het[$d]??[]];
+    for ($d=1;$d<=5;$d++) $napok[]=['nap'=>$d,'nap_neve'=>$NAP_NEVEK[$d],'orak'=>merge_consecutive_orak($het[$d]??[])];
     json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'het'=>$napok,'szunet'=>$sz?$sz['nev']:null]);
 } else {
     $result=[];
@@ -75,5 +75,6 @@ if ($het_egeszben) {
         $k=substr($o['kezdes'],0,5); $v=substr($o['vegzes'],0,5);
         $result[]=['ora_sorszam'=>$o['ora_sorszam'],'tanar'=>$tr['rovid_nev']??'?','tanar_nev'=>$tr['nev']??null,'osztaly'=>$o['osztaly'],'tantargy'=>$o['tantargy'],'kezdes'=>$k,'vegzes'=>$v,'folyamatban'=>($ido>=$k&&$ido<=$v)];
     }
+    $result = merge_consecutive_orak($result);
     json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'nap'=>$nap??mai_nap(),'nap_neve'=>$NAP_NEVEK[$nap??mai_nap()]??'','ido'=>$ido,'orak'=>$result,'szunet'=>$sz?$sz['nev']:null]);
 }
