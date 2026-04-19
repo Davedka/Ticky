@@ -1,0 +1,70 @@
+# Changelog
+
+A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
+
+Formátum a [Keep a Changelog](https://keepachangelog.com/hu/1.1.0/) szerint,
+a verziózás pedig [Semantic Versioning](https://semver.org/spec/v2.0.0.html) alapján történik.
+
+---
+
+## [1.2.0] – 2026-04-19
+
+### 🐛 Javítva
+- **Időzóna bug:** a tanár nézetben az aktuális óra elcsúszva jelent meg, mert a szerver és a kliens idő nem volt szinkronban. A backend most már `DateTime` objektumokkal dolgozik az `Europe/Budapest` időzóna alapján.
+- **Dupla óra határeset:** ha két óra közvetlenül egymás után következett (pl. 08:00–08:45 és 08:45–09:30), a 08:45-ös pillanatban az algoritmus már a következő órát mutatta. A fix: ha `ido === vegzes` és van következő óra amelynek `kezdes === vegzes`, az előző óra marad aktív a záró pillanatban.
+- **`13.c_du` és hasonló kódok** mostantól az „Egyéb" kategóriába kerülnek, nem pedig a 13. évfolyamba.
+- **Admin link a navbarban:** korábban mindenki látta, most csak az jelentkezett admin számára jelenik meg.
+
+### ✨ Hozzáadva
+- **Szünetek Supabase-ben:** hardcoded lista helyett `szunetek` tábla, teljes CRUD az admin panelen.
+- **Szünet banner minden oldalon:** tanár, osztály, terem, termek, napirend és kijelző oldal is mutatja ha aktív szünet van.
+- **Osztály oldal teljesen újraírva:** kártyás layout, élő státusz pill, csoportbontás megjelenítése.
+- **Tanár oldal újraírva:** ugyanolyan kártyás UI mint az osztály, heti napirend lista, progress bar az aktuális óránál.
+- **Felhasználók tab admin panelen:** bcrypt jelszó, szerep (admin/user), aktív toggle, jelszó csere modal.
+- **Mobil hamburger menü** a navbarban.
+
+### 🚀 Teljesítmény
+- **Lighthouse Desktop:** Performance 99, Accessibility 96, Best Practices 100, SEO 90
+- **Lighthouse Mobile:** Performance 83, Accessibility 96, Best Practices 100, SEO 90
+
+---
+
+## [1.1.0] – 2026-04-05
+
+### ✨ Hozzáadva
+- **Admin panel:** Dashboard (élő foglalt termek), Tanárok kezelése (teljes név hozzáadása rövid kódhoz).
+- **QR generátor:** nyomtatható QR kódok az összes teremhez, tömeges kiválasztás.
+- **Kijelző mód (`/kijelzo`):** folyosói monitorra tervezett teljes képernyős nézet az összes terem élő állapotával.
+- **Support oldal** egyszerű űrlappal + GitHub issue link.
+
+### 🎨 Változott
+- Glassmorphism design rendszer: sötét navy háttér, arany accent, Playfair Display + DM Sans fontok.
+- Floating oldal-sidebar + mobilon bottom bar.
+
+---
+
+## [1.0.0] – 2026-03-20
+
+### ✨ Első kiadás
+- **QR-alapú teremnézet:** `/terem/{szám}` – élő foglaltság, aktuális óra, következő óra, progress bar.
+- **Teljes heti órarend nézet:** `/terem/{szám}/nap` – desktop grid + mobil tabs.
+- **Termek lista:** `/termek` – élő foglalt/szabad státusz minden teremnél, szűrés + kereső.
+- **Tanár kereső** és **osztály kereső** oldalak.
+- **PHP 8 + Supabase PostgreSQL** backend Render.com-on.
+- **Órarendek, tanárok, termek, osztályok** Supabase táblákban.
+
+---
+
+## Jelmagyarázat
+
+- `✨ Hozzáadva` – új funkciók
+- `🎨 Változott` – meglévő funkciók módosítása
+- `🐛 Javítva` – hibajavítások
+- `🗑️ Eltávolítva` – törölt funkciók
+- `🔒 Biztonság` – biztonsági javítások
+- `🚀 Teljesítmény` – gyorsítás, méret-csökkentés
+- `📝 Dokumentáció` – README, docs változás
+
+---
+
+_Az aktuális fejlesztést a [`main`](https://github.com/Davedka/Ticky) branchen követheted._
