@@ -4,8 +4,9 @@ require_once __DIR__ . '/osztaly.php';
 
 function ticky_source_path(): string
 {
-    return dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'tanárok.js';
+    return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'tanárok.js';
 }
+
 
 function ticky_source_normalize_token(string $value): string
 {
