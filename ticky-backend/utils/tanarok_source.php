@@ -173,6 +173,116 @@ function ticky_source_class_codes(): array
     return $cache;
 }
 
+function ticky_source_teacher_names(): array
+{
+    static $cache = null;
+    if (is_array($cache)) {
+        return $cache;
+    }
+
+    $path = ticky_source_path();
+    if (!is_file($path) || !is_readable($path)) {
+        $cache = [];
+        return $cache;
+    }
+
+    $contents = file_get_contents($path);
+    if ($contents === false) {
+        $cache = [];
+        return $cache;
+    }
+
+    $start = strpos($contents, 'TEACHER_NAMES');
+    if ($start === false) {
+        $cache = [];
+        return $cache;
+    }
+
+    $brace_start = strpos($contents, '{', $start);
+    if ($brace_start === false) {
+        $cache = [];
+        return $cache;
+    }
+
+    $depth = 0;
+    $brace_end = null;
+    $length = strlen($contents);
+    for ($index = $brace_start; $index < $length; $index++) {
+        $char = $contents[$index];
+        if ($char === '{') {
+            $depth++;
+        } elseif ($char === '}') {
+            $depth--;
+            if ($depth === 0) {
+                $brace_end = $index;
+                break;
+            }
+        }
+    }
+
+    if ($brace_end === null) {
+        $cache = [];
+        return $cache;
+    }
+
+    $body = substr($contents, $brace_start + 1, ($brace_end - $brace_start) - 1);
+    preg_match_all('/[\'"]([^\'"]+)[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]/u', $body, $matches, PREG_SET_ORDER);
+
+    $names = [];
+    foreach ($matches as $match) {
+        $code = ticky_source_normalize_token((string) $match[1]);
+        $name = ticky_source_normalize_token((string) $match[2]);
+        if ($code !== '' && $name !== '') {
+            $names[$code] = $name;
+        }
+    }
+
+    $cache = $names;
+    return $cache;
+}
+
+function ticky_source_unique_teachers(): array
+{
+    static $cache = null;
+    if (is_array($cache)) {
+        return $cache;
+    }
+
+    $unique = [];
+    foreach (ticky_source_load_schedule_entries() as $entry) {
+        $code = ticky_source_normalize_token((string) ($entry['teacher'] ?? ''));
+        if ($code !== '') {
+            $unique[$code] = true;
+        }
+    }
+
+    $cache = array_keys($unique);
+    sort($cache);
+    return $cache;
+}
+
+function ticky_source_unique_rooms(): array
+{
+    static $cache = null;
+    if (is_array($cache)) {
+        return $cache;
+    }
+
+    $unique = [];
+    foreach (ticky_source_load_schedule_entries() as $entry) {
+        foreach (ticky_source_split_compound_value((string) ($entry['room'] ?? '')) as $token) {
+            if ($token !== '') {
+                $unique[$token] = true;
+            }
+        }
+    }
+
+    $cache = array_keys($unique);
+    sort($cache);
+    return $cache;
+}
+
+
 function ticky_source_expected_lessons(): array
 {
     static $cache = null;
