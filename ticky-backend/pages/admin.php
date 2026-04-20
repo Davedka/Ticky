@@ -111,6 +111,9 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <button class="navbtn" data-section="szunetek">Szunetek</button>
         <button class="navbtn" data-section="tanarok">Tanarok</button>
         <button class="navbtn" data-section="termek">Termek</button>
+        <button class="navbtn" data-section="termek">Termek</button>
+        <button class="navbtn" data-section="diagnosztika">Diagnosztika</button>
+        <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
         <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
           <a href="/termek" class="navbtn block">Termek live</a>
           <a href="/kijelzo" class="navbtn block">Kijelzo</a>
