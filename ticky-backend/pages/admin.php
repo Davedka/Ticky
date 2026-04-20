@@ -218,6 +218,44 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
           <table class="table" id="rooms-table"></table>
         </div>
       </section>
+              <section id="section-diagnosztika" class="section">
+        <div class="flex items-center justify-between gap-4 mb-5">
+          <div>
+            <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Diagnosztika</h1>
+            <p class="small mt-2">Forras (tanarok.js) es adatbazis osszehasonlitasa, import inditas.</p>
+          </div>
+          <button class="btn btn-ghost" id="reload-diag">Frissites</button>
+        </div>
+
+        <div id="diag-health" class="glass rounded-2xl p-5 mb-5"></div>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-5">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Forras (tanarok.js)</h3>
+            <div id="diag-source" class="space-y-1 small">Betoltes...</div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Adatbazis</h3>
+            <div id="diag-db" class="space-y-1 small">Betoltes...</div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-5 mb-5">
+          <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Osszehasonlitas</h3>
+          <div id="diag-comparison" class="small">Betoltes...</div>
+        </div>
+
+        <div class="glass rounded-2xl p-5">
+          <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Import</h3>
+          <p class="small mb-4">Teljes ujraimportalas a tanarok.js forrásból. Minden tanár, terem és órarend sor törlődik, majd újra beíródik.</p>
+          <div class="flex items-center gap-3">
+            <button class="btn btn-gold" id="run-import">Teljes import</button>
+            <span id="import-status" class="small"></span>
+          </div>
+          <div id="import-result" class="mt-4"></div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -250,7 +288,7 @@ function setSection(name){
   state.section=name;
   document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='section-'+name));
   document.querySelectorAll('.navbtn[data-section]').forEach(el=>el.classList.toggle('active',el.dataset.section===name));
-  const loaders={dashboard:loadDashboard,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms};
+  const loaders={dashboard:loadDashboard,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:loadDiagnosztika};
   loaders[name]?.();
 }
 document.querySelectorAll('.navbtn[data-section]').forEach(btn=>btn.addEventListener('click',()=>setSection(btn.dataset.section)));
@@ -413,7 +451,74 @@ async function autofillRooms(){
   toast(changed+' terem auto kitoltve','info');
   loadRooms();
 }
+async function loadDiagnosztika(){
+  q('diag-health').innerHTML='<div class="small">Betoltes...</div>';
+  q('diag-source').textContent='Betoltes...';
+  q('diag-db').textContent='Betoltes...';
+  q('diag-comparison').textContent='Betoltes...';
+  try{
+    const d=await adminFetch('/api/admin/diagnosztika');
+    const s=d.source||{};
+    const db=d.database||{};
+    const c=d.comparison||{};
+    const h=d.health||{};
+    const statusClass=h.status==='ok'?'green':h.status==='warning'?'gold':'red';
+    let healthHtml=`<div class="flex items-center gap-3 mb-3"><span class="chip ${statusClass}">${esc(h.status||'?').toUpperCase()}</span><span class="small">${esc(d.timestamp||'')}</span></div>`;
+    if((h.issues||[]).length>0){
+      healthHtml+='<ul class="space-y-1 mt-2">';
+      for(const issue of h.issues){
+        const ic=issue.level==='error'?'red':'gold';
+        healthHtml+=`<li><span class="chip ${ic}" style="font-size:10px">${esc(issue.level)}</span> <span class="small">${esc(issue.message)}</span></li>`;
+      }
+      healthHtml+='</ul>';
+    }else{
+      healthHtml+='<p class="small" style="color:#86efac">Minden rendben – nincs hiba vagy figyelmeztetes.</p>';
+    }
+    q('diag-health').innerHTML=healthHtml;
+    q('diag-source').innerHTML=s.file_exists
+      ?`<p>Bejegyzesek: <strong>${s.entries_count??0}</strong></p><p>Tanarok: <strong>${s.unique_teachers??0}</strong></p><p>Termek: <strong>${s.unique_rooms??0}</strong></p><p>Osztalyok: <strong>${s.unique_classes??0}</strong></p><p>Tanar nevek: <strong>${s.teacher_names_count??0}</strong></p>`
+      :'<p style="color:#fda4af">Forras fajl nem talalhato!</p>';
+    q('diag-db').innerHTML=`<p>Tanarok: <strong>${db.tanarok_count??0}</strong></p><p>Termek: <strong>${db.termek_count??0}</strong></p><p>Orarendek: <strong>${db.orarendek_count??0}</strong></p><p>Aktiv orarendek: <strong>${db.orarendek_aktiv_count??0}</strong></p>`;
+    let compHtml='';
+    const show=(label,arr)=>{if(!arr||arr.length===0) return '';return `<p>${esc(label)}: <strong style="color:#fda4af">${arr.join(', ')}</strong></p>`};
+    compHtml+=show('Hianyzo tanarok (DB-bol)',c.missing_teachers);
+    compHtml+=show('Extra tanarok (DB-ben de nincs forrasban)',c.extra_db_teachers);
+    compHtml+=show('Hianyzo termek (DB-bol)',c.missing_rooms);
+    compHtml+=show('Extra termek (DB-ben)',c.extra_db_rooms);
+    compHtml+=show('Nev nelkuli tanarok',c.teachers_without_names);
+    if(c.orphan_orarendek_teacher_count>0) compHtml+=`<p>Arva tanar FK-k: <strong style="color:#fda4af">${c.orphan_orarendek_teacher_count}</strong></p>`;
+    if(c.orphan_orarendek_terem_count>0) compHtml+=`<p>Arva terem FK-k: <strong style="color:#fda4af">${c.orphan_orarendek_terem_count}</strong></p>`;
+    q('diag-comparison').innerHTML=compHtml||'<p style="color:#86efac">Nincs elteres – forras es adatbazis szinkronban.</p>';
+  }catch(error){toast(error.message,'err')}
+}
 
+async function runImport(){
+  if(!confirm('FIGYELEM: Minden tanar, terem es orarend adat torlodik es ujra importalodik a tanarok.js forrasbol. Biztosan folytatod?')) return;
+  q('import-status').textContent='Import folyamatban...';
+  q('import-result').innerHTML='';
+  q('run-import').disabled=true;
+  try{
+    const d=await adminFetch('/api/admin/import',{method:'POST',body:{mode:'full'}});
+    q('import-status').textContent='';
+    let html=`<div class="glass rounded-xl p-4 mt-3"><p><strong style="color:#86efac">Import kesz!</strong></p><p class="small mt-1">Tanarok: ${d.tanarok_inserted??0} | Termek: ${d.termek_inserted??0} | Orarendek: ${d.orarendek_inserted??0}</p><p class="small">Emelet visszaallitva: ${d.emelet_restored??0} | Ido: ${d.duration_ms??0} ms</p>`;
+    if((d.errors||[]).length>0){
+      html+=`<p class="small mt-2" style="color:#fda4af">Hibak (${d.errors.length}):</p><ul class="small" style="color:#fda4af">`;
+      for(const e of d.errors.slice(0,15)) html+=`<li>${esc(e)}</li>`;
+      html+='</ul>';
+    }
+    html+='</div>';
+    q('import-result').innerHTML=html;
+    toast('Import sikeres!');
+    loadDiagnosztika();
+  }catch(error){
+    q('import-status').textContent='';
+    q('import-result').innerHTML=`<div class="glass rounded-xl p-4 mt-3" style="border-color:rgba(244,63,94,.3)"><p style="color:#fda4af">${esc(error.message)}</p></div>`;
+    toast(error.message,'err');
+  }finally{q('run-import').disabled=false}
+}
+
+q('reload-diag').addEventListener('click',loadDiagnosztika);
+q('run-import').addEventListener('click',runImport);
 q('reload-dashboard').addEventListener('click',loadDashboard);
 q('create-user').addEventListener('click',createUser);
 q('reload-users').addEventListener('click',loadUsers);
