@@ -4,8 +4,48 @@ require_once __DIR__ . '/osztaly.php';
 
 function ticky_source_path(): string
 {
-    return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'tanárok.js';
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+
+    $base_dirs = [
+        dirname(__DIR__),
+        dirname(__DIR__, 2),
+        __DIR__,
+        getcwd() ?: dirname(__DIR__),
+    ];
+
+    $filenames = [
+        'tanárok.js',
+        "tana\xcc\x81rok.js",
+        'tanarok.js',
+    ];
+
+    foreach ($base_dirs as $dir) {
+        if (!is_string($dir) || $dir === '' || !is_dir($dir)) {
+            continue;
+        }
+        foreach ($filenames as $name) {
+            $candidate = $dir . DIRECTORY_SEPARATOR . $name;
+            if (is_file($candidate) && is_readable($candidate)) {
+                $cached = $candidate;
+                return $cached;
+            }
+        }
+        $matches = @glob($dir . DIRECTORY_SEPARATOR . 'tan*rok*.js') ?: [];
+        foreach ($matches as $match) {
+            if (is_file($match) && is_readable($match)) {
+                $cached = $match;
+                return $cached;
+            }
+        }
+    }
+
+    $cached = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'tanárok.js';
+    return $cached;
 }
+
 
 
 function ticky_source_normalize_token(string $value): string
