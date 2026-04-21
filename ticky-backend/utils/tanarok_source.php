@@ -9,12 +9,12 @@ function ticky_source_path(): string
         return $cached;
     }
 
-    $base_dirs = [
+    $base_dirs = array_unique(array_filter([
         dirname(__DIR__),
         dirname(__DIR__, 2),
         __DIR__,
         getcwd() ?: dirname(__DIR__),
-    ];
+    ], static fn($d) => is_string($d) && $d !== '' && is_dir($d)));
 
     $filenames = [
         'tanárok.js',
@@ -23,9 +23,6 @@ function ticky_source_path(): string
     ];
 
     foreach ($base_dirs as $dir) {
-        if (!is_string($dir) || $dir === '' || !is_dir($dir)) {
-            continue;
-        }
         foreach ($filenames as $name) {
             $candidate = $dir . DIRECTORY_SEPARATOR . $name;
             if (is_file($candidate) && is_readable($candidate)) {
@@ -33,11 +30,21 @@ function ticky_source_path(): string
                 return $cached;
             }
         }
-        $matches = @glob($dir . DIRECTORY_SEPARATOR . 'tan*rok*.js') ?: [];
-        foreach ($matches as $match) {
-            if (is_file($match) && is_readable($match)) {
-                $cached = $match;
-                return $cached;
+
+        $files = @scandir($dir);
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                $ascii = preg_replace('/[^a-zA-Z0-9._\- ]/u', '', $file) ?? '';
+                if (
+                    (stripos($ascii, 'tanrok') !== false || stripos($ascii, 'tanarok') !== false)
+                    && str_ends_with(trim($file), 'js')
+                ) {
+                    $full = $dir . DIRECTORY_SEPARATOR . $file;
+                    if (is_file($full) && is_readable($full)) {
+                        $cached = $full;
+                        return $cached;
+                    }
+                }
             }
         }
     }
@@ -45,7 +52,6 @@ function ticky_source_path(): string
     $cached = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'tanárok.js';
     return $cached;
 }
-
 
 
 function ticky_source_normalize_token(string $value): string
