@@ -279,6 +279,8 @@ if ($uri === '/api/admin/felhasznalo' || $params !== false) {
 }
 if ($uri === '/admin' || admin_path_matches_request($uri)) { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
+if ($uri === '/api/admin/diagnosztika') { require __DIR__.'/api/admin_diagnosztika.php'; exit; }
+if ($uri === '/api/admin/import') { require __DIR__.'/api/admin_import.php'; exit; }
 if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
 $params = match_route('/api/admin/szunet/{id}', $uri);
 if ($uri === '/api/admin/szunet' || $params !== false) {

@@ -937,6 +937,37 @@ function handle_cors(array $methods = ['GET', 'POST', 'PATCH', 'OPTIONS'], array
             exit;
         }
 
+        function merge_consecutive_orak(array $orak): array
+{
+    if (count($orak) <= 1) {
+        return $orak;
+    }
+
+    $merged = [$orak[0]];
+    for ($i = 1; $i < count($orak); $i++) {
+        $last = &$merged[count($merged) - 1];
+        $curr = $orak[$i];
+        $lp = (int) ($last['ora_sorszam'] ?? 0);
+        $cp = (int) ($curr['ora_sorszam'] ?? 0);
+
+        if (
+            $lp > 0 && $cp === $lp + 1
+            && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
+            && ($curr['terem'] ?? '') === ($last['terem'] ?? '')
+            && ($curr['osztaly'] ?? '') === ($last['osztaly'] ?? '')
+            && ($curr['tanar'] ?? '') === ($last['tanar'] ?? '')
+        ) {
+            $last['vegzes'] = $curr['vegzes'];
+        } else {
+            $merged[] = $curr;
+        }
+        unset($last);
+    }
+
+    return $merged;
+}
+
+
         $origin = trim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''));
         if ($origin !== '') {
             header('Access-Control-Allow-Origin: ' . $origin);

@@ -2,7 +2,11 @@
 // api/osztalyok.php
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+
 require_once __DIR__ . '/../utils/tanarok_source.php';
+
+require_once __DIR__ . '/../utils/tanarok_source.php';
+
 
 handle_cors();
 
