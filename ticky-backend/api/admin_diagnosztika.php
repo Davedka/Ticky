@@ -113,7 +113,6 @@ json_response([
     'timestamp' => date('Y-m-d H:i:s'),
     'source'    => [
         'file_exists'         => $file_exists,
-        'file_path'           => $source_path,
         'entries_count'       => count($entries),
         'unique_teachers'     => count($src_teachers),
         'unique_rooms'        => count($src_rooms),

@@ -3,7 +3,8 @@
   "version": "6.0.0",
   "type": "module",
   "scripts": {
-    "import": "node importer.js"
+    "import": "node importer.js",
+    "test": "node tests/import-source.test.mjs && node tests/security-hardening.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",

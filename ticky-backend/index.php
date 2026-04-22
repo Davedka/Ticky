@@ -3,12 +3,7 @@ require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 require_once __DIR__ . '/utils/_nav.php';
 
-header('X-Frame-Options: SAMEORIGIN');
-header('X-Content-Type-Options: nosniff');
-header('X-XSS-Protection: 1; mode=block');
-header('Referrer-Policy: strict-origin-when-cross-origin');
-header_remove('X-Powered-By');
-
+send_security_headers();
 handle_cors();
 
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -277,7 +272,7 @@ if ($uri === '/api/admin/felhasznalo' || $params !== false) {
     if ($params !== false) $_GET['id'] = $params['id'];
     require __DIR__.'/api/admin_felhasznalo.php'; exit;
 }
-if ($uri === '/admin' || admin_path_matches_request($uri)) { require __DIR__.'/pages/admin.php'; exit; }
+if (admin_path_matches_request($uri)) { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if ($uri === '/api/admin/diagnosztika') { require __DIR__.'/api/admin_diagnosztika.php'; exit; }
 if ($uri === '/api/admin/import') { require __DIR__.'/api/admin_import.php'; exit; }
