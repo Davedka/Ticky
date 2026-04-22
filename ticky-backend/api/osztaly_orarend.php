@@ -51,7 +51,7 @@ $orak_raw = sb_get('orarendek', [
 
 // ─── Ha nincs Supabase adat → tanárok.js fallback ────────────────────
 if (empty($orak_raw)) {
-    $src = __DIR__ . '/../utils/ticky_source.php';
+    $src = __DIR__ . '/../utils/tanarok_source.php';
     if (is_file($src)) {
         try {
             // ticky_source.php betölti az osztaly.php-t (ne töltsük újra!)
@@ -155,5 +155,6 @@ foreach ($map as $o) {
 }
 
 usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
+$orak = merge_consecutive_orak($orak);
 
 json_response(['osztaly' => $kod, 'orak' => $orak]);

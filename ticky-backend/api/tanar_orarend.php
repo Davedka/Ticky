@@ -105,5 +105,6 @@ foreach ($csoportok_map as $o) {
 }
 
 usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
+$orak = merge_consecutive_orak($orak);
 
 json_response(['tanar_nev' => $tanar['nev'] ?? null, 'orak' => $orak]);

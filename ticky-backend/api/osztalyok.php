@@ -2,6 +2,7 @@
 // api/osztalyok.php
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/tanarok_source.php';
 
 handle_cors();
 
@@ -47,7 +48,7 @@ if ($db_classes) {
     }
 }
 
-$js_path = __DIR__ . '/../tanárok.js';
+$js_path = ticky_source_path();
 if (is_file($js_path)) {
     $contents = file_get_contents($js_path);
     preg_match_all("/\bclass\s*:\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
