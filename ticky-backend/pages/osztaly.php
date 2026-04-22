@@ -139,13 +139,14 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
 </div>
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
 const REFRESH = 60_000
 function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 let curKod = null
 
 function updateTime() {
-  document.getElementById('ido').textContent = new Date().toLocaleTimeString('hu-HU', { hour:'2-digit', minute:'2-digit' })
+  document.getElementById('ido').textContent = window.TickyTime ? window.TickyTime.formatHM() : new Date().toLocaleTimeString('hu-HU', { hour:'2-digit', minute:'2-digit' })
 }
 
 function getUrlKod() {
@@ -245,7 +246,7 @@ function setAllapot(a) {
 }
 
 function toMin(t) { const [h,m] = t.split(':').map(Number); return h*60+m }
-function nowMin() { return new Date().getHours()*60+new Date().getMinutes() }
+function nowMin() { return window.TickyTime ? window.TickyTime.nowMinutes() : (new Date().getHours()*60+new Date().getMinutes()) }
 function isAktiv(k,v) { const c=nowMin(); return c>=toMin(k)&&c<=toMin(v) }
 function isMult(v)    { return nowMin()>toMin(v) }
 function calcPct(k,v) { const c=nowMin(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
@@ -271,7 +272,7 @@ async function loadData() {
           <p style="font-size:14px;color:rgba(255,255,255,.5);">Szünet idején nincs tanítás</p>
           <p style="font-size:12px;color:rgba(255,255,255,.3);margin-top:6px;">${escHtml(d.uzenet||'')}</p>
         </div>`
-      document.getElementById('napiblock').innerHTML = ''
+      document.getElementById('lista').innerHTML = ''
       return
     }
     if (d.error) {
@@ -313,9 +314,12 @@ function renderAkt(a, k) {
       // Csoportbontásos óra
       const csoportRows = a.csoportok.map((c,i) => `
         <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="csoport-badge">${i+1}. csoport</span>
-            <span class="text-sm font-medium" style="color:rgba(255,255,255,.8);">${c.tanar_nev||c.tanar}</span>
+          <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              <span class="csoport-badge">${i+1}. csoport</span>
+              <span class="text-sm font-medium" style="color:rgba(255,255,255,.8);">${c.tanar_nev||c.tanar}</span>
+            </div>
+            <span class="text-xs" style="color:rgba(255,255,255,.4);">${c.tantargy || a.tantargy}</span>
           </div>
           <a href="/terem/${encodeURIComponent(c.terem)}" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#f0c76b;">${c.terem}. terem</a>
         </div>`).join('')
@@ -414,8 +418,8 @@ function renderLista(orak) {
       const csRows = o.csoportok.map((c,ci) => `
         <div class="flex items-center gap-1.5 flex-wrap">
           <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">${ci+1}.</span>
-          <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.75)'};">${c.terem}. terem</span>
-          <span class="text-xs" style="color:rgba(255,255,255,.35);">· ${c.tanar}</span>
+          <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.75)'};">${c.tantargy || o.tantargy}</span>
+          <span class="text-xs" style="color:rgba(255,255,255,.35);">${c.terem}. terem · ${c.tanar_nev||c.tanar}</span>
         </div>`).join('')
       body = `
         <div class="flex items-baseline gap-1.5 flex-wrap mb-0.5">

@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../utils/helpers.php'; ?>
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -158,6 +159,7 @@
   
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
 const REFRESH_MS = 60_000
 const NAP   = {1:'H',2:'K',3:'Sze',4:'Cs',5:'P'}
@@ -178,13 +180,18 @@ function getTerem() {
   if(q) return q.toUpperCase()
   return null
 }
-function maiNap() { const d=new Date().getDay(); return(d===0||d===6)?1:d }
+function maiNap() {
+  if (window.TickyTime) return window.TickyTime.schoolDayIndex()
+  const d=new Date().getDay()
+  return(d===0||d===6)?1:d
+}
 function toMin(t) { const[h,m]=t.split(':').map(Number); return h*60+m }
 function topPx(m) { return Math.max(0,(m-START)*PPM) }
-function isAktiv(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return c>=toMin(k)&&c<=toMin(v) }
-function isMult(v) { return new Date().getHours()*60+new Date().getMinutes()>toMin(v) }
-function calcPct(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
-function nowM() { return new Date().getHours()*60+new Date().getMinutes() }
+function nowMin() { return window.TickyTime ? window.TickyTime.nowMinutes() : (new Date().getHours()*60+new Date().getMinutes()) }
+function isAktiv(k,v) { const c=nowMin(); return c>=toMin(k)&&c<=toMin(v) }
+function isMult(v) { return nowMin()>toMin(v) }
+function calcPct(k,v) { const c=nowMin(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
+function nowM() { return nowMin() }
 
 // ── Státusz kártya ───────────────────────────────────
 function setAllapot(a) {
@@ -317,7 +324,7 @@ async function fetchStatus() {
       }
     }
   } catch(e){}
-  const t=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
+  const t=window.TickyTime ? window.TickyTime.formatHM() : new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
   document.getElementById('footer-ido').textContent=t
   // footer-ido2 removed
 }
@@ -335,7 +342,7 @@ async function fetchTimetable() {
 }
 
 function refresh() {
-  const ic=document.getElementById('ri'); ic.classList.add('spinning')
+  const ic=document.getElementById('refresh-icon'); ic.classList.add('spinning')
   Promise.all([fetchStatus(), fetchTimetable()])
     .finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600))
 }
@@ -352,7 +359,7 @@ if(!teremSzam){
   fetchStatus()
   fetchTimetable()
   // Live clock
-  setInterval(()=>{const t=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const el=document.getElementById('footer-ido');if(el)el.textContent=t;},1000)
+  setInterval(()=>{const t=window.TickyTime ? window.TickyTime.formatHMS() : new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const el=document.getElementById('footer-ido');if(el)el.textContent=t;},1000)
   setInterval(fetchStatus, REFRESH_MS)
   setInterval(fetchTimetable, 5*60_000)
 }
