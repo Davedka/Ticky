@@ -32,10 +32,14 @@ function merge_consecutive_orak(array $orak): array {
         $curr = $orak[$i];
         $lp = (int) ($last['ora_sorszam'] ?? 0);
         $cp = (int) ($curr['ora_sorszam'] ?? 0);
+        $last_is_group = !empty($last['is_csoport']) || !empty($last['csoportok']);
+        $curr_is_group = !empty($curr['is_csoport']) || !empty($curr['csoportok']);
 
         if (
             $lp > 0
             && $cp === $lp + 1
+            && !$last_is_group
+            && !$curr_is_group
             && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
             && ($curr['terem'] ?? '') === ($last['terem'] ?? '')
             && ($curr['osztaly'] ?? '') === ($last['osztaly'] ?? '')
@@ -936,37 +940,6 @@ function handle_cors(array $methods = ['GET', 'POST', 'PATCH', 'OPTIONS'], array
             http_response_code(403);
             exit;
         }
-
-        function merge_consecutive_orak(array $orak): array
-{
-    if (count($orak) <= 1) {
-        return $orak;
-    }
-
-    $merged = [$orak[0]];
-    for ($i = 1; $i < count($orak); $i++) {
-        $last = &$merged[count($merged) - 1];
-        $curr = $orak[$i];
-        $lp = (int) ($last['ora_sorszam'] ?? 0);
-        $cp = (int) ($curr['ora_sorszam'] ?? 0);
-
-        if (
-            $lp > 0 && $cp === $lp + 1
-            && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
-            && ($curr['terem'] ?? '') === ($last['terem'] ?? '')
-            && ($curr['osztaly'] ?? '') === ($last['osztaly'] ?? '')
-            && ($curr['tanar'] ?? '') === ($last['tanar'] ?? '')
-        ) {
-            $last['vegzes'] = $curr['vegzes'];
-        } else {
-            $merged[] = $curr;
-        }
-        unset($last);
-    }
-
-    return $merged;
-}
-
 
         $origin = trim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''));
         if ($origin !== '') {

@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../utils/helpers.php'; ?>
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -193,6 +194,7 @@
   <div class="mob-list" id="mob-list"></div>
 </div>
 
+<?php render_time_sync_bootstrap(); ?>
 <script>
 const NAP   = {1:'Hétfő',2:'Kedd',3:'Szerda',4:'Csütörtök',5:'Péntek'}
 const START = 7*60+30   // 450
@@ -209,13 +211,18 @@ function getTerem() {
   const p=location.pathname.split('/').filter(Boolean)
   return (p[0]==='terem'&&p[2]==='nap') ? p[1].toUpperCase() : null
 }
-function maiNap() { const d=new Date().getDay(); return(d===0||d===6)?1:d }
+function maiNap() {
+  if (window.TickyTime) return window.TickyTime.schoolDayIndex()
+  const d=new Date().getDay()
+  return(d===0||d===6)?1:d
+}
 function toMin(t) { const[h,m]=t.split(':').map(Number); return h*60+m }
 function topPx(m) { return Math.max(0,(m-START)*PPM) }
-function isAktiv(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return c>=toMin(k)&&c<=toMin(v) }
-function isMult(v) { return new Date().getHours()*60+new Date().getMinutes()>toMin(v) }
-function pct(k,v) { const c=new Date().getHours()*60+new Date().getMinutes(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
-function nowM() { return new Date().getHours()*60+new Date().getMinutes() }
+function nowMin() { return window.TickyTime ? window.TickyTime.nowMinutes() : (new Date().getHours()*60+new Date().getMinutes()) }
+function isAktiv(k,v) { const c=nowMin(); return c>=toMin(k)&&c<=toMin(v) }
+function isMult(v) { return nowMin()>toMin(v) }
+function pct(k,v) { const c=nowMin(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
+function nowM() { return nowMin() }
 
 // ── Fetch ────────────────────────────────────────────
 async function fetchData() {

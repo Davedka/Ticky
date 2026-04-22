@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
+require_once __DIR__ . '/../utils/tanarok_source.php';
 
 handle_cors();
 
@@ -51,11 +52,7 @@ $orak_raw = sb_get('orarendek', [
 
 // ─── Ha nincs Supabase adat → tanárok.js fallback ────────────────────
 if (empty($orak_raw)) {
-
     $src = __DIR__ . '/../utils/tanarok_source.php';
-
-   $src = __DIR__ . '/../utils/tanarok_source.php';
-
     if (is_file($src)) {
         try {
             // ticky_source.php betölti az osztaly.php-t (ne töltsük újra!)
@@ -70,6 +67,7 @@ if (empty($orak_raw)) {
                             'terem'    => (string) ($c['terem']    ?? '?'),
                             'tanar'    => (string) ($c['tanar']    ?? '?'),
                             'tanar_nev'=> $c['tanar_nev'] ?? null,
+                            'tantargy' => (string) ($c['tantargy'] ?? ''),
                         ], $cs);
                         $orak[] = [
                             'kezdes'      => (string) ($o['kezdes']      ?? ''),
@@ -95,10 +93,15 @@ if (empty($orak_raw)) {
 
 // ─── Tanárnevek ──────────────────────────────────────────────────────
 $tanar_map = [];
+$source_teacher_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
 $ids = array_unique(array_filter(array_column($orak_raw, 'tanar_id')));
 if (!empty($ids)) {
     foreach (sb_get('tanarok', ['id' => 'in.(' . implode(',', $ids) . ')', 'select' => 'id,rovid_nev,nev']) as $t) {
-        $tanar_map[$t['id']] = $t;
+        $rovid = (string) ($t['rovid_nev'] ?? '?');
+        $tanar_map[$t['id']] = [
+            'rovid_nev' => $rovid,
+            'nev' => $t['nev'] ?? ($source_teacher_names[$rovid] ?? null),
+        ];
     }
 }
 
@@ -123,17 +126,31 @@ foreach ($orak_raw as $o) {
             'kezdes'      => $o['kezdes'],
             'vegzes'      => $o['vegzes'],
             'ora_sorszam' => $o['ora_sorszam'] ?? null,
-            'tantargy'    => $o['tantargy']    ?? '',
+            'tantargyak'  => [],
             'csoportok'   => [],
         ];
     }
-    foreach ($map[$key]['csoportok'] as $c) {
-        if ($c['terem'] === $terem && $c['tanar'] === ($tanar['rovid_nev'] ?? '?')) continue 2;
+
+    $tantargy = (string) ($o['tantargy'] ?? '');
+    if ($tantargy !== '' && !in_array($tantargy, $map[$key]['tantargyak'], true)) {
+        $map[$key]['tantargyak'][] = $tantargy;
     }
+
+    foreach ($map[$key]['csoportok'] as $c) {
+        if (
+            $c['terem'] === $terem
+            && $c['tanar'] === ($tanar['rovid_nev'] ?? '?')
+            && ($c['tantargy'] ?? '') === $tantargy
+        ) {
+            continue 2;
+        }
+    }
+
     $map[$key]['csoportok'][] = [
         'terem'    => $terem,
         'tanar'    => $tanar['rovid_nev'] ?? '?',
-        'tanar_nev'=> $tanar['nev']       ?? null,
+        'tanar_nev'=> $tanar['nev']       ?? ($source_teacher_names[$tanar['rovid_nev'] ?? ''] ?? null),
+        'tantargy' => $tantargy,
     ];
 }
 
@@ -149,7 +166,7 @@ foreach ($map as $o) {
         'kezdes'      => substr($o['kezdes'], 0, 5),
         'vegzes'      => substr($o['vegzes'], 0, 5),
         'ora_sorszam' => $o['ora_sorszam'],
-        'tantargy'    => $o['tantargy'],
+        'tantargy'    => implode(' / ', $o['tantargyak']),
         'is_csoport'  => count($cs) > 1,
         'terem'       => implode(' / ', $termek_lista),
         'tanar'       => implode(', ', $tanarok_lista),
