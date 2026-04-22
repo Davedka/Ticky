@@ -51,7 +51,11 @@ $orak_raw = sb_get('orarendek', [
 
 // ─── Ha nincs Supabase adat → tanárok.js fallback ────────────────────
 if (empty($orak_raw)) {
+
+    $src = __DIR__ . '/../utils/tanarok_source.php';
+
    $src = __DIR__ . '/../utils/tanarok_source.php';
+
     if (is_file($src)) {
         try {
             // ticky_source.php betölti az osztaly.php-t (ne töltsük újra!)

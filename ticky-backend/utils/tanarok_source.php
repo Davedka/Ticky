@@ -14,7 +14,7 @@ function ticky_source_path(): string
         dirname(__DIR__, 2),
         __DIR__,
         getcwd() ?: dirname(__DIR__),
-    ], static fn($d) => is_string($d) && $d !== '' && is_dir($d)));
+    ], static fn($dir) => is_string($dir) && $dir !== '' && is_dir($dir)));
 
     $filenames = [
         'tanárok.js',
