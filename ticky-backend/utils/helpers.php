@@ -126,6 +126,30 @@ function private_response_headers(): void {
     header('X-Robots-Tag: noindex, nofollow, noarchive');
 }
 
+function send_security_headers(bool $private = false): void {
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
+    header(
+        "Content-Security-Policy: default-src 'self'; "
+        . "base-uri 'self'; "
+        . "object-src 'none'; "
+        . "frame-ancestors 'self'; "
+        . "form-action 'self'; "
+        . "img-src 'self' data: https:; "
+        . "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; "
+        . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        . "font-src 'self' https://fonts.gstatic.com data:; "
+        . "connect-src 'self';"
+    );
+    header_remove('X-Powered-By');
+
+    if ($private) {
+        private_response_headers();
+    }
+}
+
 function admin_path_value(): string {
     static $path = null;
 
@@ -186,11 +210,7 @@ function admin_is_configured(): bool {
     return admin_password() !== '';
 }
 
-function admin_cookie_name(): string {
-    return 'ticky_admin_session';
-}
-
-function admin_cookie_options(int $expires): array {
+function ticky_auth_cookie_options(int $expires): array {
     return [
         'expires' => $expires,
         'path' => '/',
@@ -200,12 +220,376 @@ function admin_cookie_options(int $expires): array {
     ];
 }
 
+function ticky_client_ip(): string {
+    $ip = trim((string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    $forwarded = trim((string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
+    if ($forwarded !== '') {
+        $parts = explode(',', $forwarded);
+        $candidate = trim($parts[0]);
+        if ($candidate !== '') {
+            $ip = $candidate;
+        }
+    }
+
+    return preg_replace('/[^a-f0-9:.]/i', '_', $ip) ?? 'unknown';
+}
+
+function ticky_user_agent_hash(): string {
+    return substr(hash('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')), 0, 32);
+}
+
+function ticky_random_token(int $bytes = 32): string {
+    try {
+        return bin2hex(random_bytes($bytes));
+    } catch (Throwable $error) {
+        return bin2hex(openssl_random_pseudo_bytes($bytes));
+    }
+}
+
+function ticky_session_cookie_name(): string {
+    return 'ticky_session';
+}
+
+function ticky_session_store_dir(): string {
+    static $dir = null;
+
+    if ($dir !== null) {
+        return $dir;
+    }
+
+    $dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ticky_sessions';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0700, true);
+    }
+
+    return $dir;
+}
+
+function ticky_session_file_path(string $session_id): string {
+    return ticky_session_store_dir() . DIRECTORY_SEPARATOR . 'sess_' . $session_id . '.json';
+}
+
+function ticky_session_hash(string $token): string {
+    return hash_hmac('sha256', $token, ticky_session_signing_key());
+}
+
+function ticky_set_cached_session(?array $session): void {
+    $GLOBALS['__ticky_session_loaded'] = true;
+    $GLOBALS['__ticky_session_cache'] = $session;
+}
+
+function ticky_cached_session_loaded(): bool {
+    return !empty($GLOBALS['__ticky_session_loaded']);
+}
+
+function ticky_rate_limit_file(string $scope): string {
+    $key = $scope . '|' . ticky_client_ip();
+    return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ticky_rl_' . hash('sha256', $key) . '.json';
+}
+
+function ticky_rate_limit_state(string $scope): array {
+    $file = ticky_rate_limit_file($scope);
+    if (!is_file($file)) {
+        return ['attempts' => [], 'blocked_until' => 0];
+    }
+
+    $raw = @file_get_contents($file);
+    $data = json_decode($raw ?: '', true);
+    if (!is_array($data)) {
+        return ['attempts' => [], 'blocked_until' => 0];
+    }
+
+    return [
+        'attempts' => array_values(array_filter($data['attempts'] ?? [], 'is_int')),
+        'blocked_until' => (int) ($data['blocked_until'] ?? 0),
+    ];
+}
+
+function ticky_write_rate_limit_state(string $scope, array $state): void {
+    @file_put_contents(ticky_rate_limit_file($scope), json_encode($state), LOCK_EX);
+}
+
+function ticky_rate_limit_wait_seconds(string $scope, int $window, int $max_attempts, int $block_seconds): int {
+    $state = ticky_rate_limit_state($scope);
+    $now = time();
+
+    if (($state['blocked_until'] ?? 0) > $now) {
+        return (int) $state['blocked_until'] - $now;
+    }
+
+    $state['attempts'] = array_values(array_filter(
+        $state['attempts'] ?? [],
+        static fn($attempt) => $attempt > ($now - $window)
+    ));
+
+    if (count($state['attempts']) >= $max_attempts) {
+        $state['blocked_until'] = $now + $block_seconds;
+        ticky_write_rate_limit_state($scope, $state);
+        return $block_seconds;
+    }
+
+    ticky_write_rate_limit_state($scope, $state);
+    return 0;
+}
+
+function ticky_record_rate_limit_failure(string $scope, int $window, int $max_attempts, int $block_seconds): int {
+    $state = ticky_rate_limit_state($scope);
+    $now = time();
+    $state['attempts'] = array_values(array_filter(
+        $state['attempts'] ?? [],
+        static fn($attempt) => $attempt > ($now - $window)
+    ));
+    $state['attempts'][] = $now;
+
+    $wait = 0;
+    if (count($state['attempts']) >= $max_attempts) {
+        $state['blocked_until'] = $now + $block_seconds;
+        $wait = $block_seconds;
+    }
+
+    ticky_write_rate_limit_state($scope, $state);
+    return $wait;
+}
+
+function ticky_clear_rate_limit(string $scope): void {
+    @unlink(ticky_rate_limit_file($scope));
+}
+
+function ticky_clear_legacy_auth_cookies(): void {
+    $expired = time() - 3600;
+    setcookie(admin_cookie_name(), '', ticky_auth_cookie_options($expired));
+    setcookie(admin_visibility_cookie_name(), '', ticky_auth_cookie_options($expired));
+    setcookie(ticky_user_cookie_name(), '', ticky_auth_cookie_options($expired));
+}
+
+function ticky_parse_session_cookie(): ?array {
+    $raw = trim((string) ($_COOKIE[ticky_session_cookie_name()] ?? ''));
+    if ($raw === '' || !str_contains($raw, '.')) {
+        return null;
+    }
+
+    [$session_id, $token] = explode('.', $raw, 2);
+    if (!preg_match('/^[a-f0-9]{32}$/', $session_id) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
+        return null;
+    }
+
+    return ['id' => $session_id, 'token' => $token];
+}
+
+function ticky_write_session_record(array $record): void {
+    @file_put_contents(
+        ticky_session_file_path((string) $record['id']),
+        json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        LOCK_EX
+    );
+}
+
+function ticky_read_session_record(string $session_id): ?array {
+    if (!preg_match('/^[a-f0-9]{32}$/', $session_id)) {
+        return null;
+    }
+
+    $file = ticky_session_file_path($session_id);
+    if (!is_file($file)) {
+        return null;
+    }
+
+    $raw = @file_get_contents($file);
+    $record = json_decode($raw ?: '', true);
+    if (!is_array($record) || (string) ($record['id'] ?? '') !== $session_id) {
+        return null;
+    }
+
+    return $record;
+}
+
+function ticky_set_session_cookie_value(string $session_id, string $token, int $expires_at): void {
+    setcookie(
+        ticky_session_cookie_name(),
+        $session_id . '.' . $token,
+        ticky_auth_cookie_options($expires_at)
+    );
+}
+
+function ticky_clear_session_cookie(): void {
+    setcookie(ticky_session_cookie_name(), '', ticky_auth_cookie_options(time() - 3600));
+}
+
+function ticky_destroy_session(bool $clear_cookie = true): void {
+    $parsed = ticky_parse_session_cookie();
+    if (is_array($parsed)) {
+        @unlink(ticky_session_file_path((string) $parsed['id']));
+    }
+
+    if ($clear_cookie) {
+        ticky_clear_session_cookie();
+    }
+
+    ticky_clear_legacy_auth_cookies();
+    ticky_set_cached_session(null);
+}
+
+function ticky_issue_session(array $claims, int $ttl_seconds = 43200): array {
+    $now = time();
+    $session_id = ticky_random_token(16);
+    $session_token = ticky_random_token(32);
+    $record = [
+        'id' => $session_id,
+        'token_hash' => ticky_session_hash($session_token),
+        'type' => (string) ($claims['type'] ?? 'guest'),
+        'user_id' => $claims['user_id'] ?? null,
+        'created_at' => $now,
+        'updated_at' => $now,
+        'expires_at' => $now + $ttl_seconds,
+        'fresh_until' => (int) ($claims['fresh_until'] ?? ($now + 900)),
+        'csrf_token' => (string) ($claims['csrf_token'] ?? ticky_random_token(24)),
+        'user_agent_hash' => ticky_user_agent_hash(),
+        'ip_hash' => substr(hash('sha256', ticky_client_ip()), 0, 32),
+    ];
+
+    ticky_write_session_record($record);
+    ticky_set_session_cookie_value($session_id, $session_token, (int) $record['expires_at']);
+    ticky_clear_legacy_auth_cookies();
+    ticky_set_cached_session($record);
+
+    return $record;
+}
+
+function ticky_replace_session(array $claims, int $ttl_seconds = 43200): array {
+    ticky_destroy_session(false);
+    return ticky_issue_session($claims, $ttl_seconds);
+}
+
+function ticky_read_session(): ?array {
+    if (ticky_cached_session_loaded()) {
+        return $GLOBALS['__ticky_session_cache'] ?? null;
+    }
+
+    $parsed = ticky_parse_session_cookie();
+    if (!is_array($parsed)) {
+        ticky_set_cached_session(null);
+        return null;
+    }
+
+    $record = ticky_read_session_record((string) $parsed['id']);
+    if (!is_array($record)) {
+        ticky_destroy_session();
+        return null;
+    }
+
+    if ((int) ($record['expires_at'] ?? 0) < time()) {
+        ticky_destroy_session();
+        return null;
+    }
+
+    if (!hash_equals((string) ($record['token_hash'] ?? ''), ticky_session_hash((string) $parsed['token']))) {
+        ticky_destroy_session();
+        return null;
+    }
+
+    if (!hash_equals((string) ($record['user_agent_hash'] ?? ''), ticky_user_agent_hash())) {
+        ticky_destroy_session();
+        return null;
+    }
+
+    $last_seen = (int) ($record['updated_at'] ?? 0);
+    if ($last_seen < (time() - 60)) {
+        $record['updated_at'] = time();
+        ticky_write_session_record($record);
+    }
+
+    ticky_set_cached_session($record);
+    return $record;
+}
+
+function ticky_ensure_request_session(): array {
+    $session = ticky_read_session();
+    if (is_array($session)) {
+        return $session;
+    }
+
+    return ticky_issue_session(['type' => 'guest'], 2 * 3600);
+}
+
+function ticky_csrf_token(): string {
+    $session = ticky_ensure_request_session();
+    return (string) ($session['csrf_token'] ?? '');
+}
+
+function ticky_request_csrf_token(): string {
+    $header = trim((string) ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+    if ($header !== '') {
+        return $header;
+    }
+
+    if (isset($_POST['csrf_token'])) {
+        return trim((string) $_POST['csrf_token']);
+    }
+
+    return '';
+}
+
+function ticky_has_valid_csrf_token(?string $provided = null): bool {
+    $session = ticky_read_session();
+    if (!is_array($session)) {
+        return false;
+    }
+
+    $provided ??= ticky_request_csrf_token();
+    if ($provided === '') {
+        return false;
+    }
+
+    return hash_equals((string) ($session['csrf_token'] ?? ''), $provided);
+}
+
+function ticky_require_csrf_token(): void {
+    if (!ticky_has_valid_csrf_token()) {
+        json_error('Ervenytelen CSRF token', 419);
+    }
+}
+
+function ticky_require_same_origin_request(): void {
+    if (!ticky_request_origin_is_same_host()) {
+        json_error('Tiltott origin', 403);
+    }
+}
+
+function ticky_require_rate_limit_json(string $scope, int $window, int $max_attempts, int $block_seconds, string $message): void {
+    $wait = ticky_rate_limit_wait_seconds($scope, $window, $max_attempts, $block_seconds);
+    if ($wait <= 0) {
+        return;
+    }
+
+    header('Retry-After: ' . $wait);
+    json_response(['error' => $message, 'retry_after' => $wait], 429);
+}
+
+function ticky_current_session_is_fresh(): bool {
+    $session = ticky_read_session();
+    return is_array($session) && (int) ($session['fresh_until'] ?? 0) >= time();
+}
+
+function ticky_require_fresh_admin_auth(): void {
+    if (!ticky_current_session_is_fresh()) {
+        json_error('Friss bejelentkezes szukseges ehhez a muvelethez', 403);
+    }
+}
+
+function admin_cookie_name(): string {
+    return 'ticky_admin_session';
+}
+
+function admin_cookie_options(int $expires): array {
+    return ticky_auth_cookie_options($expires);
+}
+
 function admin_visibility_cookie_name(): string {
     return 'ticky_admin_visible';
 }
 
 function admin_visibility_cookie_options(int $expires): array {
-    return admin_cookie_options($expires);
+    return ticky_auth_cookie_options($expires);
 }
 
 function admin_user_agent_hash(): string {
@@ -222,8 +606,10 @@ function admin_issue_token(?int $expires_at = null): string {
 }
 
 function admin_set_auth_cookie(): void {
-    $expires_at = time() + (8 * 3600);
-    setcookie(admin_cookie_name(), admin_issue_token($expires_at), admin_cookie_options($expires_at));
+    ticky_replace_session([
+        'type' => 'secret_admin',
+        'fresh_until' => time() + 900,
+    ], 8 * 3600);
 }
 
 function admin_issue_visibility_token(?int $expires_at = null): string {
@@ -232,16 +618,11 @@ function admin_issue_visibility_token(?int $expires_at = null): string {
 }
 
 function admin_set_visibility_cookie(): void {
-    $expires_at = time() + (30 * 24 * 3600);
-    setcookie(
-        admin_visibility_cookie_name(),
-        admin_issue_visibility_token($expires_at),
-        admin_visibility_cookie_options($expires_at)
-    );
+    // Legacy no-op. The admin UI is now shown only for an active admin session.
 }
 
 function admin_clear_auth_cookie(): void {
-    setcookie(admin_cookie_name(), '', admin_cookie_options(time() - 3600));
+    ticky_destroy_session();
 }
 
 function admin_clear_visibility_cookie(): void {
@@ -253,50 +634,16 @@ function admin_is_authenticated(): bool {
         return false;
     }
 
-    $cookie = trim((string) ($_COOKIE[admin_cookie_name()] ?? ''));
-    if ($cookie === '' || !str_contains($cookie, '.')) {
-        return false;
-    }
-
-    [$expires_raw, $signature] = explode('.', $cookie, 2);
-    if (!ctype_digit($expires_raw) || $signature === '') {
-        return false;
-    }
-
-    $expires_at = (int) $expires_raw;
-    if ($expires_at < time()) {
-        return false;
-    }
-
-    return hash_equals(admin_sign_token($expires_at), $signature);
+    $session = ticky_read_session();
+    return is_array($session) && (($session['type'] ?? '') === 'secret_admin');
 }
 
 function admin_visibility_cookie_is_valid(): bool {
-    if (!admin_is_configured()) {
-        return false;
-    }
-
-    $cookie = trim((string) ($_COOKIE[admin_visibility_cookie_name()] ?? ''));
-    if ($cookie === '' || !str_contains($cookie, '.')) {
-        return false;
-    }
-
-    [$expires_raw, $signature] = explode('.', $cookie, 2);
-    if (!ctype_digit($expires_raw) || $signature === '') {
-        return false;
-    }
-
-    $expires_at = (int) $expires_raw;
-    if ($expires_at < time()) {
-        return false;
-    }
-
-    $expected = hash_hmac('sha256', 'ticky_admin_visible|' . $expires_at . '|' . admin_user_agent_hash(), admin_password());
-    return hash_equals($expected, $signature);
+    return false;
 }
 
 function admin_can_see_ui(): bool {
-    return admin_is_authenticated() || admin_visibility_cookie_is_valid() || ticky_current_user_is_admin();
+    return ticky_is_admin_authed();
 }
 
 function ticky_user_cookie_name(): string {
@@ -304,13 +651,7 @@ function ticky_user_cookie_name(): string {
 }
 
 function ticky_user_cookie_options(int $expires): array {
-    return [
-        'expires' => $expires,
-        'path' => '/',
-        'secure' => ticky_is_https(),
-        'httponly' => true,
-        'samesite' => 'Strict',
-    ];
+    return ticky_auth_cookie_options($expires);
 }
 
 function ticky_session_signing_key(): string {
@@ -340,16 +681,15 @@ function ticky_issue_user_session_token(string $user_id, ?int $expires_at = null
 }
 
 function ticky_set_user_session(string $user_id): void {
-    $expires_at = time() + (12 * 3600);
-    setcookie(
-        ticky_user_cookie_name(),
-        ticky_issue_user_session_token($user_id, $expires_at),
-        ticky_user_cookie_options($expires_at)
-    );
+    ticky_replace_session([
+        'type' => 'user',
+        'user_id' => $user_id,
+        'fresh_until' => time() + 900,
+    ], 12 * 3600);
 }
 
 function ticky_clear_user_session(): void {
-    setcookie(ticky_user_cookie_name(), '', ticky_user_cookie_options(time() - 3600));
+    ticky_destroy_session();
 }
 
 function ticky_read_user_session_payload(): ?array {
@@ -409,18 +749,19 @@ function ticky_current_user(): ?array {
     }
     $loaded = true;
 
-    $payload = ticky_read_user_session_payload();
-    if ($payload === null) {
+    $session = ticky_read_session();
+    if (!is_array($session) || (($session['type'] ?? '') !== 'user')) {
         return null;
     }
 
     $rows = sb_get('felhasznalok', [
-        'id' => 'eq.' . $payload['user_id'],
+        'id' => 'eq.' . (string) ($session['user_id'] ?? ''),
         'aktiv' => 'eq.true',
         'select' => 'id,felhasznalonev,nev,szerep,aktiv',
     ], 'service');
 
     if (empty($rows)) {
+        ticky_destroy_session();
         return null;
     }
 
@@ -438,23 +779,22 @@ function ticky_is_admin_authed(): bool {
 }
 
 function require_admin_api_request(array $allowed_methods): void {
-    handle_cors(array_merge($allowed_methods, ['OPTIONS']), ['Content-Type', 'X-Ticky-Admin']);
-    private_response_headers();
+    handle_cors(array_merge($allowed_methods, ['OPTIONS']), ['Content-Type', 'X-CSRF-Token', 'X-Ticky-Admin']);
+    send_security_headers(true);
 
     if (!in_array($_SERVER['REQUEST_METHOD'], $allowed_methods, true)) {
-        json_error('Érvénytelen kérés', 405);
+        json_error('Ervenytelen keres', 405);
+    }
+
+    ticky_require_same_origin_request();
+    ticky_require_csrf_token();
+
+    if ((string) ($_SERVER['HTTP_X_TICKY_ADMIN'] ?? '') !== '1') {
+        json_error('Ervenytelen admin keres', 400);
     }
 
     if (!ticky_is_admin_authed()) {
-        json_error('Hozzáférés megtagadva', 401);
-    }
-
-    if ((string) ($_SERVER['HTTP_X_TICKY_ADMIN'] ?? '') !== '1') {
-        json_error('Érvénytelen admin kérés', 400);
-    }
-
-    if (!ticky_request_origin_is_same_host()) {
-        json_error('Tiltott origin', 403);
+        json_error('Hozzaferes megtagadva', 401);
     }
 }
 

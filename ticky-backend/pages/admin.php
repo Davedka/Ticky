@@ -2,26 +2,38 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-private_response_headers();
-
-if (isset($_GET['logout'])) {
-    admin_clear_auth_cookie();
-    admin_clear_visibility_cookie();
-    ticky_clear_user_session();
-    header('Location: ' . admin_url());
-    exit;
-}
+send_security_headers(true);
 
 $login_error = false;
+$login_error_message = '';
+$secret_login_wait = 0;
+$csrf_token = ticky_csrf_token();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
-    $input = trim((string) $_POST['pw']);
-    if (admin_is_configured() && hash_equals(admin_password(), $input)) {
-        admin_set_auth_cookie();
-        admin_set_visibility_cookie();
-        header('Location: ' . admin_url());
-        exit;
+    if (!ticky_has_valid_csrf_token((string) ($_POST['csrf_token'] ?? ''))) {
+        $login_error = true;
+        $login_error_message = 'Ervenytelen CSRF token.';
+    } else {
+        $secret_login_wait = ticky_rate_limit_wait_seconds('secret_admin', 300, 8, 900);
+        if ($secret_login_wait > 0) {
+            $login_error = true;
+            $login_error_message = 'Tul sok sikertelen secret admin probalkozas. Varj ' . $secret_login_wait . ' masodpercet.';
+        } else {
+            $input = trim((string) $_POST['pw']);
+            if (admin_is_configured() && hash_equals(admin_password(), $input)) {
+                ticky_clear_rate_limit('secret_admin');
+                admin_set_auth_cookie();
+                header('Location: ' . admin_url());
+                exit;
+            }
+
+            ticky_record_rate_limit_failure('secret_admin', 300, 8, 900);
+            $secret_login_wait = ticky_rate_limit_wait_seconds('secret_admin', 300, 8, 900);
+            $login_error = true;
+            $login_error_message = $secret_login_wait > 0
+                ? 'Tul sok sikertelen secret admin probalkozas. Varj ' . $secret_login_wait . ' masodpercet.'
+                : 'Hibas admin jelszo.';
+        }
     }
-    $login_error = true;
 }
 
 $authed = ticky_is_admin_authed();
@@ -30,7 +42,6 @@ $current_user = ticky_current_user();
 $display_name = $current_user['nev'] ?? $current_user['felhasznalonev'] ?? 'Secret admin';
 $auth_mode = is_array($current_user) ? 'felhasznalo' : 'secret';
 $admin_path = admin_url();
-$logout_url = admin_url(['logout' => 1]);
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -66,12 +77,16 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <p class="small mt-2">Ha van admin szerepu felhasznalod, a <a href="/login" class="text-amber-300">/login</a> oldalon be tud lepni es ide fog erkezni.</p>
       <?php else: ?>
         <form method="POST" action="<?= htmlspecialchars($admin_path, ENT_QUOTES, 'UTF-8') ?>" class="space-y-4">
+          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
           <div>
             <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Secret admin jelszo</label>
             <input type="password" name="pw" class="inp" placeholder="ADMIN_PASSWORD" autofocus>
           </div>
           <?php if ($login_error): ?>
-            <p class="text-sm text-rose-300">Hibas admin jelszo.</p>
+            <p class="text-sm text-rose-300"><?= htmlspecialchars($login_error_message, ENT_QUOTES, 'UTF-8') ?></p>
+          <?php endif; ?>
+          <?php if ($secret_login_wait > 0): ?>
+            <p class="small">A secret admin login ideiglenesen rate limitelve van. Ujraprobalas: <?= (int) $secret_login_wait ?> mp.</p>
           <?php endif; ?>
           <button type="submit" class="btn btn-gold w-full justify-center">Belepes</button>
         </form>
@@ -99,7 +114,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <div class="small"><?= $auth_mode === 'felhasznalo' ? 'admin felhasznalo' : 'secret admin' ?></div>
       </div>
       <div id="nav-time" class="small mono hidden sm:block"></div>
-      <a href="<?= htmlspecialchars($logout_url, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-ghost">Kilepes</a>
+      <button type="button" class="btn btn-ghost" id="logout-btn">Kilepes</button>
     </div>
   </header>
 
@@ -111,9 +126,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <button class="navbtn" data-section="szunetek">Szunetek</button>
         <button class="navbtn" data-section="tanarok">Tanarok</button>
         <button class="navbtn" data-section="termek">Termek</button>
-        <button class="navbtn" data-section="termek">Termek</button>
         <button class="navbtn" data-section="diagnosztika">Diagnosztika</button>
-        <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
         <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
           <a href="/termek" class="navbtn block">Termek live</a>
           <a href="/kijelzo" class="navbtn block">Kijelzo</a>
@@ -263,6 +276,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
 <script>
 const state={section:'dashboard',users:[],breaks:[],teachers:[],rooms:[]};
 const currentUserId=<?= json_encode($current_user['id'] ?? null, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const csrfToken=<?= json_encode($csrf_token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
 function toast(msg,type='ok'){const n=document.createElement('div');n.className='toast '+type;n.textContent=msg;document.body.appendChild(n);setTimeout(()=>n.remove(),3200)}
 function q(id){return document.getElementById(id)}
@@ -276,12 +290,25 @@ async function adminFetch(url,options={}){
   const init={credentials:'same-origin',...options};
   const headers=new Headers(init.headers||{});
   headers.set('X-Ticky-Admin','1');
+  headers.set('X-CSRF-Token',csrfToken);
   if(init.body&&typeof init.body!=='string'){headers.set('Content-Type','application/json');init.body=JSON.stringify(init.body)}
   init.headers=headers;
   const res=await fetch(url,init);
   const data=await readJson(res);
   if(!res.ok){throw new Error(data.error||('HTTP '+res.status))}
   return data;
+}
+
+async function logout(){
+  try{
+    await fetch('/api/auth/logout',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'X-CSRF-Token':csrfToken}
+    });
+  }finally{
+    window.location.href='/login';
+  }
 }
 
 function setSection(name){
@@ -372,7 +399,7 @@ async function createUser(){
 async function toggleUser(id,aktiv){try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'PATCH',body:{aktiv}});toast('Felhasznalo frissitve');loadUsers()}catch(error){toast(error.message,'err')}}
 async function setRole(id,szerep){try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'PATCH',body:{szerep}});toast('Szerepkor frissitve');loadUsers()}catch(error){toast(error.message,'err')}}
 async function renameUser(id,currentName){const nev=prompt('Uj nev:',currentName||'');if(nev===null)return;try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'PATCH',body:{nev}});toast('Nev frissitve');loadUsers()}catch(error){toast(error.message,'err')}}
-async function resetUserPassword(id){const jelszo=prompt('Uj jelszo (min. 6 karakter):');if(jelszo===null||jelszo==='')return;try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'PATCH',body:{jelszo}});toast('Jelszo frissitve')}catch(error){toast(error.message,'err')}}
+async function resetUserPassword(id){const jelszo=prompt('Uj jelszo (min. 10 karakter):');if(jelszo===null||jelszo==='')return;try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'PATCH',body:{jelszo}});toast('Jelszo frissitve')}catch(error){toast(error.message,'err')}}
 async function deleteUser(id){if(!confirm('Biztosan torlod ezt a felhasznalot?'))return;try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'DELETE'});toast('Felhasznalo torolve');loadUsers()}catch(error){toast(error.message,'err')}}
 
 function renderBreaks(){
@@ -530,6 +557,7 @@ q('reload-teachers').addEventListener('click',loadTeachers);
 q('room-search').addEventListener('input',renderRooms);
 q('reload-rooms').addEventListener('click',loadRooms);
 q('autofill-rooms').addEventListener('click',autofillRooms);
+q('logout-btn').addEventListener('click',logout);
 
 loadDashboard();
 </script>

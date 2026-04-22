@@ -8,6 +8,7 @@ require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
 
 require_admin_api_request(['POST']);
+ticky_require_fresh_admin_auth();
 
 set_time_limit(120);
 ignore_user_abort(true);

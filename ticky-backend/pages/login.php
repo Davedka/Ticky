@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-private_response_headers();
+send_security_headers(true);
+
+$csrf_token = ticky_csrf_token();
 
 if (ticky_is_admin_authed()) {
     header('Location: ' . admin_url());
@@ -77,6 +79,7 @@ const fnevEl = document.getElementById('fnev')
 const pwEl = document.getElementById('pw')
 const btn = document.getElementById('login-btn')
 const errEl = document.getElementById('login-err')
+const csrfToken = <?= json_encode($csrf_token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
 
 async function doLogin() {
   const fnev = fnevEl.value.trim()
@@ -95,7 +98,10 @@ async function doLogin() {
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
       body: JSON.stringify({ felhasznalonev: fnev, jelszo: pw })
     })
     const d = await res.json()
