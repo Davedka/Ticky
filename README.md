@@ -166,7 +166,7 @@ The importer wipes existing data and re-uploads. Run it whenever the timetable c
 | 4th | 10:15 | 11:00 |
 | 5th | 11:10 | 11:55 |
 | 6th | 12:05 | 12:50 |
-| 7th | 12:50 | 13:35 |
+| 7th | 12:55 | 13:35 |
 | 8th | 13:40 | 14:20 |
 
 ---

@@ -445,7 +445,7 @@ const ORA_IDOK = [
   {kezdes:'10:15',vegzes:'11:00'},
   {kezdes:'11:10',vegzes:'11:55'},
   {kezdes:'12:05',vegzes:'12:50'},
-  {kezdes:'12:50',vegzes:'13:35'},
+  {kezdes:'12:55',vegzes:'13:35'},
   {kezdes:'13:40',vegzes:'14:20'},
 ]
 

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "import": "node importer.js",
-    "test": "node tests/import-source.test.mjs && node tests/security-hardening.test.mjs"
+    "test": "node tests/import-source.test.mjs && node tests/security-hardening.test.mjs && node tests/timetable-merge-audit.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
