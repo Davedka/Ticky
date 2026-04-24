@@ -87,6 +87,19 @@ if ($terem === null && empty($orak)) {
     json_error('Terem nem található: '.$szam, 404);
 }
 
+$orak = array_map(static function (array $ora): array {
+    if (isset($ora['kezdes'])) {
+        $ora['kezdes'] = substr((string) $ora['kezdes'], 0, 5);
+    }
+    if (isset($ora['vegzes'])) {
+        $ora['vegzes'] = substr((string) $ora['vegzes'], 0, 5);
+    }
+    return $ora;
+}, $orak);
+
+usort($orak, static fn(array $left, array $right): int => strcmp((string) ($left['kezdes'] ?? ''), (string) ($right['kezdes'] ?? '')));
+$orak = merge_consecutive_orak($orak);
+
 $aktualis=$kovetkezo=null;
 foreach ($orak as $ora) {
     $k=substr($ora['kezdes'],0,5); $v=substr($ora['vegzes'],0,5);

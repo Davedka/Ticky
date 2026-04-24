@@ -21,6 +21,35 @@ function aktualis_ido(): string {
     return date('H:i');
 }
 
+function ticky_group_merge_signature(array $groups): string {
+    $normalized = [];
+
+    foreach ($groups as $group) {
+        if (!is_array($group)) {
+            continue;
+        }
+
+        $item = [];
+        foreach (['terem', 'osztaly', 'tanar', 'tanar_nev', 'tantargy'] as $key) {
+            if (array_key_exists($key, $group)) {
+                $item[$key] = (string) ($group[$key] ?? '');
+            }
+        }
+
+        ksort($item);
+        $normalized[] = $item;
+    }
+
+    usort($normalized, static function (array $left, array $right): int {
+        return strcmp(
+            (string) json_encode($left, JSON_UNESCAPED_UNICODE),
+            (string) json_encode($right, JSON_UNESCAPED_UNICODE)
+        );
+    });
+
+    return (string) json_encode($normalized, JSON_UNESCAPED_UNICODE);
+}
+
 function merge_consecutive_orak(array $orak): array {
     if (count($orak) <= 1) {
         return $orak;
@@ -34,16 +63,27 @@ function merge_consecutive_orak(array $orak): array {
         $cp = (int) ($curr['ora_sorszam'] ?? 0);
         $last_is_group = !empty($last['is_csoport']) || !empty($last['csoportok']);
         $curr_is_group = !empty($curr['is_csoport']) || !empty($curr['csoportok']);
-
-        if (
-            $lp > 0
-            && $cp === $lp + 1
-            && !$last_is_group
+        $last_group_signature = $last_is_group ? ticky_group_merge_signature($last['csoportok'] ?? []) : '';
+        $curr_group_signature = $curr_is_group ? ticky_group_merge_signature($curr['csoportok'] ?? []) : '';
+        $can_merge_simple = (
+            !$last_is_group
             && !$curr_is_group
             && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
             && ($curr['terem'] ?? '') === ($last['terem'] ?? '')
             && ($curr['osztaly'] ?? '') === ($last['osztaly'] ?? '')
             && ($curr['tanar'] ?? '') === ($last['tanar'] ?? '')
+        );
+        $can_merge_group = (
+            $last_is_group
+            && $curr_is_group
+            && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
+            && $last_group_signature === $curr_group_signature
+        );
+
+        if (
+            $lp > 0
+            && $cp === $lp + 1
+            && ($can_merge_simple || $can_merge_group)
         ) {
             $last['vegzes'] = $curr['vegzes'];
         } else {

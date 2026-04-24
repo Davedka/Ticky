@@ -12,7 +12,7 @@ import {
 } from './osztaly-rules.mjs'
 
 export const NAP = { 'Hétfő': 1, 'Kedd': 2, 'Szerda': 3, 'Csütörtök': 4, 'Péntek': 5 }
-export const ORA = { '07:30': 1, '08:20': 2, '09:15': 3, '10:15': 4, '11:10': 5, '12:05': 6, '12:50': 7, '13:40': 8 }
+export const ORA = { '07:30': 1, '08:20': 2, '09:15': 3, '10:15': 4, '11:10': 5, '12:05': 6, '12:50': 7, '12:55': 7, '13:40': 8 }
 
 export function loadEnvFile(file) {
   if (!existsSync(file)) return {}

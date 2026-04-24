@@ -81,7 +81,7 @@ if (empty($orak_raw)) {
                             'csoportok'   => $norm_cs,
                         ];
                     }
-                    json_response(['osztaly' => $result['osztaly'], 'orak' => $orak]);
+                    json_response(['osztaly' => $result['osztaly'], 'orak' => merge_consecutive_orak($orak)]);
                 }
             }
         } catch (\Throwable $e) {

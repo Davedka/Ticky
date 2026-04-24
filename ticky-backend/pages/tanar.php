@@ -299,6 +299,115 @@ function renderLista(orak){
   }).join('')+'</div>'
 }
 
+function renderAkt(a, k){
+  const el = document.getElementById('aktblock')
+  if(a){
+    const p = calcPct(a.kezdes,a.vegzes)
+    if(a.is_csoport){
+      const csoportRows = a.csoportok.map((c,i)=>`
+        <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;">${i+1}. csoport</span>
+            <span class="text-sm font-medium" style="color:rgba(255,255,255,.82);">${c.osztaly}</span>
+            <span class="text-xs" style="color:rgba(255,255,255,.38);">${c.terem}. terem</span>
+          </div>
+          <span class="text-xs" style="color:rgba(255,255,255,.42);">${c.tantargy || a.tantargy}</span>
+        </div>`).join('')
+
+      el.innerHTML=`<div class="aktiv-card flex flex-col gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Most tanitja</p>
+            <p style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:white;line-height:1.1;">${a.tantargy}</p>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;">Csoportbontas</span>
+        </div>
+        <div class="flex flex-col gap-2">${csoportRows}</div>
+        <div>
+          <div style="height:5px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);">
+            <div style="height:100%;width:${p}%;background:linear-gradient(90deg,#e8334a,#ff6b82);transition:width .6s;"></div>
+          </div>
+          <div class="flex justify-between mt-1" style="font-size:11px;color:rgba(255,255,255,.35);">
+            <span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">${a.vegzes}-ig</span><span>${a.vegzes}</span>
+          </div>
+        </div>
+      </div>`
+      return
+    }
+
+    el.innerHTML=`<div class="aktiv-card flex flex-col gap-3">
+      <div>
+        <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Most itt van</p>
+        <p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.1;">${a.terem}. terem</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztaly</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div>
+        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantargy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div>
+      </div>
+      <div>
+        <div style="height:5px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);">
+          <div style="height:100%;width:${p}%;background:linear-gradient(90deg,#e8334a,#ff6b82);transition:width .6s;"></div>
+        </div>
+        <div class="flex justify-between mt-1" style="font-size:11px;color:rgba(255,255,255,.35);">
+          <span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">${a.vegzes}-ig</span><span>${a.vegzes}</span>
+        </div>
+      </div>
+    </div>`
+  }else if(k){
+    const kovText = k.is_csoport
+      ? `${k.tantargy} · ${k.osztaly} · ${k.terem}. terem`
+      : `${k.terem}. terem`
+    el.innerHTML=`<div class="aktiv-card flex items-center gap-3 py-1">
+      <span style="font-size:26px;">☕</span>
+      <div>
+        <p style="font-weight:600;color:rgba(255,255,255,.8);">Jelenleg szabad</p>
+        <p style="font-size:12px;margin-top:2px;color:rgba(255,255,255,.4);">Kovetkezo: <strong style="color:rgba(255,255,255,.7);">${kovText}</strong> · ${k.kezdes}–${k.vegzes}</p>
+      </div>
+    </div>`
+  }else{
+    el.innerHTML=`<div class="aktiv-card flex items-center gap-3 py-1">
+      <span style="font-size:26px;">✅</span>
+      <div><p style="font-weight:600;color:#4ade80;">Szabad</p><p style="font-size:12px;margin-top:2px;color:rgba(255,255,255,.4);">Ma mar nincs tobb ora</p></div>
+    </div>`
+  }
+}
+
+function renderLista(orak){
+  const el = document.getElementById('napiblock')
+  if(!orak.length){ el.innerHTML=`<p class="text-sm" style="color:rgba(255,255,255,.35);">Nincs mai ora</p>`; return }
+  el.innerHTML='<div class="lista-in">'+orak.map((o,i)=>{
+    const ak=isAktiv(o.kezdes,o.vegzes), mu=isMult(o.vegzes)
+    let body = ''
+    if(o.is_csoport){
+      const csRows = o.csoportok.map((c,ci)=>`
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;">${ci+1}.</span>
+          <span style="font-size:12px;font-weight:500;color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.78)'};">${c.osztaly}</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.35);">${c.terem}. terem · ${c.tantargy || o.tantargy}</span>
+        </div>`).join('')
+      body = `
+        <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
+          <span style="font-size:13px;font-weight:500;color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${o.tantargy}</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;">csoport</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;">${csRows}</div>
+        <p style="font-size:11px;color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
+    } else {
+      body = `
+        <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:500;color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${o.terem}. terem</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.35);">${o.osztaly} · ${o.tantargy}</span>
+        </div>
+        <p style="font-size:11px;color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
+    }
+    return `<div class="ora-row${ak?' aktiv':mu?' mult':''}" style="display:flex;align-items:flex-start;gap:10px;padding:9px 8px;margin:0 -4px;">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:${mu?'rgba(255,255,255,.2)':'rgba(255,255,255,.8)'};width:20px;text-align:right;flex-shrink:0;">${o.ora_sorszam||i+1}</span>
+      <div style="flex:1;min-width:0;">${body}</div>
+      ${ak?`<span style="width:7px;height:7px;border-radius:50%;background:#ff6b82;display:inline-block;animation:pd 2s infinite;flex-shrink:0;"></span>`:''}
+    </div>`
+  }).join('')+'</div>'
+}
+
 function refresh(){ const ic=document.getElementById('ri'); ic.classList.add('spinning'); loadData().finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600)) }
 
 updateTime()
