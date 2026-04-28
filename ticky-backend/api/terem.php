@@ -68,54 +68,65 @@ if (!empty($orak)) {
     }
 }
 
-foreach ($orak as &$o) {
+$grouped=[];
+foreach ($orak as $o) {
     $t=$tanar_nevek[$o['tanar_id']]??null;
-    $o['tanar']    =$t['rovid_nev']??'?';
-    $o['tanar_nev']=$t['nev']??null;
-    unset($o['tanar_id']);
-}
-unset($o);
-
-if (empty($orak) && function_exists('ticky_source_room_lessons_for_day')) {
-    $source_day = ticky_source_room_lessons_for_day($szam, $nap);
-    if ($source_day !== null) {
-        $orak = $source_day['orak'] ?? [];
+    $k=substr($o['kezdes'],0,5); $v=substr($o['vegzes'],0,5);
+    $key=$k.'_'.$v;
+    if (!isset($grouped[$key])) {
+        $grouped[$key]=['ora_sorszam'=>$o['ora_sorszam'],'kezdes'=>$k,'vegzes'=>$v,'csoportok'=>[]];
+    }
+    $tanar_code=$t['rovid_nev']??'?';
+    $tanar_nev=$t['nev']??null;
+    $osztaly=$o['osztaly'];
+    $tantargy=$o['tantargy'];
+    $mar_van=false;
+    foreach ($grouped[$key]['csoportok'] as $c) {
+        if ($c['tanar']===$tanar_code && $c['osztaly']===$osztaly && $c['tantargy']===$tantargy) { $mar_van=true; break; }
+    }
+    if (!$mar_van) {
+        $grouped[$key]['csoportok'][]=['tanar'=>$tanar_code,'tanar_nev'=>$tanar_nev,'osztaly'=>$osztaly,'tantargy'=>$tantargy];
     }
 }
 
-if ($terem === null && empty($orak)) {
-    json_error('Terem nem található: '.$szam, 404);
+$slots=[];
+foreach ($grouped as $slot) {
+    $cs=$slot['csoportok'];
+    $osztalyok=[]; $tanarok=[]; $tantargyak=[];
+    foreach ($cs as $c) {
+        if (!in_array($c['osztaly'],$osztalyok,true)) $osztalyok[]=$c['osztaly'];
+        if (!in_array($c['tanar'],$tanarok,true)) $tanarok[]=$c['tanar'];
+        if (!in_array($c['tantargy'],$tantargyak,true)) $tantargyak[]=$c['tantargy'];
+    }
+    $slots[]=[
+        'ora_sorszam'=>$slot['ora_sorszam'],
+        'tanar'=>implode(' / ',$tanarok),
+        'tanar_nev'=>count($cs)===1?$cs[0]['tanar_nev']:null,
+        'osztaly'=>implode(', ',$osztalyok),
+        'tantargy'=>implode(' / ',$tantargyak),
+        'kezdes'=>$slot['kezdes'],
+        'vegzes'=>$slot['vegzes'],
+    ];
 }
-
-$orak = array_map(static function (array $ora): array {
-    if (isset($ora['kezdes'])) {
-        $ora['kezdes'] = substr((string) $ora['kezdes'], 0, 5);
-    }
-    if (isset($ora['vegzes'])) {
-        $ora['vegzes'] = substr((string) $ora['vegzes'], 0, 5);
-    }
-    return $ora;
-}, $orak);
-
-usort($orak, static fn(array $left, array $right): int => strcmp((string) ($left['kezdes'] ?? ''), (string) ($right['kezdes'] ?? '')));
-$orak = merge_consecutive_orak($orak);
+usort($slots, fn($a,$b)=>strcmp($a['kezdes'],$b['kezdes']));
 
 $aktualis=$kovetkezo=null;
-foreach ($orak as $ora) {
-    $k=substr($ora['kezdes'],0,5); $v=substr($ora['vegzes'],0,5);
+foreach ($slots as $ora) {
+    $k=$ora['kezdes']; $v=$ora['vegzes'];
     if ($ido>=$k&&$ido<=$v) $aktualis=$ora;
     elseif ($ido<$k&&$kovetkezo===null) $kovetkezo=$ora;
 }
 
 if ($aktualis!==null) {
-    $k=substr($aktualis['kezdes'],0,5); $v=substr($aktualis['vegzes'],0,5);
+    $k=$aktualis['kezdes']; $v=$aktualis['vegzes'];
     $pm=(strtotime($v)-strtotime($ido))/60;
-    json_response(['terem'=>$szam,'emelet'=>$emelet,'allapot'=>'foglalt',
+    json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'allapot'=>'foglalt',
         'aktualis'=>['ora_sorszam'=>$aktualis['ora_sorszam'],'tanar'=>$aktualis['tanar'],'tanar_nev'=>$aktualis['tanar_nev'],'osztaly'=>$aktualis['osztaly'],'tantargy'=>$aktualis['tantargy'],'kezdes'=>$k,'vegzes'=>$v,'perc_maradt'=>max(0,(int)$pm)],
-        'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>substr($kovetkezo['kezdes'],0,5),'vegzes'=>substr($kovetkezo['vegzes'],0,5)]:null,
+        'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>$kovetkezo['kezdes'],'vegzes'=>$kovetkezo['vegzes']]:null,
     ]);
 } else {
-    json_response(['terem'=>$szam,'emelet'=>$emelet,'allapot'=>'szabad','aktualis'=>null,
-        'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>substr($kovetkezo['kezdes'],0,5),'vegzes'=>substr($kovetkezo['vegzes'],0,5)]:null,
+    json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'allapot'=>'szabad','aktualis'=>null,
+        'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>$kovetkezo['kezdes'],'vegzes'=>$kovetkezo['vegzes']]:null,
     ]);
+}
 }
