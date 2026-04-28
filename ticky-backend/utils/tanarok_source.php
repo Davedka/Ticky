@@ -368,13 +368,14 @@ function ticky_source_expected_lessons(): array
         $end = substr(ticky_source_normalize_token((string) ($entry['end'] ?? '')), 0, 5);
         $period = ticky_source_period_number($start);
 
-        foreach ($room_codes as $room) {
-            foreach ($class_codes as $class_code) {
+        if (count($room_codes) === count($class_codes) && count($room_codes) > 1) {
+            // ZIP: room 1→class 12.a, room 308→class 12.b
+            for ($zi = 0; $zi < count($room_codes); $zi++) {
                 $lessons[] = [
-                    'terem' => $room,
+                    'terem' => $room_codes[$zi],
                     'tanar' => $teacher,
-                    'tanar_nev' => $teacher_names[$teacher] ?? null,
-                    'osztaly' => $class_code,
+                    'tanar_nev' => null,
+                    'osztaly' => $class_codes[$zi],
                     'tantargy' => $subject,
                     'het_napja' => $day,
                     'ora_sorszam' => $period,
@@ -382,7 +383,23 @@ function ticky_source_expected_lessons(): array
                     'vegzes' => $end,
                 ];
             }
-        }
+        } else {
+            // Cross product (1 room × N classes, or N rooms × 1 class)
+            foreach ($room_codes as $room) {
+                foreach ($class_codes as $class_code) {
+                    $lessons[] = [
+                        'terem' => $room,
+                        'tanar' => $teacher,
+                        'tanar_nev' => null,
+                        'osztaly' => $class_code,
+                        'tantargy' => $subject,
+                        'het_napja' => $day,
+                        'ora_sorszam' => $period,
+                        'kezdes' => $start,
+                        'vegzes' => $end,
+                    ];
+                }
+          }
     }
 
     $cache = $lessons;
