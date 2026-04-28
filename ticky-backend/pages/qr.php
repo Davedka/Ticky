@@ -218,7 +218,7 @@ function updateUI() {
 
 function printSelected() {
   const toPrint=selectedRooms.size>0?selectedRooms:new Set(allRooms)
-  allRooms.forEach(szam=>{const card=document.getElementById(`card-${szam}`);if(!card)return;toPrint.has(szam)?card.classList.add('print-me'):card.classList.remove('print-me')})
+  allRooms.forEach(szam=>{const card=document.getElementById(roomDomId('card',szam));if(!card)return;toPrint.has(szam)?card.classList.add('print-me'):card.classList.remove('print-me')})
   window.print()
   allRooms.forEach(szam=>{document.getElementById(roomDomId('card',szam))?.classList.remove('print-me')})
 }
