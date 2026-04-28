@@ -148,22 +148,21 @@ if ($het_egeszben) {
  }
 }
 
-if ($het_egeszben) {
-    if (!empty($orak)) {
-        $tanar_map = [];
-        $ids = array_unique(array_filter(array_column($orak, 'tanar_id')));
-        if (!empty($ids)) {
-            foreach (sb_get('tanarok', [
-                'id' => 'in.(' . implode(',', $ids) . ')',
-                'select' => 'id,rovid_nev,nev',
-            ]) as $tanar) {
-                $rovid = (string) ($tanar['rovid_nev'] ?? '?');
-                $tanar_map[$tanar['id']] = [
-                    'rovid_nev' => $rovid,
-                    'nev' => $tanar['nev'] ?? ($source_teacher_names[$rovid] ?? null),
-                ];
-            }
-        }
+$orak = [];
+if ($terem_id !== null) {
+    $orarendek_params = [
+        'terem_id' => 'eq.' . $terem_id,
+        'aktiv' => 'eq.true',
+        'select' => 'osztaly,tantargy,kezdes,vegzes,ora_sorszam,het_napja,tanar_id',
+        'order' => 'het_napja.asc,kezdes.asc',
+    ];
+    if ($het_egeszben) {
+        $orarendek_params['het_napja'] = 'in.(1,2,3,4,5)';
+    } else {
+        $orarendek_params['het_napja'] = 'eq.' . $nap;
+    }
+    $orak = sb_get('orarendek', $orarendek_params);
+}
 
         $het = [];
         foreach ($orak as $ora) {
