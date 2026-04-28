@@ -56,14 +56,96 @@ if ($terem_id !== null) {
         'select' => 'osztaly,tantargy,kezdes,vegzes,ora_sorszam,het_napja,tanar_id',
         'order' => 'het_napja.asc,kezdes.asc',
     ];
-
-    if ($het_egeszben) {
-        $orarendek_params['het_napja'] = 'in.(1,2,3,4,5)';
-    } else {
-        $orarendek_params['het_napja'] = 'eq.' . $nap;
+if ($het_egeszben) {
+    $het=[];
+    foreach ($orak as $o) {
+        $d=$o['het_napja']; $tr=$tanar_map[$o['tanar_id']]??null;
+        $k=substr($o['kezdes'],0,5); $v=substr($o['vegzes'],0,5);
+        $key=$d.'_'.$k.'_'.$v;
+        if (!isset($het[$key])) {
+            $het[$key]=['het_napja'=>$d,'ora_sorszam'=>$o['ora_sorszam'],'kezdes'=>$k,'vegzes'=>$v,'csoportok'=>[]];
+        }
+        $tanar_code=$tr['rovid_nev']??'?';
+        $tanar_nev=$tr['nev']??null;
+        $osztaly=$o['osztaly'];
+        $tantargy=$o['tantargy'];
+        $mar_van=false;
+        foreach ($het[$key]['csoportok'] as $c) {
+            if ($c['tanar']===$tanar_code && $c['osztaly']===$osztaly && $c['tantargy']===$tantargy) { $mar_van=true; break; }
+        }
+        if (!$mar_van) {
+            $het[$key]['csoportok'][]=['tanar'=>$tanar_code,'tanar_nev'=>$tanar_nev,'osztaly'=>$osztaly,'tantargy'=>$tantargy];
+        }
     }
-
-    $orak = sb_get('orarendek', $orarendek_params);
+    $napok_data=[];
+    foreach ($het as $slot) {
+        $d=$slot['het_napja'];
+        $cs=$slot['csoportok'];
+        $osztalyok=[]; $tanarok=[]; $tantargyak=[];
+        foreach ($cs as $c) {
+            if (!in_array($c['osztaly'],$osztalyok,true)) $osztalyok[]=$c['osztaly'];
+            if (!in_array($c['tanar'],$tanarok,true)) $tanarok[]=$c['tanar'];
+            if (!in_array($c['tantargy'],$tantargyak,true)) $tantargyak[]=$c['tantargy'];
+        }
+        $napok_data[$d][]=[
+            'ora_sorszam'=>$slot['ora_sorszam'],
+            'tanar'=>implode(' / ',$tanarok),
+            'tanar_nev'=>count($cs)===1?$cs[0]['tanar_nev']:null,
+            'osztaly'=>implode(', ',$osztalyok),
+            'tantargy'=>implode(' / ',$tantargyak),
+            'kezdes'=>$slot['kezdes'],
+            'vegzes'=>$slot['vegzes'],
+        ];
+    }
+    $napok=[];
+    for ($d=1;$d<=5;$d++) $napok[]=['nap'=>$d,'nap_neve'=>$NAP_NEVEK[$d],'orak'=>merge_consecutive_orak($napok_data[$d]??[])];
+    json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'het'=>$napok,'szunet'=>$sz?$sz['nev']:null]);
+} else {
+    $grouped=[];
+    foreach ($orak as $o) {
+        $tr=$tanar_map[$o['tanar_id']]??null;
+        $k=substr($o['kezdes'],0,5); $v=substr($o['vegzes'],0,5);
+        $key=$k.'_'.$v;
+        if (!isset($grouped[$key])) {
+            $grouped[$key]=['ora_sorszam'=>$o['ora_sorszam'],'kezdes'=>$k,'vegzes'=>$v,'csoportok'=>[]];
+        }
+        $tanar_code=$tr['rovid_nev']??'?';
+        $tanar_nev=$tr['nev']??null;
+        $osztaly=$o['osztaly'];
+        $tantargy=$o['tantargy'];
+        $mar_van=false;
+        foreach ($grouped[$key]['csoportok'] as $c) {
+            if ($c['tanar']===$tanar_code && $c['osztaly']===$osztaly && $c['tantargy']===$tantargy) { $mar_van=true; break; }
+        }
+        if (!$mar_van) {
+            $grouped[$key]['csoportok'][]=['tanar'=>$tanar_code,'tanar_nev'=>$tanar_nev,'osztaly'=>$osztaly,'tantargy'=>$tantargy];
+        }
+    }
+    $result=[];
+    foreach ($grouped as $slot) {
+        $cs=$slot['csoportok'];
+        $osztalyok=[]; $tanarok=[]; $tantargyak=[];
+        foreach ($cs as $c) {
+            if (!in_array($c['osztaly'],$osztalyok,true)) $osztalyok[]=$c['osztaly'];
+            if (!in_array($c['tanar'],$tanarok,true)) $tanarok[]=$c['tanar'];
+            if (!in_array($c['tantargy'],$tantargyak,true)) $tantargyak[]=$c['tantargy'];
+        }
+        $k=$slot['kezdes']; $v=$slot['vegzes'];
+        $result[]=[
+            'ora_sorszam'=>$slot['ora_sorszam'],
+            'tanar'=>implode(' / ',$tanarok),
+            'tanar_nev'=>count($cs)===1?$cs[0]['tanar_nev']:null,
+            'osztaly'=>implode(', ',$osztalyok),
+            'tantargy'=>implode(' / ',$tantargyak),
+            'kezdes'=>$k,
+            'vegzes'=>$v,
+            'folyamatban'=>($ido>=$k&&$ido<=$v),
+        ];
+    }
+    usort($result, fn($a,$b)=>strcmp($a['kezdes'],$b['kezdes']));
+    $result = merge_consecutive_orak($result);
+    json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'nap'=>$nap??mai_nap(),'nap_neve'=>$NAP_NEVEK[$nap??mai_nap()]??'','ido'=>$ido,'orak'=>$result,'szunet'=>$sz?$sz['nev']:null]);
+ }
 }
 
 if ($het_egeszben) {
