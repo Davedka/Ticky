@@ -399,7 +399,8 @@ function ticky_source_expected_lessons(): array
                         'vegzes' => $end,
                     ];
                 }
-          }
+            }
+        }
     }
 
     $cache = $lessons;
