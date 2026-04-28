@@ -129,4 +129,3 @@ if ($aktualis!==null) {
         'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>$kovetkezo['kezdes'],'vegzes'=>$kovetkezo['vegzes']]:null,
     ]);
 }
-}
