@@ -74,10 +74,10 @@ function merge_consecutive_orak(array $orak): array {
             && ($curr['tanar'] ?? '') === ($last['tanar'] ?? '')
         );
         $can_merge_group = (
-            _is_group
+            $last_is_group
             && $curr_is_group
-            && ($curr['tantargy'] ?? '') === (['tantargy'] ?? '')
-            && _group_signature === $curr_group_signature
+            && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
+            && $last_group_signature === $curr_group_signature
         );
 
         if (
