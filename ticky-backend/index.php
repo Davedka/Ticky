@@ -6,8 +6,11 @@ require_once __DIR__ . '/utils/_nav.php';
 send_security_headers();
 handle_cors();
 
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
+if (function_exists('ticky_read_session')) {
+    ticky_read_session();
+}
+
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Statikus fájlok védelme (Favicon fix)
 $file = __DIR__ . $uri;
