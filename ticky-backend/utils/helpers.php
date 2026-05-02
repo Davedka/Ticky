@@ -94,7 +94,6 @@ function merge_consecutive_orak(array $orak): array {
     }
 
     return $merged;
-}
 
 function ticky_is_https(): bool {
     if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
