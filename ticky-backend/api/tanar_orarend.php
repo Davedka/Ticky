@@ -117,12 +117,12 @@ foreach ($csoportok_map as $o) {
         'tantargy'    => $o['tantargy'],
         'is_csoport'  => count($cs) > 1,
         'terem'       => implode(' / ', $termek_lista),
-        'osztaly'     => implode(', ', $osztalyok_lista),
+        'osztaly'     => implode('/', $osztalyok_lista),
         'csoportok'   => $cs,
     ];
 }
 
 usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
-$orak = merge_consecutive_orak($orak);
+
 
 json_response(['tanar_nev' => $tanar['nev'] ?? null, 'orak' => $orak]);
