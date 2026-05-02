@@ -615,7 +615,7 @@ function ticky_source_group_teacher_lessons(array $raw_lessons): array
             'tantargy' => (string) ($lesson['tantargy'] ?? ''),
             'is_csoport' => count($lesson['csoportok']) > 1,
             'terem' => implode(' / ', $rooms),
-            'osztaly' => implode(', ', $classes),
+            'osztaly' => implode('/', $classes),
             'csoportok' => $lesson['csoportok'],
         ];
     }
@@ -662,6 +662,7 @@ function ticky_source_teacher_day_schedule(string $requested_teacher, int $day):
     ];
 }
 
+
 function ticky_source_room_lessons_for_day(string $requested_room, int $day): ?array
 {
     $room_code = ticky_source_resolve_room_code($requested_room);
@@ -670,7 +671,8 @@ function ticky_source_room_lessons_for_day(string $requested_room, int $day): ?a
     }
 
     $room_lower = osztaly_lower($room_code);
-    $lessons = [];
+    $teacher_names = ticky_source_teacher_names();
+    $grouped = [];
 
     foreach (ticky_source_expected_lessons() as $lesson) {
         if ((int) ($lesson['het_napja'] ?? 0) !== $day) {
@@ -681,25 +683,69 @@ function ticky_source_room_lessons_for_day(string $requested_room, int $day): ?a
             continue;
         }
 
+        $kezdes = (string) ($lesson['kezdes'] ?? '');
+        $vegzes = (string) ($lesson['vegzes'] ?? '');
+        $key = $kezdes . '_' . $vegzes;
+
+        if (!isset($grouped[$key])) {
+            $grouped[$key] = [
+                'kezdes' => $kezdes,
+                'vegzes' => $vegzes,
+                'ora_sorszam' => $lesson['ora_sorszam'] ?? null,
+                'csoportok' => [],
+            ];
+        }
+
+        $tanar = (string) ($lesson['tanar'] ?? '?');
+        $osztaly = (string) ($lesson['osztaly'] ?? '?');
+        $tantargy = (string) ($lesson['tantargy'] ?? '');
+
+        $exists = false;
+        foreach ($grouped[$key]['csoportok'] as $g) {
+            if ($g['tanar'] === $tanar && $g['osztaly'] === $osztaly && $g['tantargy'] === $tantargy) {
+                $exists = true;
+                break;
+            }
+        }
+        if (!$exists) {
+            $grouped[$key]['csoportok'][] = [
+                'tanar' => $tanar,
+                'tanar_nev' => $teacher_names[$tanar] ?? null,
+                'osztaly' => $osztaly,
+                'tantargy' => $tantargy,
+            ];
+        }
+    }
+
+    $lessons = [];
+    foreach ($grouped as $slot) {
+        $cs = $slot['csoportok'];
+        $tanarok = $osztalyok = $tantargyak = [];
+        foreach ($cs as $c) {
+            if (!in_array($c['tanar'], $tanarok, true)) $tanarok[] = $c['tanar'];
+            if (!in_array($c['osztaly'], $osztalyok, true)) $osztalyok[] = $c['osztaly'];
+            if ($c['tantargy'] !== '' && !in_array($c['tantargy'], $tantargyak, true)) $tantargyak[] = $c['tantargy'];
+        }
         $lessons[] = [
-            'ora_sorszam' => $lesson['ora_sorszam'] ?? null,
-            'tanar' => (string) ($lesson['tanar'] ?? '?'),
-            'tanar_nev' => $lesson['tanar_nev'] ?? null,
-            'osztaly' => (string) ($lesson['osztaly'] ?? '?'),
-            'tantargy' => (string) ($lesson['tantargy'] ?? ''),
-            'kezdes' => (string) ($lesson['kezdes'] ?? ''),
-            'vegzes' => (string) ($lesson['vegzes'] ?? ''),
+            'ora_sorszam' => $slot['ora_sorszam'],
+            'tanar' => implode(' / ', $tanarok),
+            'tanar_nev' => count($cs) === 1 ? ($cs[0]['tanar_nev'] ?? null) : null,
+            'osztaly' => implode('/', $osztalyok),
+            'tantargy' => implode(' / ', $tantargyak),
+            'kezdes' => $slot['kezdes'],
+            'vegzes' => $slot['vegzes'],
+            'is_csoport' => count($cs) > 1,
+            'csoportok' => $cs,
         ];
     }
 
-    usort($lessons, static fn(array $left, array $right): int => strcmp($left['kezdes'], $right['kezdes']));
+    usort($lessons, static fn(array $left, array $right): int => strcmp((string) ($left['kezdes'] ?? ''), (string) ($right['kezdes'] ?? '')));
 
     return [
         'terem' => $room_code,
         'orak' => $lessons,
     ];
 }
-
 function ticky_source_room_lessons_for_week(string $requested_room): ?array
 {
     $room_code = ticky_source_resolve_room_code($requested_room);
