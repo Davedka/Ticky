@@ -51,9 +51,8 @@ function ticky_group_merge_signature(array $groups): string {
 }
 
 function merge_consecutive_orak(array $orak): array {
-    if (count($orak) <= 1) {
-        return $orak;
-    }
+    return $orak;
+}
 
     $merged = [$orak[0]];
     for ($i = 1; $i < count($orak); $i++) {
