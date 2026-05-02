@@ -102,7 +102,7 @@ foreach ($grouped as $slot) {
         'ora_sorszam'=>$slot['ora_sorszam'],
         'tanar'=>implode(' / ',$tanarok),
         'tanar_nev'=>count($cs)===1?$cs[0]['tanar_nev']:null,
-        'osztaly'=>implode(', ',$osztalyok),
+        'osztaly'=>implode('/',$osztalyok),
         'tantargy'=>implode(' / ',$tantargyak),
         'kezdes'=>$slot['kezdes'],
         'vegzes'=>$slot['vegzes'],
