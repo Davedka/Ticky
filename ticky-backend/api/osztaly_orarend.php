@@ -169,7 +169,7 @@ foreach ($map as $o) {
         'tantargy'    => implode(' / ', $o['tantargyak']),
         'is_csoport'  => count($cs) > 1,
         'terem'       => implode(' / ', $termek_lista),
-        'tanar'       => implode(', ', $tanarok_lista),
+        'tanar'       => implode(' / ', $tanarok_lista),
         'tanar_nev'   => count($cs) === 1 ? ($cs[0]['tanar_nev'] ?? null) : null,
         'csoportok'   => $cs,
     ];
