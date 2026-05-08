@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/tanarok_source.php';
 
 handle_cors();
 
@@ -16,6 +17,24 @@ $termek = sb_get('termek', [
     'select' => 'id,terem_szam,emelet',
     'order'  => 'terem_szam.asc',
 ]);
+
+// Fallback: ha üres a DB → tanárok.js-ből
+if (empty($termek) && function_exists('ticky_source_unique_rooms')) {
+    $rooms = ticky_source_unique_rooms();
+    if (!empty($rooms)) {
+        $fallback = array_map(static fn($r) => [
+            'terem_szam' => (string) $r,
+            'emelet' => null,
+        ], $rooms);
+        usort($fallback, static fn($a, $b) => strcmp((string) $a['terem_szam'], (string) $b['terem_szam']));
+        json_response([
+            'termek' => $fallback,
+            'count'  => count($fallback),
+            'nap'    => $nap,
+            'ido'    => $ido,
+        ]);
+    }
+}
 
 if (empty($termek)) {
     json_response(['termek' => [], 'count' => 0, 'nap' => $nap, 'ido' => $ido]);
