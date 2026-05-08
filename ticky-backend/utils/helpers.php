@@ -54,46 +54,6 @@ function merge_consecutive_orak(array $orak): array {
     return $orak;
 }
 
-    $merged = [$orak[0]];
-    for ($i = 1; $i < count($orak); $i++) {
-        $last = &$merged[count($merged) - 1];
-        $curr = $orak[$i];
-        $lp = (int) ($last['ora_sorszam'] ?? 0);
-        $cp = (int) ($curr['ora_sorszam'] ?? 0);
-        $last_is_group = !empty($last['is_csoport']) || !empty($last['csoportok']);
-        $curr_is_group = !empty($curr['is_csoport']) || !empty($curr['csoportok']);
-        $last_group_signature = $last_is_group ? ticky_group_merge_signature($last['csoportok'] ?? []) : '';
-        $curr_group_signature = $curr_is_group ? ticky_group_merge_signature($curr['csoportok'] ?? []) : '';
-        $can_merge_simple = (
-            !$last_is_group
-            && !$curr_is_group
-            && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
-            && ($curr['terem'] ?? '') === ($last['terem'] ?? '')
-            && ($curr['osztaly'] ?? '') === ($last['osztaly'] ?? '')
-            && ($curr['tanar'] ?? '') === ($last['tanar'] ?? '')
-        );
-        $can_merge_group = (
-            $last_is_group
-            && $curr_is_group
-            && ($curr['tantargy'] ?? '') === ($last['tantargy'] ?? '')
-            && $last_group_signature === $curr_group_signature
-        );
-
-        if (
-            $lp > 0
-            && $cp === $lp + 1
-            && ($can_merge_simple || $can_merge_group)
-        ) {
-            $last['vegzes'] = $curr['vegzes'];
-            $last['ora_sorszam'] = $cp;
-        } else {
-            $merged[] = $curr;
-        }
-
-        unset($last);
-    }
-
-    return $merged;
 
 function ticky_is_https(): bool {
     if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
