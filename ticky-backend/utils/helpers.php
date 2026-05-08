@@ -137,7 +137,8 @@ function send_security_headers(bool $private = false): void {
         . "frame-ancestors 'self'; "
         . "form-action 'self'; "
         . "img-src 'self' data: https:; "
-        . "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; "
+        
+        . "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; "
         . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         . "font-src 'self' https://fonts.gstatic.com data:; "
         . "connect-src 'self';"
