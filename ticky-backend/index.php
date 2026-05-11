@@ -312,6 +312,11 @@ if ($params !== false) {
     require __DIR__.'/api/admin_terem.php'; exit;
 }
 
+if ($uri === '/tester') {
+    require __DIR__.'/pages/tester.php';
+    exit;
+}
+
 
 // 404
 http_response_code(404);
