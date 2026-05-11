@@ -2,7 +2,7 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 require_once __DIR__ . '/utils/_nav.php';
-
+require_once __DIR__ . '/../utils/auth.php';
 
 send_security_headers();
 handle_cors();
@@ -274,8 +274,7 @@ if ($params !== false) {
 }
 
 if ($uri === '/login')  { require __DIR__.'/pages/login.php';  exit; }
-if ($uri === '/logout') { require __DIR__.'/pages/logout.php'; exit; }  // ← ÚJ
-
+if ($uri === '/logout') { require __DIR__.'/pages/logout.php'; exit; } 
 
 if ($uri === '/api/auth/login')  { require __DIR__.'/api/auth/login.php'; exit; }
 if ($uri === '/api/auth/logout') { require __DIR__.'/api/auth/logout.php'; exit; }
@@ -289,6 +288,7 @@ if ($uri === '/admin') {
     require __DIR__.'/pages/admin.php';
     exit;
 }
+
 
 if ($uri === '/api/admin/felhasznalok') { require __DIR__.'/api/admin_felhasznalok.php'; exit; }
 $params = match_route('/api/admin/felhasznalo/{id}', $uri);
