@@ -1,10 +1,6 @@
 <?php
 // =============================================================
 //  utils/auth.php
-//  Session-alapú authentikáció a felhasznalok táblán keresztül.
-//  Cseréld le a régi ADMIN_PATH alapú "secret URL" megoldást
-//  erre. A SUPABASE_SERVICE_KEY továbbra is server-side only!
-// =============================================================
 
 require_once __DIR__ . '/../config/supabase.php';
 // supabase_query($table, $method, $payload, $filter) függvényt
