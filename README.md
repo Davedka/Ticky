@@ -324,7 +324,6 @@ I used AI tools throughout the project. Being honest about how is more useful th
 - It kept suggesting a JS frontend framework (React/Vue) when the project clearly didn't need one. I stuck with vanilla JS + Tailwind on purpose.
 **My takeaway:** AI is a fast pair-programmer that doesn't get tired of boilerplate, but it confidently produces wrong code at the edges (time math, off-by-one errors, auth flow corners). Trust nothing without running it.
  
-> *Note: replace the bracketed bits above with the real tools and the real mistakes you caught. Specificity is what makes this section believable.*
  
 ---
  
@@ -346,4 +345,3 @@ Built with ☕ by [**Dávid Kiss**](https://github.com/Davedka) · Mátészalka,
 📧 dkiss0478@gmail.com · 🌐 [davedka.github.io/weboldal](https://davedka.github.io/weboldal)
  
 </div>
- 
