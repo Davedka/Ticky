@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 require_once __DIR__ . '/utils/_nav.php';
+require_once __DIR__ . '/../utils/auth.php';
 
 send_security_headers();
 handle_cors();
@@ -111,7 +112,10 @@ if ($uri === '/') {
     <a href="/qr"      class="nav-link">QR</a>
     <a href="/kijelzo" class="nav-link">Kijelző</a>
     <?php if (admin_can_see_ui()): ?>
-    <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="nav-link gold">⚙️ Admin</a>
+    <a href="/admin" class="nav-link gold">⚙️ Admin</a>
+    <a href="/logout" class="nav-link">Kilépés</a>
+    <?php else: ?>
+    <a href="/login" class="nav-link">Belépés</a>
     <?php endif; ?>
   </div>
   <div class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -128,7 +132,10 @@ if ($uri === '/') {
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
   <?php if (admin_can_see_ui()): ?>
-  <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="mm-gold">⚙️ Admin panel</a>
+  <a href="/admin" class="mm-gold">⚙️ Admin panel</a>
+  <a href="/logout">🚪 Kilépés</a>
+  <?php else: ?>
+  <a href="/login">🔑 Belépés</a>
   <?php endif; ?>
 </div>
 
@@ -266,16 +273,29 @@ if ($params !== false) {
     require __DIR__.'/api/napirend.php'; exit;
 }
 
-if ($uri === '/login') { require __DIR__.'/pages/login.php'; exit; }
+if ($uri === '/login')  { require __DIR__.'/pages/login.php';  exit; }
+if ($uri === '/logout') { require __DIR__.'/pages/logout.php'; exit; }  // ← ÚJ
+
+
 if ($uri === '/api/auth/login')  { require __DIR__.'/api/auth/login.php'; exit; }
 if ($uri === '/api/auth/logout') { require __DIR__.'/api/auth/logout.php'; exit; }
+
+
+if ($uri === '/admin') {
+    if (!admin_can_see_ui()) {
+        header('Location: /login?from=/admin');
+        exit;
+    }
+    require __DIR__.'/pages/admin.php';
+    exit;
+}
+
 if ($uri === '/api/admin/felhasznalok') { require __DIR__.'/api/admin_felhasznalok.php'; exit; }
 $params = match_route('/api/admin/felhasznalo/{id}', $uri);
 if ($uri === '/api/admin/felhasznalo' || $params !== false) {
     if ($params !== false) $_GET['id'] = $params['id'];
     require __DIR__.'/api/admin_felhasznalo.php'; exit;
 }
-if (admin_path_matches_request($uri)) { require __DIR__.'/pages/admin.php'; exit; }
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if ($uri === '/api/admin/diagnosztika') { require __DIR__.'/api/admin_diagnosztika.php'; exit; }
 if ($uri === '/api/admin/import') { require __DIR__.'/api/admin_import.php'; exit; }
@@ -291,6 +311,7 @@ if ($params !== false) {
     $_GET['szam'] = $params['szam'];
     require __DIR__.'/api/admin_terem.php'; exit;
 }
+
 
 // 404
 http_response_code(404);
