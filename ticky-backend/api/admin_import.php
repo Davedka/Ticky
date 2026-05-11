@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/_nav.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
 
 if (!admin_can_see_ui()) {
@@ -55,22 +56,20 @@ if (is_array($existing_rooms)) {
 }
 
 // ── 3. Törlés ────────────────────────────────────────
-$rpc_ok = false;
-$rpc    = sb_request('POST', 'rpc/truncate_all_data', (object) [], [], 'service');
-if ($rpc['success']) {
-    usleep(600_000);
-    $rpc_ok = true;
-}
-
-if (!$rpc_ok) {
-    $delete_tables = ['aktualis_orak', 'napi_orarend', 'orak_rendje', 'orarendek', 'termek', 'tanarok'];
-    foreach ($delete_tables as $table) {
-        $del = sb_request('DELETE', $table, null, ['id' => 'not.is.null'], 'service');
-        if (!$del['success']) {
-            $errors[] = 'Törlés sikertelen: ' . $table;
-        }
-        usleep(200_000);
+// CSAK a 3 adat-táblát, FK-safe sorrendben.
+// View-ket (aktualis_orak, napi_orarend) NEM lehet DELETE-elni.
+// orak_rendje (csengetési rend) seed adat – nem szabad törölni.
+//
+// orarendek-nek van FK-ja termek és tanarok felé (ON DELETE CASCADE),
+// szóval elég lenne a termek + tanarok törlése, de explicit
+// orarendek DELETE elsőként biztonságosabb és gyorsabb.
+$delete_tables = ['orarendek', 'termek', 'tanarok'];
+foreach ($delete_tables as $table) {
+    $del = sb_request('DELETE', $table, null, ['id' => 'not.is.null'], 'service');
+    if (!$del['success']) {
+        $errors[] = 'Törlés sikertelen: ' . $table;
     }
+    usleep(200_000);
 }
 
 // ── 4. Tanárok insert ────────────────────────────────
