@@ -312,7 +312,7 @@ Because the threat model is "a curious student typing `/admin` into the URL bar,
  
 I used AI tools throughout the project. Being honest about how is more useful than pretending I didn't.
  
-**Tools used:** [Claude / ChatGPT / Copilot — *replace with the ones you actually used*]
+**Tools used:** [Claude ]
  
 **Where they helped:**
 - Drafting the initial Supabase SQL schema (then reviewed and tightened by hand)
