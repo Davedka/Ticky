@@ -2,8 +2,6 @@
 
 A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
 
-Formátum a [Keep a Changelog](https://keepachangelog.com/hu/1.1.0/) szerint,
-a verziózás pedig [Semantic Versioning](https://semver.org/spec/v2.0.0.html) alapján történik.
 
 ---
 
