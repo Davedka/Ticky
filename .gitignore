@@ -1,18 +1,17 @@
-# PHP / Composer
+
 vendor/
 .phpunit.result.cache
 
-# Configs - SOHA NE LEGYEN PUBLIC
 config/supabase.php
 .env
 .env.local
 .env.*.local
 
-# Logs and databases
+
 *.log
 /tmp/
 
-# OS / IDE
+
 .DS_Store
 Thumbs.db
 .vscode/
