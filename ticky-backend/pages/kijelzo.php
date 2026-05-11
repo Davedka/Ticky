@@ -498,6 +498,9 @@ async function fetchRooms() {
   try {
     const d = await fetch('/api/termek?allapot=1').then(r=>r.json())
     if(d.error){ console.error(d.error); return }
+    // Megj: az API a fizikai bejárási sorrendben adja vissza a termeket.
+    // Itt nem rendezzük át, hogy az iskolai folyosón sétáló diák
+    // ugyanabban a sorrendben lássa a kijelzőn őket.
     allRooms = (d.termek||[]).map(r=>({
       ...r,
       allapot: r.allapot??'szabad',
