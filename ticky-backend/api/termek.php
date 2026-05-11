@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/room_sort.php';
 
 handle_cors();
 
