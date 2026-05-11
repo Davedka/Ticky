@@ -2,7 +2,7 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 require_once __DIR__ . '/utils/_nav.php';
-require_once __DIR__ . '/../utils/auth.php';
+
 
 send_security_headers();
 handle_cors();
