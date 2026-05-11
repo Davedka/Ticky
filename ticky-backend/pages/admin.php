@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pw'])) {
             if (admin_is_configured() && hash_equals(admin_password(), $input)) {
                 ticky_clear_rate_limit('secret_admin');
                 admin_set_auth_cookie();
-                header('Location: ' . admin_url());
+                header('Location: /admin');
                 exit;
             }
 
@@ -41,7 +41,7 @@ $no_pw_set = !admin_is_configured();
 $current_user = ticky_current_user();
 $display_name = $current_user['nev'] ?? $current_user['felhasznalonev'] ?? 'Secret admin';
 $auth_mode = is_array($current_user) ? 'felhasznalo' : 'secret';
-$admin_path = admin_url();
+$admin_path = '/admin';
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -52,7 +52,7 @@ $admin_path = admin_url();
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:100vh;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(26,74,138,.4) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(200,151,42,.10) 0%,transparent 50%)}body:before{content:'';position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:44px 44px}.top{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8972a 30%,#f0c76b 50%,#c8972a 70%,transparent);box-shadow:0 0 16px rgba(200,151,42,.3);z-index:50}.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08)}.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600}.btn-gold{background:linear-gradient(135deg,#c8972a,#9e6d1e);color:#fff}.btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.78)}.inp{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);padding:10px 12px;color:#fff}.inp:focus{outline:none;border-color:rgba(200,151,42,.45)}.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.12)}.chip.gold{color:#f0c76b;background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.24)}.chip.green{color:#86efac;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.24)}.chip.red{color:#fda4af;background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.24)}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}.table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35)}.navbtn{width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.65);border:1px solid transparent}.navbtn.active{background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.24);color:#f0c76b}.toast{position:fixed;right:20px;bottom:20px;padding:12px 16px;border-radius:12px;z-index:200;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px)}.toast.ok{background:rgba(34,197,94,.18);color:#86efac}.toast.err{background:rgba(244,63,94,.18);color:#fda4af}.toast.info{background:rgba(200,151,42,.18);color:#f0c76b}.section{display:none}.section.active{display:block}.mono{font-family:'DM Mono',monospace}.stat{padding:18px;border-radius:14px}.small{font-size:12px;color:rgba(255,255,255,.5)}@media(max-width:900px){.layout{display:block}.sidebar{width:auto;margin-bottom:16px}.content{padding:16px}}@media(min-width:901px){.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px}.content{padding:24px 24px 40px 0}.sidebar{padding:24px 0 24px 24px}}
+body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:100vh;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(26,74,138,.4) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(200,151,42,.10) 0%,transparent 50%)}body:before{content:'';position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:44px 44px}.top{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8972a 30%,#f0c76b 50%,#c8972a 70%,transparent);box-shadow:0 0 16px rgba(200,151,42,.3);z-index:50}.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08)}.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600}.btn-gold{background:linear-gradient(135deg,#c8972a,#9e6d1e);color:#fff}.btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.78)}.inp{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);padding:10px 12px;color:#fff}.inp:focus{outline:none;border-color:rgba(200,151,42,.45)}.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.12)}.chip.gold{color:#f0c76b;background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.24)}.chip.green{color:#86efac;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.24)}.chip.red{color:#fda4af;background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.24)}.chip.blue{color:#93c5fd;background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.24)}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}.table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35)}.navbtn{width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.65);border:1px solid transparent}.navbtn.active{background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.24);color:#f0c76b}.toast{position:fixed;right:20px;bottom:20px;padding:12px 16px;border-radius:12px;z-index:200;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px)}.toast.ok{background:rgba(34,197,94,.18);color:#86efac}.toast.err{background:rgba(244,63,94,.18);color:#fda4af}.toast.info{background:rgba(200,151,42,.18);color:#f0c76b}.section{display:none}.section.active{display:block}.mono{font-family:'DM Mono',monospace}.stat{padding:18px;border-radius:14px}.small{font-size:12px;color:rgba(255,255,255,.5)}@media(max-width:900px){.layout{display:block}.sidebar{width:auto;margin-bottom:16px}.content{padding:16px}}@media(min-width:901px){.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px}.content{padding:24px 24px 40px 0}.sidebar{padding:24px 0 24px 24px}}
 </style>
 </head>
 <body>
@@ -67,19 +67,18 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         Ticky
       </a>
       <p class="small mt-3">Admin dashboard</p>
-      <p class="small mt-1 mono"><?= htmlspecialchars($admin_path, ENT_QUOTES, 'UTF-8') ?></p>
+      <p class="small mt-1 mono">/admin</p>
     </div>
 
     <div class="glass p-8 rounded-2xl">
       <?php if ($no_pw_set): ?>
         <p class="text-lg font-semibold text-amber-300">Nincs ADMIN_PASSWORD beallitva.</p>
-        <p class="small mt-3">A secret path route mar mukodik, de jelszo nelkul ezen a login panelen nem lehet belepni.</p>
-        <p class="small mt-2">Ha van admin szerepu felhasznalod, a <a href="/login" class="text-amber-300">/login</a> oldalon be tud lepni es ide fog erkezni.</p>
+        <p class="small mt-3">Hasznald a <a href="/login" class="text-amber-300">/login</a> oldalt admin szerepu felhasznaloval.</p>
       <?php else: ?>
-        <form method="POST" action="<?= htmlspecialchars($admin_path, ENT_QUOTES, 'UTF-8') ?>" class="space-y-4">
+        <form method="POST" action="/admin" class="space-y-4">
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
           <div>
-            <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Secret admin jelszo</label>
+            <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Secret admin jelszo (legacy)</label>
             <input type="password" name="pw" class="inp" placeholder="ADMIN_PASSWORD" autofocus>
           </div>
           <?php if ($login_error): ?>
@@ -90,7 +89,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
           <?php endif; ?>
           <button type="submit" class="btn btn-gold w-full justify-center">Belepes</button>
         </form>
-        <p class="small mt-4">Alternativa: <a href="/login" class="text-amber-300">/login</a> admin szerepu felhasznaloval.</p>
+        <p class="small mt-4">Ajanlott: <a href="/login" class="text-amber-300">/login</a> admin szerepu felhasznaloval.</p>
       <?php endif; ?>
     </div>
   </div>
@@ -106,7 +105,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
       </a>
       <span class="text-white/20">·</span>
       <span class="text-sm text-white/50">Admin</span>
-      <span class="chip gold mono"><?= htmlspecialchars($admin_path, ENT_QUOTES, 'UTF-8') ?></span>
+      <span class="chip gold mono">/admin</span>
     </div>
     <div class="flex items-center gap-3">
       <div class="text-right">
@@ -130,6 +129,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
           <a href="/termek" class="navbtn block">Termek live</a>
           <a href="/kijelzo" class="navbtn block">Kijelzo</a>
+          <a href="/tester" class="navbtn block">🧪 Tester felulet</a>
           <a href="/support" class="navbtn block">Support</a>
         </div>
       </div>
@@ -153,15 +153,15 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <div class="flex items-center justify-between gap-4 mb-5">
           <div>
             <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Felhasznalok</h1>
-            <p class="small mt-2">Admin vagy user account letrehozasa, szerepkor es aktiv allapot kezelese.</p>
+            <p class="small mt-2">Admin vagy tester account letrehozasa, szerepkor es aktiv allapot kezelese.</p>
           </div>
           <button class="btn btn-ghost" id="reload-users">Frissites</button>
         </div>
         <div class="glass rounded-2xl p-5 mb-5 grid md:grid-cols-4 gap-3">
           <input id="new-username" class="inp" placeholder="Felhasznalonev">
           <input id="new-name" class="inp" placeholder="Nev">
-          <input id="new-password" class="inp" placeholder="Jelszo" type="password">
-          <select id="new-role" class="inp"><option value="user">user</option><option value="admin">admin</option></select>
+          <input id="new-password" class="inp" placeholder="Jelszo (min. 10)" type="password">
+          <select id="new-role" class="inp"><option value="tester">tester</option><option value="admin">admin</option></select>
           <div class="md:col-span-4">
             <button class="btn btn-gold" id="create-user">Felhasznalo letrehozasa</button>
           </div>
@@ -231,7 +231,8 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
           <table class="table" id="rooms-table"></table>
         </div>
       </section>
-              <section id="section-diagnosztika" class="section">
+
+      <section id="section-diagnosztika" class="section">
         <div class="flex items-center justify-between gap-4 mb-5">
           <div>
             <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Diagnosztika</h1>
@@ -356,8 +357,8 @@ async function loadDashboard(){
       <div class="grid md:grid-cols-2 gap-3">
         <div>${statusChip('Admin auth rendben','green')} <span class="small ml-2"><?= $auth_mode === 'felhasznalo' ? 'Belepve admin accounttal.' : 'Belepve secret pathon.' ?></span></div>
         <div>${statusChip('Supabase API elerheto','green')} <span class="small ml-2">Valaszok sikeresek.</span></div>
-        <div>${statusChip('Foglalt most: ${occupied}','gold')} <span class="small ml-2">Szabad: ${free}</span></div>
-        <div>${statusChip('Admin path aktiv','gold')} <span class="small ml-2 mono"><?= htmlspecialchars($admin_path, ENT_QUOTES, 'UTF-8') ?></span></div>
+        <div>${statusChip('Foglalt most: '+occupied,'gold')} <span class="small ml-2">Szabad: ${free}</span></div>
+        <div>${statusChip('Admin path aktiv','gold')} <span class="small ml-2 mono">/admin</span></div>
       </div>
     `;
   }catch(error){q('dashboard-status').textContent=error.message;toast(error.message,'err')}
@@ -368,13 +369,13 @@ function renderUsers(){
     <tr>
       <td class="mono">${esc(user.felhasznalonev)}</td>
       <td>${esc(user.nev||'-')}</td>
-      <td>${statusChip(user.szerep||'user',user.szerep==='admin'?'gold':'green')}</td>
+      <td>${statusChip(user.szerep||'tester',user.szerep==='admin'?'gold':'blue')}</td>
       <td>${statusChip((user.aktiv??true)?'aktiv':'tiltott',(user.aktiv??true)?'green':'red')}</td>
       <td class="mono">${esc((user.letrehozva||'').replace('T',' ').slice(0,16)||'-')}</td>
       <td>
         <div class="flex flex-wrap gap-2">
           <button class="btn btn-ghost" onclick="toggleUser('${esc(user.id)}',${!(user.aktiv??true)})">${(user.aktiv??true)?'Tiltas':'Aktivalas'}</button>
-          <button class="btn btn-ghost" onclick="setRole('${esc(user.id)}','${user.szerep==='admin'?'user':'admin'}')">${user.szerep==='admin'?'Userre':'Adminna'}</button>
+          <button class="btn btn-ghost" onclick="setRole('${esc(user.id)}','${user.szerep==='admin'?'tester':'admin'}')">${user.szerep==='admin'?'Testerre':'Adminna'}</button>
           <button class="btn btn-ghost" onclick="renameUser('${esc(user.id)}',${attrLiteral(user.nev||'')})">Nev</button>
           <button class="btn btn-ghost" onclick="resetUserPassword('${esc(user.id)}')">Jelszo</button>
           ${user.id===currentUserId?'':`<button class="btn btn-ghost" onclick="deleteUser('${esc(user.id)}')">Torles</button>`}
@@ -391,7 +392,7 @@ async function createUser(){
   const szerep=q('new-role').value;
   try{
     await adminFetch('/api/admin/felhasznalo',{method:'POST',body:{felhasznalonev,nev,jelszo,szerep}});
-    q('new-username').value='';q('new-name').value='';q('new-password').value='';q('new-role').value='user';
+    q('new-username').value='';q('new-name').value='';q('new-password').value='';q('new-role').value='tester';
     toast('Felhasznalo letrehozva');
     loadUsers();
   }catch(error){toast(error.message,'err')}
