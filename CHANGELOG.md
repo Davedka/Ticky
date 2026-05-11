@@ -7,6 +7,16 @@ a verziózás pedig [Semantic Versioning](https://semver.org/spec/v2.0.0.html) a
 
 ---
 
+## [1.2.4] – 2026-05-11
+
+###📝Frissitve
+- ** Frissitve lett a dokumentáció mivel már elavult lett egy picit a readme teljesen átlett irva.
+- ** A legutobbi változtatásokat illetve javitásokat és fejlesztések belelettek irva hogy uptodate legyen a readme.
+
+###🐛 Javítva
+- **`Tanárok órája egybecsuszott`bug:** a(z) `Osztálynézet` & `Termek` & `Kijelző` - mindegyiknél egybecsuszott a tanárok oróji ha egymás után van órája ugyanabban a teremben ugyanazzal az osztályal ugyanazon a napon, mostmár jól mutatja az órákat mindenhol.
+- **`Napirend nézet`: `Termek-> bármelyik terem-> és ott Napirend nézet`: - ha véletlen két vagy több osztály van azon az órán vagy terembe akkor nem rendes modon irta ki ergo xy osztály - másik xy osztály na mostmár ugy nézki hogy xy osztály/xy osztály
+
 ## [1.2.0] – 2026-04-19
 
 ### 🐛 Javítva
