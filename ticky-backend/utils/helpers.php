@@ -774,6 +774,16 @@ function ticky_current_user_is_admin(): bool {
     return is_array($user) && (($user['szerep'] ?? '') === 'admin');
 }
 
+function ticky_current_user_is_tester(): bool {
+    $user = ticky_current_user();
+    return is_array($user) && (($user['szerep'] ?? '') === 'tester');
+}
+
+function ticky_current_user_can_test(): bool {
+    $user = ticky_current_user();
+    return is_array($user) && in_array(($user['szerep'] ?? ''), ['admin', 'tester'], true);
+}
+
 function ticky_is_admin_authed(): bool {
     return admin_is_authenticated() || ticky_current_user_is_admin();
 }
