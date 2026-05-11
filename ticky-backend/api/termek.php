@@ -1,7 +1,5 @@
 <?php
 // api/termek.php
-// GET /api/termek
-// GET /api/termek?allapot=1  – élő foglaltság is
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
@@ -12,13 +10,12 @@ handle_cors();
 $nap = mai_nap();
 $ido = aktualis_ido();
 
-
-
 // ─── Összes terem (Supabase) ────────────────────────────────────────
 $termek_raw = [];
 try {
     $termek_raw = sb_get('termek', [
         'select' => 'id,terem_szam,emelet',
+ 
         'order'  => 'terem_szam.asc',
     ]);
 } catch (\Throwable $e) {
@@ -37,7 +34,10 @@ if (empty($termek_raw)) {
                         'terem_szam' => (string) $r,
                         'emelet'     => null,
                     ], $rooms);
-                    usort($fallback, static fn($a, $b) => strcmp((string) $a['terem_szam'], (string) $b['terem_szam']));
+
+                    // ── Fizikai bejárási sorrend a fallback ágban is ──
+                    $fallback = ticky_sort_rooms($fallback);
+
                     json_response([
                         'termek' => $fallback,
                         'count'  => count($fallback),
@@ -48,7 +48,6 @@ if (empty($termek_raw)) {
                 }
             }
         } catch (\Throwable $e) {
-
         }
     }
     json_response(['termek' => [], 'count' => 0, 'nap' => $nap, 'ido' => $ido]);
@@ -56,12 +55,9 @@ if (empty($termek_raw)) {
 
 $termek = $termek_raw;
 
-
 $allapot_kell = isset($_GET['allapot']) && $_GET['allapot'] === '1';
-
 if ($allapot_kell && $nap > 0) {
     $terem_ids = array_column($termek, 'id');
-
     $foglalt_map = [];
 
     if (!empty($terem_ids)) {
@@ -95,7 +91,6 @@ if ($allapot_kell && $nap > 0) {
                         $tanar_map[$t['id']] = $t['rovid_nev'];
                     }
                 } catch (\Throwable $e) {
-
                 }
             }
         }
@@ -117,13 +112,14 @@ if ($allapot_kell && $nap > 0) {
         unset($terem['id']);
     }
     unset($terem);
-
 } else {
     foreach ($termek as &$terem) {
         unset($terem['id']);
     }
     unset($terem);
 }
+
+$termek = ticky_sort_rooms($termek);
 
 json_response([
     'termek' => $termek,
