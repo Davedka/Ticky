@@ -1,8 +1,8 @@
 <?php
 // api/admin_terem.php
-
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/_nav.php';
 
 if (!admin_can_see_ui()) {
     http_response_code(401);
@@ -11,29 +11,9 @@ if (!admin_can_see_ui()) {
     exit;
 }
 
-
-handle_cors(['PATCH', 'OPTIONS'], ['Content-Type', 'X-Ticky-Admin']);
+require_admin_api_request(['PATCH']);
+handle_cors(['PATCH', 'OPTIONS'], ['Content-Type']);
 private_response_headers();
-
-// ── Auth ─────────────────────────────────────────────────────────────
-$admin_pw = trim((string) (getenv('ADMIN_PASSWORD') ?: ($_ENV['ADMIN_PASSWORD'] ?? '')));
-if ($admin_pw === '') {
-    json_error('Admin nincs konfigurálva', 500);
-}
-
-$expected = hash_hmac('sha256', 'ticky_admin_' . $admin_pw, $admin_pw);
-$cookie   = $_COOKIE['ticky_auth'] ?? '';
-if ($cookie === '' || !hash_equals($expected, $cookie)) {
-    json_error('Hozzáférés megtagadva', 403);
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'PATCH') {
-    json_error('Csak PATCH kérés', 405);
-}
-
-if ((string) ($_SERVER['HTTP_X_TICKY_ADMIN'] ?? '') !== '1') {
-    json_error('Érvénytelen admin kérés', 400);
-}
 
 // ── Terem szám kinyerése URL-ből ─────────────────────────────────────
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -73,8 +53,8 @@ if (empty($update)) {
 }
 
 // ── Supabase PATCH ────────────────────────────────────────────────────
-$sb_url = SUPABASE_URL . '/rest/v1/termek?terem_szam=eq.' . urlencode($szam);
-$sb_key = SUPABASE_SERVICE_KEY;
+$sb_url  = SUPABASE_URL . '/rest/v1/termek?terem_szam=eq.' . urlencode($szam);
+$sb_key  = SUPABASE_SERVICE_KEY;
 $payload = json_encode($update, JSON_UNESCAPED_UNICODE);
 
 $ctx = stream_context_create([
@@ -109,7 +89,7 @@ if ($result === false || $http_code >= 400) {
 }
 
 json_response([
-    'ok'    => true,
-    'szam'  => $szam,
+    'ok'     => true,
+    'szam'   => $szam,
     'update' => $update,
 ]);
