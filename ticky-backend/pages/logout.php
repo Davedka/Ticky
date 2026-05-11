@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/../utils/auth.php';
-require_once __DIR__ . '/../utils/_nav.php';
+require_once __DIR__ . '/../config/supabase.php';
+require_once __DIR__ . '/../utils/helpers.php';
 
-if (function_exists('ticky_logout')) {
-    ticky_logout();
-}
+// Megsemmisítjük a sessiont (file + cookie + legacy cookie-k is)
+ticky_destroy_session();
+
 header('Location: /login');
 exit;
