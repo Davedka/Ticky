@@ -100,7 +100,7 @@ if ($method === 'POST') {
     $username = trim((string) ($data['felhasznalonev'] ?? ''));
     $name = admin_validate_display_name($data['nev'] ?? null);
     $password = (string) ($data['jelszo'] ?? '');
-    $role = (string) ($data['szerep'] ?? 'user');
+    $role = (string) ($data['szerep'] ?? 'tester');  // ← default tester
 
     if ($username === '') {
         json_error('Hianyzo felhasznalonev', 400);
@@ -111,8 +111,8 @@ if ($method === 'POST') {
     if (admin_string_length($password) < 10) {
         json_error('A jelszonak legalabb 10 karakter kell', 400);
     }
-    if (!in_array($role, ['admin', 'user'], true)) {
-        $role = 'user';
+    if (!in_array($role, ['admin', 'tester'], true)) {  // ← admin/tester only
+        $role = 'tester';
     }
 
     $existing = sb_get('felhasznalok', [
@@ -136,7 +136,7 @@ if ($method === 'POST') {
         json_error('Supabase hiba a letrehozasnal (' . $response['status'] . ')', 500);
     }
 
-    json_response(['ok' => true, 'felhasznalonev' => $username]);
+    json_response(['ok' => true, 'felhasznalonev' => $username, 'szerep' => $role]);
 }
 
 $params = match_route('/api/admin/felhasznalo/{id}', $uri);
@@ -179,7 +179,7 @@ if ($method === 'PATCH') {
         $update['nev'] = admin_validate_display_name($data['nev']);
     }
 
-    if (isset($data['szerep']) && in_array($data['szerep'], ['admin', 'user'], true)) {
+    if (isset($data['szerep']) && in_array($data['szerep'], ['admin', 'tester'], true)) {  // ← admin/tester only
         ticky_require_fresh_admin_auth();
         $update['szerep'] = $data['szerep'];
     }
@@ -188,7 +188,7 @@ if ($method === 'PATCH') {
         json_error('Nincs modositando adat', 400);
     }
 
-    $current_role = (string) ($target_user['szerep'] ?? 'user');
+    $current_role = (string) ($target_user['szerep'] ?? 'tester');
     $current_active = (bool) ($target_user['aktiv'] ?? false);
     $next_role = (string) ($update['szerep'] ?? $current_role);
     $next_active = array_key_exists('aktiv', $update) ? (bool) $update['aktiv'] : $current_active;
