@@ -15,7 +15,17 @@ a verziózás pedig [Semantic Versioning](https://semver.org/spec/v2.0.0.html) a
 
 ### 🐛 Javítva
 - `Tanárok órája egybecsuszott`bug: a(z) `Osztálynézet` & `Termek` & `Kijelző` - mindegyiknél egybecsuszott a tanárok oróji ha egymás után van órája ugyanabban a teremben ugyanazzal az osztályal ugyanazon a napon, mostmár jól mutatja az órákat mindenhol.
-- `Napirend nézet`: `Termek-> bármelyik terem-> és ott Napirend nézet`: - ha véletlen két vagy több osztály van azon az órán vagy terembe akkor nem rendes modon irta ki ergo xy osztály - másik xy osztály na mostmár ugy nézki hogy xy osztály/xy osztály
+- `Napirend nézet`: `Termek-> bármelyik terem-> és ott Napirend nézet`: - ha véletlen két vagy több osztály van azon az órán vagy terembe akkor nem rendes modon irta ki ergo xy osztály - másik xy osztály na mostmár ugy nézki hogy xy osztály/xy osztály.
+- `Qr generátor`bug: az utobbi patchek illetve updatek után a qr-kódók nem töltöttek be átkerületek cloudbase-re tehát mostantol látszódnak az összes termeknek a qr-kódjai.
+
+### ⚙️ WIP [2026-09-01 - 2026-11-01]
+- Nos mivel az iskola átesett nem régiben érettségi előtt egy épület bövitésen következő tanévben várhatóak az uj termek is.
+- Szeretnék pár tester-t szerezni aki tud minden ujdonságot tesztelni fejlesztés alatt van egy olyan tesztelési felület amivel tudnak tesztelni könnyen ugy hogy ne törjön el semmi.
+
+
+### 💡 Tervek
+-`Lyukas óra`: Következő tanévre szeretném megcsinálni a lyukasórát is mivel egy nagyon fontos dolog lehetne mind a tanároknak illetve diákoknak is.
+
 
 ## [1.2.0] – 2026-04-19
 
@@ -68,6 +78,8 @@ a verziózás pedig [Semantic Versioning](https://semver.org/spec/v2.0.0.html) a
 ## Jelmagyarázat
 
 - `✨ Hozzáadva` – új funkciók
+- `⚙️ WIP` – Dolgozás van rajta
+- `💡 Ötletek` – Ötletek
 - `🎨 Változott` – meglévő funkciók módosítása
 - `🐛 Javítva` – hibajavítások
 - `🗑️ Eltávolítva` – törölt funkciók
