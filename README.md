@@ -1,4 +1,4 @@
-div align="center">
+
 # 🏫 Ticky
  
 ### Real-Time Classroom Availability System
@@ -79,13 +79,7 @@ Prints a QR code per room linking to `https://ticky-6r32.onrender.com/terem/{roo
  
 ![QR code generator](screenshots/qr.png)
  
-### 🔐 Admin dashboard
- 
-Hidden route (path stored in `ADMIN_PATH` env var, not in the codebase). Live counters for rooms, teachers, users, breaks, plus a status panel with checks for: Supabase auth, API reachability, occupied/free split, admin path validity.
- 
-![Admin dashboard](screenshots/admin.png)
- 
----
+
  
 ## 🏗️ Architecture
  
