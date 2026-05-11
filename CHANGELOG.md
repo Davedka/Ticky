@@ -24,7 +24,7 @@ a verziózás pedig [Semantic Versioning](https://semver.org/spec/v2.0.0.html) a
 
 
 ### 💡 Tervek
--`Lyukas óra`: Következő tanévre szeretném megcsinálni a lyukasórát is mivel egy nagyon fontos dolog lehetne mind a tanároknak illetve diákoknak is.
+`Lyukas óra`: Következő tanévre szeretném megcsinálni a lyukasórát is mivel egy nagyon fontos dolog lehetne mind a tanároknak illetve diákoknak is.
 
 
 ## [1.2.0] – 2026-04-19
