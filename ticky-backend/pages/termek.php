@@ -49,7 +49,7 @@
     <span style="color:rgba(255,255,255,.2);">·</span>
     <span class="text-sm" style="color:rgba(255,255,255,.45);">Összes terem</span>
   </div>
-  <<button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
+  <button onclick="refresh()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
     <svg id="refresh-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     <span id="footer-ido">–</span>
   </button>
@@ -119,6 +119,7 @@ async function fetchRooms() {
       szunetBanner.querySelector('span').textContent='🌙 '+d.szunet+' – jelenleg szünet van, nincs foglalt terem'
     } else if(szunetBanner){ szunetBanner.style.display='none' }
     // Hétvégén (nap:0) nincs allapot mező – alapból szabad minden terem
+    // Megj: az API a fizikai bejárási sorrendben adja vissza, ezt itt NEM rendezzük át.
     allRooms=(d.termek||[]).map(r=>({
       ...r,
       allapot: r.allapot ?? 'szabad',
