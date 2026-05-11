@@ -1,9 +1,16 @@
 <?php
 // api/admin_terem.php
-// PATCH /api/admin/terem/{szam}  { emelet, nev }
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
+
+if (!admin_can_see_ui()) {
+    http_response_code(401);
+    header('Content-Type: application/json');
+    echo json_encode(['hiba' => 'Bejelentkezés szükséges']);
+    exit;
+}
+
 
 handle_cors(['PATCH', 'OPTIONS'], ['Content-Type', 'X-Ticky-Admin']);
 private_response_headers();
