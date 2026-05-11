@@ -12,6 +12,8 @@ handle_cors();
 $nap = mai_nap();
 $ido = aktualis_ido();
 
+
+
 // ─── Összes terem (Supabase) ────────────────────────────────────────
 $termek_raw = [];
 try {
@@ -23,7 +25,6 @@ try {
     $termek_raw = [];
 }
 
-// ─── Fallback: tanárok.js, ha a DB üres vagy elérhetetlen ───────────
 if (empty($termek_raw)) {
     $tanarok_source = __DIR__ . '/../utils/tanarok_source.php';
     if (is_file($tanarok_source)) {
@@ -47,7 +48,7 @@ if (empty($termek_raw)) {
                 }
             }
         } catch (\Throwable $e) {
-            // forrás nem elérhető – üres listát adunk vissza
+
         }
     }
     json_response(['termek' => [], 'count' => 0, 'nap' => $nap, 'ido' => $ido]);
@@ -55,13 +56,12 @@ if (empty($termek_raw)) {
 
 $termek = $termek_raw;
 
-// ─── Ha ?allapot=1 → foglaltság is ──────────────────────────────────
+
 $allapot_kell = isset($_GET['allapot']) && $_GET['allapot'] === '1';
 
 if ($allapot_kell && $nap > 0) {
     $terem_ids = array_column($termek, 'id');
 
-    // FIX: in.() üres lista → Supabase 400 hibát dob → ezért checkeljük előre
     $foglalt_map = [];
 
     if (!empty($terem_ids)) {
@@ -95,7 +95,7 @@ if ($allapot_kell && $nap > 0) {
                         $tanar_map[$t['id']] = $t['rovid_nev'];
                     }
                 } catch (\Throwable $e) {
-                    // tanár lookup hiba – kód marad '?'
+
                 }
             }
         }
