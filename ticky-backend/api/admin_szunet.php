@@ -2,6 +2,14 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
+
+if (!admin_can_see_ui()) {
+    http_response_code(401);
+    header('Content-Type: application/json');
+    echo json_encode(['hiba' => 'Bejelentkezés szükséges']);
+    exit;
+}
+
 require_admin_api_request(['GET', 'POST', 'PATCH', 'DELETE']);
 
 $method = $_SERVER['REQUEST_METHOD'];
