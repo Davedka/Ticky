@@ -1,11 +1,16 @@
 <?php
 // api/admin_import.php
-// POST /api/admin/import
-// Teljes újraimportálás a tanárok.js forrásból – PHP-ből, Node.js nélkül.
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+
+if (!admin_can_see_ui()) {
+    http_response_code(401);
+    header('Content-Type: application/json');
+    echo json_encode(['hiba' => 'Bejelentkezés szükséges']);
+    exit;
+}
 
 require_admin_api_request(['POST']);
 ticky_require_fresh_admin_auth();
