@@ -24,6 +24,12 @@ if ($uri === '/') {
     $nap_nevek = [0=>'Hétvége',1=>'Hétfő',2=>'Kedd',3=>'Szerda',4=>'Csütörtök',5=>'Péntek'];
     $nap = mai_nap();
     $ido = aktualis_ido();
+
+    // Navbar állapot
+    $nav_user        = ticky_current_user();
+    $nav_show_admin  = admin_can_see_ui();
+    $nav_show_tester = $nav_user && ($nav_user['szerep'] ?? '') === 'tester';
+    $nav_logged_in   = $nav_show_admin || is_array($nav_user);
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -58,6 +64,8 @@ if ($uri === '/') {
   .nav-link:hover{color:white;background:rgba(255,255,255,.09);}
   .nav-link.gold{color:rgba(200,151,42,.8);border:1px solid rgba(200,151,42,.2);}
   .nav-link.gold:hover{color:#f0c76b;background:rgba(200,151,42,.1);}
+  .nav-link.blue{color:rgba(96,165,250,.85);border:1px solid rgba(96,165,250,.25);}
+  .nav-link.blue:hover{color:#93c5fd;background:rgba(96,165,250,.1);}
   /* HAMBURGER */
   .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);}
   .hamburger span{width:20px;height:2px;background:rgba(255,255,255,.7);border-radius:2px;transition:all .25s;}
@@ -70,6 +78,7 @@ if ($uri === '/') {
   .mobile-menu a{font-size:15px;font-weight:500;padding:13px 16px;border-radius:10px;color:rgba(255,255,255,.7);border:1px solid transparent;transition:all .15s;}
   .mobile-menu a:hover{background:rgba(255,255,255,.07);color:white;}
   .mobile-menu .mm-gold{color:#f0c76b;border-color:rgba(200,151,42,.2);background:rgba(200,151,42,.06);}
+  .mobile-menu .mm-blue{color:#93c5fd;border-color:rgba(96,165,250,.25);background:rgba(96,165,250,.06);}
   /* SIDEBAR */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
   .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:rgba(255,255,255,.6);transition:all .18s;text-decoration:none;}
@@ -111,11 +120,15 @@ if ($uri === '/') {
     <a href="/osztaly" class="nav-link">Osztály</a>
     <a href="/qr"      class="nav-link">QR</a>
     <a href="/kijelzo" class="nav-link">Kijelző</a>
-    <?php if (admin_can_see_ui()): ?>
-    <a href="/admin" class="nav-link gold">⚙️ Admin</a>
-    <a href="/logout" class="nav-link">Kilépés</a>
+    <?php if ($nav_show_admin): ?>
+      <a href="/admin" class="nav-link gold">⚙️ Admin</a>
+    <?php elseif ($nav_show_tester): ?>
+      <a href="/tester" class="nav-link blue">🧪 Tester</a>
+    <?php endif; ?>
+    <?php if ($nav_logged_in): ?>
+      <a href="/logout" class="nav-link">Kilépés</a>
     <?php else: ?>
-    <a href="/login" class="nav-link">Belépés</a>
+      <a href="/login" class="nav-link">Belépés</a>
     <?php endif; ?>
   </div>
   <div class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -131,11 +144,15 @@ if ($uri === '/') {
   <a href="/kijelzo">📺 Kijelző</a>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
-  <?php if (admin_can_see_ui()): ?>
-  <a href="/admin" class="mm-gold">⚙️ Admin panel</a>
-  <a href="/logout">🚪 Kilépés</a>
+  <?php if ($nav_show_admin): ?>
+    <a href="/admin" class="mm-gold">⚙️ Admin panel</a>
+  <?php elseif ($nav_show_tester): ?>
+    <a href="/tester" class="mm-blue">🧪 Tester felület</a>
+  <?php endif; ?>
+  <?php if ($nav_logged_in): ?>
+    <a href="/logout">🚪 Kilépés</a>
   <?php else: ?>
-  <a href="/login">🔑 Belépés</a>
+    <a href="/login">🔑 Belépés</a>
   <?php endif; ?>
 </div>
 
@@ -274,7 +291,7 @@ if ($params !== false) {
 }
 
 if ($uri === '/login')  { require __DIR__.'/pages/login.php';  exit; }
-if ($uri === '/logout') { require __DIR__.'/pages/logout.php'; exit; } 
+if ($uri === '/logout') { require __DIR__.'/pages/logout.php'; exit; }
 
 if ($uri === '/api/auth/login')  { require __DIR__.'/api/auth/login.php'; exit; }
 if ($uri === '/api/auth/logout') { require __DIR__.'/api/auth/logout.php'; exit; }
@@ -286,6 +303,17 @@ if ($uri === '/admin') {
         exit;
     }
     require __DIR__.'/pages/admin.php';
+    exit;
+}
+
+// Tester route – csak admin vagy tester szerepű usereknek
+if ($uri === '/tester') {
+    $tu = ticky_current_user();
+    if (!$tu || !in_array($tu['szerep'] ?? '', ['admin', 'tester'], true)) {
+        header('Location: /login?from=/tester');
+        exit;
+    }
+    require __DIR__.'/pages/tester.php';
     exit;
 }
 
@@ -310,11 +338,6 @@ $params = match_route('/api/admin/terem/{szam}', $uri);
 if ($params !== false) {
     $_GET['szam'] = $params['szam'];
     require __DIR__.'/api/admin_terem.php'; exit;
-}
-
-if ($uri === '/tester') {
-    require __DIR__.'/pages/tester.php';
-    exit;
 }
 
 
