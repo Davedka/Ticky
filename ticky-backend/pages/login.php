@@ -1,15 +1,12 @@
 <?php
 // pages/login.php
-// Felhasználói belépés (admin VAGY tester) – szerep alapján redirectol.
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
 send_security_headers();
 
-// ─────────────────────────────────────────────────────────────
-// Ha már be van lépve, ne mutassuk a formot – egyből a dashboardjára.
-// ─────────────────────────────────────────────────────────────
+
 if (function_exists('ticky_current_user')) {
     $alreadyUser = ticky_current_user();
     if (is_array($alreadyUser)) {
@@ -25,18 +22,17 @@ $from  = isset($_GET['from']) ? trim((string) $_GET['from']) : '';
 $error = '';
 $wait  = 0;
 
-// Csak relatív, biztonságos `from` URL-eket fogadunk el (XSS / open-redirect ellen)
 $safe_from = '';
 if ($from !== '' && preg_match('#^/(?!/)#', $from)) {
     $safe_from = $from;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // CSRF védelem
+
     if (!ticky_has_valid_csrf_token((string) ($_POST['csrf_token'] ?? ''))) {
         $error = 'Érvénytelen CSRF token. Frissítsd az oldalt és próbáld újra.';
     } else {
-        // Rate limit ellenőrzés
+
         $wait = ticky_rate_limit_wait_seconds('login', 300, 8, 900);
         if ($wait > 0) {
             $error = "Túl sok sikertelen próbálkozás. Várj $wait másodpercet.";
@@ -44,14 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $felh   = trim((string) ($_POST['felhasznalonev'] ?? ''));
             $jelszo = (string) ($_POST['jelszo'] ?? '');
 
-            // Felhasználó keresése
+
             $user = null;
             try {
                 $rows = sb_get('felhasznalok', [
                     'select'         => 'id,felhasznalonev,nev,szerep,aktiv,jelszo_hash',
                     'felhasznalonev' => 'eq.' . $felh,
                     'limit'          => '1',
-                ]);
+                ], 'service');
                 if (!empty($rows)) {
                     $user = $rows[0];
                 }
@@ -59,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user = null;
             }
 
-            // Validációk
+
             $valid_password = $user && !empty($user['jelszo_hash'])
                 ? password_verify($jelszo, (string) $user['jelszo_hash'])
                 : false;
@@ -78,21 +74,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ticky_record_rate_limit_failure('login', 300, 8, 900);
                 $error = 'A fiókod szerepköre nem engedélyezi a belépést.';
             } else {
-                // ─── SIKERES LOGIN ────────────────────────────────────
-                ticky_clear_rate_limit('login');
-                ticky_set_user_session($user);
 
-                // Szerep alapú default redirect:
-                // - admin → /admin
-                // - tester → /tester
+                ticky_clear_rate_limit('login');
+
+
+                ticky_set_user_session((string) $user['id']);
+
+                try {
+                    sb_patch(
+                        'felhasznalok',
+                        ['id' => 'eq.' . (string) $user['id']],
+                        [
+                            'utolso_belepes'    => date('c'),
+                            'utolso_belepes_ip' => ticky_client_ip(),
+                        ],
+                        'service'
+                    );
+                } catch (\Throwable $e) {
+
+                }
+
+
                 $role    = (string) $user['szerep'];
                 $default = $role === 'admin' ? '/admin' : '/tester';
 
-                // Ha van biztonságos `?from=` paraméter, azt használjuk
-                // (pl. /admin-ról vagy /tester-ről redirectelt ide a guard)
+
                 $redirect = $safe_from !== '' ? $safe_from : $default;
 
-                // De tester ne tudjon /admin-ra redirecteltetni magát
+
                 if ($role === 'tester' && str_starts_with($redirect, '/admin')) {
                     $redirect = '/tester';
                 }
