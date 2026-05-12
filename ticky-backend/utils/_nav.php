@@ -10,6 +10,12 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
         ['href'=>'/qr',      'label'=>'QR',      'key'=>'qr'],
         ['href'=>'/kijelzo', 'label'=>'Kijelző', 'key'=>'kijelzo'],
     ];
+
+    // Navbar állapot – ugyanaz a logika mint az index.php főoldalánál
+    $nav_user        = function_exists('ticky_current_user') ? ticky_current_user() : null;
+    $nav_show_admin  = function_exists('admin_can_see_ui') && admin_can_see_ui();
+    $nav_show_tester = $nav_user && ($nav_user['szerep'] ?? '') === 'tester';
+    $nav_logged_in   = $nav_show_admin || is_array($nav_user);
     ?>
 <style>
 /* ── SHARED NAV ── */
@@ -29,6 +35,8 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
 .tn-link.active{color:rgba(200,151,42,.9);background:rgba(200,151,42,.1);}
 .tn-link.gold{color:rgba(200,151,42,.8);border:1px solid rgba(200,151,42,.2);}
 .tn-link.gold:hover{color:#f0c76b;background:rgba(200,151,42,.1);}
+.tn-link.blue{color:rgba(96,165,250,.85);border:1px solid rgba(96,165,250,.25);}
+.tn-link.blue:hover{color:#93c5fd;background:rgba(96,165,250,.1);}
 .tn-right{display:flex;align-items:center;gap:6px;}
 /* Hamburger */
 .tn-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);}
@@ -48,6 +56,7 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
 .tn-mobile a:hover{background:rgba(255,255,255,.07);color:white;}
 .tn-mobile a.active{background:rgba(200,151,42,.1);border-color:rgba(200,151,42,.2);color:#f0c76b;}
 .tn-mobile a.mm-gold{color:#f0c76b;border-color:rgba(200,151,42,.2);background:rgba(200,151,42,.06);}
+.tn-mobile a.mm-blue{color:#93c5fd;border-color:rgba(96,165,250,.25);background:rgba(96,165,250,.06);}
 /* Sidebar */
 .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
 .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:rgba(255,255,255,.6);transition:all .18s;text-decoration:none;}
@@ -92,8 +101,15 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
       <?php foreach ($links as $l): ?>
         <a href="<?= $l['href'] ?>" class="tn-link<?= $aktiv===$l['key']?' active':'' ?>"><?= $l['label'] ?></a>
       <?php endforeach; ?>
-      <?php if (admin_can_see_ui()): ?>
-        <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="tn-link gold">⚙️ Admin</a>
+      <?php if ($nav_show_admin): ?>
+        <a href="/admin" class="tn-link gold">⚙️ Admin</a>
+      <?php elseif ($nav_show_tester): ?>
+        <a href="/tester" class="tn-link blue">🧪 Tester</a>
+      <?php endif; ?>
+      <?php if ($nav_logged_in): ?>
+        <a href="/logout" class="tn-link">Kilépés</a>
+      <?php else: ?>
+        <a href="/login" class="tn-link">Belépés</a>
       <?php endif; ?>
     </div>
     <div class="tn-hamburger" id="tn-hamburger" onclick="tnToggle()">
@@ -109,8 +125,15 @@ function ticky_nav(string $aktiv = '', string $cim = '') {
   <?php endforeach; ?>
   <a href="/support">✉️ Support</a>
   <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener">🐛 Bug report</a>
-  <?php if (admin_can_see_ui()): ?>
-    <a href="<?= htmlspecialchars(admin_url(), ENT_QUOTES, 'UTF-8') ?>" class="mm-gold">⚙️ Admin</a>
+  <?php if ($nav_show_admin): ?>
+    <a href="/admin" class="mm-gold">⚙️ Admin</a>
+  <?php elseif ($nav_show_tester): ?>
+    <a href="/tester" class="mm-blue">🧪 Tester</a>
+  <?php endif; ?>
+  <?php if ($nav_logged_in): ?>
+    <a href="/logout">🚪 Kilépés</a>
+  <?php else: ?>
+    <a href="/login">🔑 Belépés</a>
   <?php endif; ?>
 </div>
 
