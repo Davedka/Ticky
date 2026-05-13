@@ -1,6 +1,8 @@
 <?php
 // api/tanar_orarend.php
 // GET /api/tanar/{kod}/orarend
+//
+// ÚJ FLOW: source helper (tanárok.js) ELSŐDLEGES, DB csak fallback.
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
@@ -28,7 +30,7 @@ if ($nap === 0) {
     json_response(['tanar_nev' => null, 'orak' => [], 'uzenet' => 'Hétvége – nincs tanítás']);
 }
 
-// Szünet ellenőrzés (Supabase-ből)
+// Szünet
 $sz = aktiv_szunet();
 if ($sz !== null) {
     json_response([
@@ -39,42 +41,48 @@ if ($sz !== null) {
     ]);
 }
 
-// Tanár keresés
-$tanarok = sb_get('tanarok', ['rovid_nev' => 'eq.' . $kod, 'select' => 'id,rovid_nev,nev']);
 $source_teacher_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
+
+// ───────────────────────────────────────────────────────────────
+// ELSŐDLEGES: source helper (tanárok.js)
+// ───────────────────────────────────────────────────────────────
+if (function_exists('ticky_source_teacher_day_schedule')) {
+    try {
+        $result = ticky_source_teacher_day_schedule($kod, $nap);
+        if ($result !== null && !empty($result['orak'] ?? [])) {
+            json_response([
+                'tanar_nev' => $result['tanar_nev'] ?? ($source_teacher_names[$kod] ?? null),
+                'orak'      => merge_consecutive_orak($result['orak'] ?? []),
+            ]);
+        }
+    } catch (\Throwable $e) {
+        // Folytatás a DB fallback-kal
+    }
+}
+
+// ───────────────────────────────────────────────────────────────
+// MÁSODLAGOS: DB fallback
+// ───────────────────────────────────────────────────────────────
+$tanarok = sb_get('tanarok', ['rovid_nev' => 'eq.' . $kod, 'select' => 'id,rovid_nev,nev']);
 $tanar = $tanarok[0] ?? null;
 $tanar_id = $tanar['id'] ?? null;
 if ($tanar !== null) {
     $tanar['nev'] = $tanar['nev'] ?? ($source_teacher_names[$tanar['rovid_nev'] ?? $kod] ?? null);
 }
 
-// Órarend lekérés
-$orak_raw = [];
-if ($tanar_id !== null) {
-    $orak_raw = sb_get('orarendek', [
-        'tanar_id'  => 'eq.' . $tanar_id,
-        'het_napja' => 'eq.' . $nap,
-        'aktiv'     => 'eq.true',
-        'select'    => 'ora_sorszam,kezdes,vegzes,osztaly,tantargy,termek(terem_szam)',
-        'order'     => 'kezdes.asc,ora_sorszam.asc',
-    ]);
-}
-
-if (empty($orak_raw) && function_exists('ticky_source_teacher_day_schedule')) {
-    $source_schedule = ticky_source_teacher_day_schedule($kod, $nap);
-    if ($source_schedule !== null) {
-        json_response([
-            'tanar_nev' => $source_schedule['tanar_nev'] ?? ($source_teacher_names[$kod] ?? null),
-            'orak' => merge_consecutive_orak($source_schedule['orak'] ?? []),
-        ]);
-    }
-}
-
 if ($tanar === null) {
     json_error('Tanár nem található: ' . $kod, 404);
 }
 
-// Csoportosítás: azonos időszak = csoportbontásos óra
+$orak_raw = sb_get('orarendek', [
+    'tanar_id'  => 'eq.' . $tanar_id,
+    'het_napja' => 'eq.' . $nap,
+    'aktiv'     => 'eq.true',
+    'select'    => 'ora_sorszam,kezdes,vegzes,osztaly,tantargy,termek(terem_szam)',
+    'order'     => 'kezdes.asc,ora_sorszam.asc',
+]);
+
+// Csoportosítás: azonos időszak = csoportbontás
 $csoportok_map = [];
 foreach ($orak_raw as $ora) {
     $terem   = $ora['termek']['terem_szam'] ?? '?';
@@ -123,6 +131,5 @@ foreach ($csoportok_map as $o) {
 }
 
 usort($orak, fn($a, $b) => strcmp($a['kezdes'], $b['kezdes']));
-
 
 json_response(['tanar_nev' => $tanar['nev'] ?? null, 'orak' => $orak]);
