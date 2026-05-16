@@ -338,8 +338,8 @@ I used AI tools throughout the project. Being honest about how is more useful th
 ---
  
 <div align="center">
-Built with ☕ by [**Dávid Kiss**](https://github.com/Davedka) · Mátészalka, HU
-*Backend developer — looking for a junior role*
+Built with ☕ by Dávid Kiss(https://github.com/Davedka) · Mátészalka, HU
+Backend developer — looking for a junior role
  
 📧 dkiss0478@gmail.com · 🌐 [davedka.github.io/weboldal](https://davedka.github.io/weboldal)
  
