@@ -112,6 +112,60 @@ function ticky_source_period_number(string $start): ?int
     return $map[$start] ?? null;
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Idősávok (8 tanóra). Ezt használjuk a több órát átfogó (összevont)
+// blokkok óránkénti szétbontásához.
+// ─────────────────────────────────────────────────────────────────
+function ticky_source_period_slots(): array
+{
+    static $slots = [
+        ['07:30', '08:10'],
+        ['08:20', '09:05'],
+        ['09:15', '10:00'],
+        ['10:15', '11:00'],
+        ['11:10', '11:55'],
+        ['12:05', '12:50'],
+        ['12:55', '13:35'],
+        ['13:40', '14:20'],
+    ];
+
+    return $slots;
+}
+
+// Egy [start, end] sávot óránként szétbont, ha több tanórát fog át.
+// 1 órás (vagy nem szabványos idejű) bejegyzés változatlanul tér vissza,
+// így a sima órák viselkedése nem változik.
+function ticky_source_expand_period_slots(string $start, string $end): array
+{
+    $start = substr($start, 0, 5);
+    $end   = substr($end, 0, 5);
+
+    $slots = ticky_source_period_slots();
+
+    $start_idx = null;
+    $end_idx   = null;
+    foreach ($slots as $i => $slot) {
+        if ($slot[0] === $start) {
+            $start_idx = $i;
+        }
+        if ($slot[1] === $end) {
+            $end_idx = $i;
+        }
+    }
+
+    // Nem szabványos időpont vagy egyetlen tanóra → marad, ahogy van.
+    if ($start_idx === null || $end_idx === null || $end_idx <= $start_idx) {
+        return [[$start, $end]];
+    }
+
+    $expanded = [];
+    for ($i = $start_idx; $i <= $end_idx; $i++) {
+        $expanded[] = $slots[$i];
+    }
+
+    return $expanded;
+}
+
 function ticky_source_load_schedule_entries(): array
 {
     static $cache = null;
@@ -409,6 +463,9 @@ function ticky_source_expected_lessons(): array
 // ─────────────────────────────────────────────────────────────────
 // ÚJ LOGIKA: minden tanárok.js bejegyzés = EGY csoport, combined
 // osztály/terem mezőkkel. Nem ZIP-elünk a megjelenítéshez.
+//
+// JAVÍTÁS: a több tanórát átfogó (összevont) blokkokat óránként
+// szétbontjuk, hogy a 2–4. óra ne egyetlen sorként jelenjen meg.
 // ─────────────────────────────────────────────────────────────────
 function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?array
 {
@@ -457,49 +514,55 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
             $room_codes = [ticky_source_normalize_token((string) ($entry['room'] ?? '?'))];
         }
 
-        $start   = substr(ticky_source_normalize_token((string) ($entry['start']   ?? '')), 0, 5);
-        $end     = substr(ticky_source_normalize_token((string) ($entry['end']     ?? '')), 0, 5);
-        $teacher = ticky_source_normalize_token((string) ($entry['teacher'] ?? '?'));
-        $subject = ticky_source_normalize_token((string) ($entry['subject'] ?? ''));
-        $key     = $start . '_' . $end;
-
-        if (!isset($grouped[$key])) {
-            $grouped[$key] = [
-                'kezdes'      => $start,
-                'vegzes'      => $end,
-                'ora_sorszam' => ticky_source_period_number($start),
-                'csoportok'   => [],
-            ];
-        }
+        $raw_start = substr(ticky_source_normalize_token((string) ($entry['start']   ?? '')), 0, 5);
+        $raw_end   = substr(ticky_source_normalize_token((string) ($entry['end']     ?? '')), 0, 5);
+        $teacher   = ticky_source_normalize_token((string) ($entry['teacher'] ?? '?'));
+        $subject   = ticky_source_normalize_token((string) ($entry['subject'] ?? ''));
 
         $osztaly_str = implode('/', $class_codes);
         $terem_str   = implode('/', $room_codes);
 
-        // Deduplikáció
-        $exists = false;
-        foreach ($grouped[$key]['csoportok'] as $existing) {
-            if (
-                $existing['tanar']    === $teacher
-                && $existing['terem']    === $terem_str
-                && $existing['osztaly']  === $osztaly_str
-                && $existing['tantargy'] === $subject
-            ) {
-                $exists = true;
-                break;
-            }
-        }
-        if ($exists) {
-            continue;
-        }
+        // Több órát átfogó blokk → óránként külön idősávra bontjuk,
+        // így minden tanóra önálló sorként jelenik meg (2. óra, 3. óra, 4. óra…).
+        foreach (ticky_source_expand_period_slots($raw_start, $raw_end) as $slot) {
+            [$start, $end] = $slot;
+            $key = $start . '_' . $end;
 
-        // EGY source bejegyzés = EGY csoport (combined)
-        $grouped[$key]['csoportok'][] = [
-            'tanar'     => $teacher,
-            'tanar_nev' => $teacher_names[$teacher] ?? null,
-            'osztaly'   => $osztaly_str,  // '12.a/12.b'
-            'terem'     => $terem_str,     // '1/14'
-            'tantargy'  => $subject,
-        ];
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'kezdes'      => $start,
+                    'vegzes'      => $end,
+                    'ora_sorszam' => ticky_source_period_number($start),
+                    'csoportok'   => [],
+                ];
+            }
+
+            // Deduplikáció az adott idősávon belül
+            $exists = false;
+            foreach ($grouped[$key]['csoportok'] as $existing) {
+                if (
+                    $existing['tanar']    === $teacher
+                    && $existing['terem']    === $terem_str
+                    && $existing['osztaly']  === $osztaly_str
+                    && $existing['tantargy'] === $subject
+                ) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if ($exists) {
+                continue;
+            }
+
+            // EGY source bejegyzés = EGY csoport (combined)
+            $grouped[$key]['csoportok'][] = [
+                'tanar'     => $teacher,
+                'tanar_nev' => $teacher_names[$teacher] ?? null,
+                'osztaly'   => $osztaly_str,  // '12.a/12.b'
+                'terem'     => $terem_str,     // '1/14'
+                'tantargy'  => $subject,
+            ];
+        }
     }
 
     // Output: minden idősáv csoportokkal + aggregált info
