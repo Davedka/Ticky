@@ -49,6 +49,12 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   a{text-decoration:none;}
   /* Csoport badge */
   .csoport-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;}
+  /* Időtartam badge (több órás összevont blokk) */
+  .dur-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(96,165,250,.16);border:1px solid rgba(96,165,250,.3);color:#93c5fd;white-space:nowrap;}
+  /* Csoportsorok – fix, sosem törik szét csúnyán (akárhány csoport) */
+  .cs-list{display:flex;flex-direction:column;gap:5px;}
+  .cs-row{display:flex;align-items:flex-start;gap:6px;min-width:0;}
+  .cs-mini{font-size:9px;padding:1px 6px;flex-shrink:0;margin-top:1px;}
   /* Floating sidebar */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
   .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
@@ -251,6 +257,18 @@ function isAktiv(k,v) { const c=nowMin(); return c>=toMin(k)&&c<=toMin(v) }
 function isMult(v)    { return nowMin()>toMin(v) }
 function calcPct(k,v) { const c=nowMin(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
 
+// Időtartam-jelölő: hány tanórát fog át a blokk
+function oraSzam(o){ return Math.max(1, parseInt(o.ora_szam || 1, 10)) }
+function durBadgeHtml(o){
+  const n = oraSzam(o)
+  return n > 1 ? `<span class="dur-badge">${n} óra</span>` : ''
+}
+function sorszamLabel(o, fallback){
+  const tol = o.ora_sorszam || fallback
+  if (oraSzam(o) > 1 && o.ora_sorszam_ig) return `${tol}–${o.ora_sorszam_ig}`
+  return `${tol}`
+}
+
 // ─── Adatok betöltése ─────────────────────────────────────────────────
 async function loadData() {
   if (!curKod) return
@@ -309,6 +327,7 @@ function renderAkt(a, k) {
   if (a) {
     const p = calcPct(a.kezdes, a.vegzes)
     const percMaradt = Math.max(0, Math.round(toMin(a.vegzes) - nowMin()))
+    const dur = durBadgeHtml(a)
 
     if (a.is_csoport) {
       // Csoportbontásos óra
@@ -317,21 +336,24 @@ function renderAkt(a, k) {
           <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;min-width:0;">
               <span class="csoport-badge">${i+1}. csoport</span>
-              <span class="text-sm font-medium" style="color:rgba(255,255,255,.8);">${c.tanar_nev||c.tanar}</span>
+              <span class="text-sm font-medium" style="color:rgba(255,255,255,.8);">${escHtml(c.tanar_nev||c.tanar)}</span>
             </div>
-            <span class="text-xs" style="color:rgba(255,255,255,.4);">${c.tantargy || a.tantargy}</span>
+            <span class="text-xs" style="color:rgba(255,255,255,.4);">${escHtml(c.tantargy || a.tantargy)}</span>
           </div>
-          <a href="/terem/${encodeURIComponent(c.terem)}" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#f0c76b;">${c.terem}. terem</a>
+          <a href="/terem/${encodeURIComponent(c.terem)}" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#f0c76b;white-space:nowrap;">${escHtml(c.terem)}. terem</a>
         </div>`).join('')
 
       el.innerHTML = `
         <div class="flex flex-col gap-3 aktiv-card">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-2">
             <div>
               <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p>
-              <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${a.tantargy}</p>
+              <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${escHtml(a.tantargy)}</p>
             </div>
-            <span class="csoport-badge" style="font-size:11px;padding:4px 10px;">Csoportbontás</span>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              ${dur}
+              <span class="csoport-badge" style="font-size:11px;padding:4px 10px;">Csoportbontás</span>
+            </div>
           </div>
           <div class="flex flex-col gap-2">${csoportRows}</div>
           <div>
@@ -350,17 +372,20 @@ function renderAkt(a, k) {
       el.innerHTML = `
         <div class="flex flex-col gap-4 aktiv-card">
           <div>
-            <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Most itt van</p>
-            <a href="/terem/${encodeURIComponent(a.terem)}" style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:white;line-height:1.1;display:block;">${a.terem}. terem <span style="font-size:18px;color:#f0c76b;">→</span></a>
+            <div class="flex items-center gap-2 mb-0.5">
+              <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Most itt van</p>
+              ${dur}
+            </div>
+            <a href="/terem/${encodeURIComponent(a.terem)}" style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:white;line-height:1.1;display:block;">${escHtml(a.terem)}. terem <span style="font-size:18px;color:#f0c76b;">→</span></a>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tanár</p>
-              <p style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;">${a.tanar_nev||a.tanar}</p>
+              <p style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;">${escHtml(a.tanar_nev||a.tanar)}</p>
             </div>
             <div>
               <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p>
-              <p style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;">${a.tantargy}</p>
+              <p style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;">${escHtml(a.tantargy)}</p>
             </div>
           </div>
           <div>
@@ -382,8 +407,8 @@ function renderAkt(a, k) {
         <div>
           <p class="font-semibold" style="color:rgba(255,255,255,.8);">Jelenleg szabad</p>
           <p class="text-sm mt-0.5" style="color:rgba(255,255,255,.4);">
-            Következő: <strong style="color:rgba(255,255,255,.7);">${k.terem}. terem</strong>
-            · ${k.tantargy} · ${k.kezdes}–${k.vegzes}
+            Következő: <strong style="color:rgba(255,255,255,.7);">${escHtml(k.terem)}. terem</strong>
+            · ${escHtml(k.tantargy)} · ${k.kezdes}–${k.vegzes}
           </p>
         </div>
       </div>`
@@ -411,35 +436,42 @@ function renderLista(orak) {
     const ak = isAktiv(o.kezdes, o.vegzes)
     const mu = isMult(o.vegzes)
     const numColor = mu ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.85)'
+    const multi = oraSzam(o) > 1
+    const numLabel = sorszamLabel(o, i + 1)
+    const dur = durBadgeHtml(o)
 
     let body = ''
     if (o.is_csoport) {
-      // Csoportbontásos sor
+      // Csoportbontásos sor – minden csoport külön blokkban, tárgy felül, terem · tanár alul
       const csRows = o.csoportok.map((c,ci) => `
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">${ci+1}.</span>
-          <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.75)'};">${c.tantargy || o.tantargy}</span>
-          <span class="text-xs" style="color:rgba(255,255,255,.35);">${c.terem}. terem · ${c.tanar_nev||c.tanar}</span>
+        <div class="cs-row">
+          <span class="csoport-badge cs-mini">${ci+1}.</span>
+          <div style="min-width:0;">
+            <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(c.tantargy || o.tantargy)}</span>
+            <span class="text-xs" style="display:block;color:rgba(255,255,255,.4);">${escHtml(c.terem)}. terem · ${escHtml(c.tanar_nev||c.tanar)}</span>
+          </div>
         </div>`).join('')
       body = `
-        <div class="flex items-baseline gap-1.5 flex-wrap mb-0.5">
-          <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${o.tantargy}</span>
+        <div class="flex items-center gap-1.5 flex-wrap mb-1">
+          <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.tantargy)}</span>
           <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">csoport</span>
+          ${dur}
         </div>
-        <div class="flex flex-col gap-0.5">${csRows}</div>
-        <p class="text-xs" style="color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
+        <div class="cs-list">${csRows}</div>
+        <p class="text-xs" style="color:rgba(255,255,255,.28);margin-top:3px;">${o.kezdes} – ${o.vegzes}</p>`
     } else {
       body = `
         <div class="flex items-baseline gap-1.5 flex-wrap">
-          <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${o.terem}. terem</span>
-          <span class="text-xs" style="color:rgba(255,255,255,.35);">${o.tantargy} · ${o.tanar_nev||o.tanar}</span>
+          <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.terem)}. terem</span>
+          <span class="text-xs" style="color:rgba(255,255,255,.35);">${escHtml(o.tantargy)} · ${escHtml(o.tanar_nev||o.tanar)}</span>
+          ${dur}
         </div>
         <p class="text-xs" style="color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
     }
 
     return `
       <div class="ora-row${ak?' aktiv':mu?' mult':''} flex items-start gap-3 px-2 py-2.5 -mx-1">
-        <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:${numColor};width:20px;text-align:right;flex-shrink:0;margin-top:2px;">${o.ora_sorszam||i+1}</span>
+        <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:${multi?'13px':'16px'};color:${numColor};min-width:22px;text-align:right;flex-shrink:0;margin-top:2px;white-space:nowrap;">${numLabel}</span>
         <div class="flex-1 min-w-0">${body}</div>
         ${ak ? `<span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#ff6b82;display:inline-block;margin-top:6px;"></span>` : ''}
       </div>`
