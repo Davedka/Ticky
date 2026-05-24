@@ -50,8 +50,57 @@ function ticky_group_merge_signature(array $groups): string {
     return (string) json_encode($normalized, JSON_UNESCAPED_UNICODE);
 }
 
+function ticky_period_index_by_start(): array {
+    return ['07:30'=>1,'08:20'=>2,'09:15'=>3,'10:15'=>4,'11:10'=>5,'12:05'=>6,'12:55'=>7,'13:40'=>8];
+}
+
+function ticky_period_index_by_end(): array {
+    return ['08:10'=>1,'09:05'=>2,'10:00'=>3,'11:00'=>4,'11:55'=>5,'12:50'=>6,'13:35'=>7,'14:20'=>8];
+}
+
 function merge_consecutive_orak(array $orak): array {
-    return $orak;
+    if (count($orak) < 2) {
+        foreach ($orak as &$o) {
+            $o['ora_szam'] = $o['ora_szam'] ?? 1;
+        }
+        unset($o);
+        return $orak;
+    }
+
+    usort($orak, static fn($a, $b) => strcmp((string) ($a['kezdes'] ?? ''), (string) ($b['kezdes'] ?? '')));
+ 
+    $start_idx = ticky_period_index_by_start();
+    $end_idx   = ticky_period_index_by_end();
+ 
+    $result = [];
+    foreach ($orak as $ora) {
+        $ora['ora_szam'] = 1;
+ 
+        if (empty($result)) {
+            $result[] = $ora;
+            continue;
+        }
+ 
+        $li   = count($result) - 1;
+        $last = $result[$li];
+ 
+        $same_content = ticky_group_merge_signature($last['csoportok'] ?? [])
+                      === ticky_group_merge_signature($ora['csoportok'] ?? []);
+ 
+        $last_end   = $end_idx[substr((string) ($last['vegzes'] ?? ''), 0, 5)] ?? null;
+        $this_start = $start_idx[substr((string) ($ora['kezdes'] ?? ''), 0, 5)] ?? null;
+        $consecutive = $last_end !== null && $this_start !== null && $this_start === $last_end + 1;
+ 
+        if ($same_content && $consecutive) {
+            $result[$li]['vegzes']         = $ora['vegzes'];
+            $result[$li]['ora_szam']       = ($result[$li]['ora_szam'] ?? 1) + 1;
+            $result[$li]['ora_sorszam_ig'] = $ora['ora_sorszam'] ?? null;
+        } else {
+            $result[] = $ora;
+        }
+    }
+ 
+    return $result;
 }
 
 
