@@ -4,15 +4,13 @@ require_once __DIR__ . '/../utils/helpers.php';
 
 send_security_headers(true);
 
-// ── Extra védelmi fejlécek (a tester egy bejelentkezett, érzékeny felület) ──
-// A header() alapból FELÜLÍRJA az azonos nevű korábbi fejlécet, így ha a
-// send_security_headers() is állít CSP-t, ez lesz az érvényes. Ha ott már van
-// egy szigorúbb globális CSP, egyeztesd a kettőt.
-// Megjegyzés: a Tailwind Play CDN (cdn.tailwindcss.com) 'unsafe-eval'-t igényel.
-// Élesben érdemes a Tailwindet build-időben fordítani, hogy ez elhagyható legyen.
+
+$csp_nonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
+
+
 header("Content-Security-Policy: "
     . "default-src 'self'; "
-    . "script-src 'self' https://cdn.tailwindcss.com 'unsafe-eval'; "
+    . "script-src 'self' 'nonce-{$csp_nonce}' https://cdn.tailwindcss.com 'unsafe-eval'; "
     . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; "
     . "font-src 'self' https://fonts.gstatic.com; "
     . "img-src 'self' data:; "
@@ -385,7 +383,7 @@ $test_areas = [
   </p>
 </main>
 
-<script>
+<script nonce="<?= htmlspecialchars($csp_nonce, ENT_QUOTES, 'UTF-8') ?>">
   // Karakterszámláló a leíráshoz
   (function(){
     var ta = document.querySelector('textarea[name="description"]');
