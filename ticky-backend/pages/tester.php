@@ -4,9 +4,20 @@ require_once __DIR__ . '/../utils/helpers.php';
 
 send_security_headers(true);
 
+$user = ticky_current_user();
+if (!is_array($user)) {
+    header('Location: /login?from=/tester');
+    exit;
+}
 
+$role = (string) ($user['szerep'] ?? '');
+if (!in_array($role, ['admin', 'tester'], true)) {
+    http_response_code(403);
+    exit('403 – Nincs jogosultságod.');
+}
+
+// ── CSP nonce (az oldal saját inline scriptjéhez) ──────
 $csp_nonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
-
 
 header("Content-Security-Policy: "
     . "default-src 'self'; "
@@ -25,42 +36,21 @@ header('X-Frame-Options: DENY');
 header('Cache-Control: no-store, max-age=0');
 header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
 
-$user = ticky_current_user();
-if (!is_array($user)) {
-    header('Location: /login?from=/tester');
-    exit;
-}
-
-$role = (string) ($user['szerep'] ?? '');
-if (!in_array($role, ['admin', 'tester'], true)) {
-    http_response_code(403);
-    exit('403 – Nincs jogosultságod.');
-}
-
 $csrf = ticky_csrf_token();
 $feedback_sent  = false;
 $feedback_error = null;
 
-// ── Bemenet-tisztító segédfüggvények ───────────────────
 function tester_clean_text(string $value): string {
-    // Vezérlőkarakterek kiszűrése (tab/újsor marad), majd trim
     $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? $value;
     return trim($value);
 }
 
-// ── Feedback POST handler ──────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedback') {
-
-    // (1) Honeypot: a 'kapcsolat' mezőnek üresnek kell lennie (botok kitöltik).
-    //     Ha ki van töltve, csendben "sikert" jelzünk, de NEM mentünk.
     $honeypot = (string) ($_POST['kapcsolat'] ?? '');
-
-    // (2) Minimális kitöltési idő (a render óta) – túl gyors submit = bot.
     $rendered_at = (int) ($_SESSION['tester_form_render'] ?? 0);
     $too_fast    = $rendered_at > 0 && (time() - $rendered_at) < 2;
 
     if ($honeypot !== '' || $too_fast) {
-        // Ne áruljuk el a botnak, hogy kiszűrtük.
         $feedback_sent = true;
     } elseif (!ticky_has_valid_csrf_token((string) ($_POST['csrf_token'] ?? ''))) {
         $feedback_error = 'Érvénytelen CSRF token. Töltsd újra az oldalt.';
@@ -74,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedb
             $description = tester_clean_text((string) ($_POST['description'] ?? ''));
             $page_url    = tester_clean_text((string) ($_POST['page_url'] ?? ''));
 
-            // UTF-8 érvényesség (a hibás bájtsorozat adatbázis/JSON hibát okozhat)
             if (!mb_check_encoding($title, 'UTF-8') || !mb_check_encoding($description, 'UTF-8') || !mb_check_encoding($page_url, 'UTF-8')) {
                 $feedback_error = 'Érvénytelen karakterkódolás a bemenetben.';
             } elseif (!in_array($category, ['bug', 'feature', 'feedback'], true)) {
@@ -86,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedb
             } elseif (mb_strlen($description, 'UTF-8') > 5000) {
                 $feedback_error = 'A leírás legfeljebb 5000 karakter lehet.';
             } elseif ($page_url !== '' && !preg_match('#^/[\w\-./%?=&]*$#', $page_url)) {
-                // Csak belső, relatív útvonal engedett (nem teljes URL, nem //host)
                 $feedback_error = 'A megadott oldal csak belső útvonal lehet (pl. /terem/204).';
             } else {
                 $res = sb_request('POST', 'tester_feedback', [
@@ -109,10 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedb
     }
 }
 
-// Új render-időbélyeg a (lassú-submit) bot-szűréshez
 $_SESSION['tester_form_render'] = time();
 
-// ── Saját feedback-ek lekérdezése (utolsó 10) ──────────
 $my_feedback = sb_get('tester_feedback', [
     'user_id' => 'eq.' . $user['id'],
     'select'  => 'id,category,title,status,created_at,admin_note',
@@ -120,47 +106,41 @@ $my_feedback = sb_get('tester_feedback', [
     'limit'   => '10',
 ], 'service') ?: [];
 
-// ── Build info ─────────────────────────────────────────
+// Saját feedback statisztika
+$fb_stats = ['new' => 0, 'reviewed' => 0, 'fixed' => 0, 'wont_fix' => 0];
+foreach ($my_feedback as $fb) {
+    $s = (string) ($fb['status'] ?? 'new');
+    if (isset($fb_stats[$s])) $fb_stats[$s]++;
+}
+
 $build_commit = substr(trim((string) (getenv('RENDER_GIT_COMMIT') ?: '')), 0, 7);
 $build_branch = trim((string) (getenv('RENDER_GIT_BRANCH') ?: 'main'));
 $build_time   = filemtime(__DIR__ . '/../index.php') ?: time();
+$server_now_ms = (int) round(microtime(true) * 1000);
+
+// Mit teszteljünk most (friss változások)
+$focus = [
+    ['🆕', 'Több órás blokk', 'Az osztály nézetben az egymás utáni azonos órák egy blokk: lássd a „2 óra” / „3 óra” badge-t és a teljes idősávot (pl. 07:30–10:00).'],
+    ['🆕', 'Csoportsorok', 'Csoportbontásnál a sorok ne törjenek szét hosszú tanárnévnél vagy 3+ csoportnál.'],
+    ['🆕', 'Lyukasóra', 'A hiányzó óra valóban üres-e (nem hiba), és helyesen ugrik a következő meglévő órára.'],
+];
+
+// Edge-case gyorslinkek (valós, trükkös esetek)
+$quick = [
+    ['🎓', '12.e (péntek, csoportbontás)', '/osztaly/12.e'],
+    ['🎓', '13.a (3 órás blokk: bpét)', '/osztaly/13.a'],
+    ['👩‍🏫', 'KM tanár (sok óra)', '/tanar/KM'],
+    ['👩‍🏫', 'BO tanár (utolsó órák)', '/tanar/BO'],
+    ['🏫', '104. terem', '/terem/104'],
+    ['📺', 'Kijelző', '/kijelzo'],
+];
 
 $test_areas = [
-    [
-        'icon' => '🏫',
-        'title' => 'Termek live nézet',
-        'desc' => 'Ellenőrizd a /termek oldalt: minden terem státusza valóban frissül? Foglalt/szabad helyesen jelenik meg?',
-        'href' => '/termek',
-        'check' => 'Próbáld ki több böngészőben, mobilon is.',
-    ],
-    [
-        'icon' => '👩‍🏫',
-        'title' => 'Tanár kereső',
-        'desc' => 'Válassz ki egy tanárt és nézd meg a napi órarendjét. Stimmel az adat?',
-        'href' => '/tanar',
-        'check' => 'Próbálj ki olyan tanárt is, akinek lyukasórája van.',
-    ],
-    [
-        'icon' => '🎓',
-        'title' => 'Osztály nézet',
-        'desc' => 'Válaszd ki a saját osztályod, ellenőrizd a megjelenő órarendet.',
-        'href' => '/osztaly',
-        'check' => 'Hibás óraszám / terem / tanár? Több órás (összevont) blokk jól jelenik meg?',
-    ],
-    [
-        'icon' => '📺',
-        'title' => 'Kijelző',
-        'desc' => 'A folyosói kijelző nézet. Próbáld ki nagy képernyőn, illetve hogy auto-frissül-e.',
-        'href' => '/kijelzo',
-        'check' => 'Olvasható távolról? Frissül 30 másodpercenként?',
-    ],
-    [
-        'icon' => '📱',
-        'title' => 'QR kódok',
-        'desc' => 'Generálj QR-t egy teremhez, szkenneld be telefonnal.',
-        'href' => '/qr',
-        'check' => 'A QR a helyes /terem/{szam} oldalra visz?',
-    ],
+    ['🏫', 'Termek live nézet', 'Minden terem státusza valóban frissül? Foglalt/szabad helyes?', '/termek'],
+    ['👩‍🏫', 'Tanár kereső', 'Tanár napi órarendje. Lyukasóra, csoportbontás OK?', '/tanar'],
+    ['🎓', 'Osztály nézet', 'Órarend, több órás blokk, csoportsorok, aktuális óra.', '/osztaly'],
+    ['📺', 'Kijelző', 'Olvasható távolról? Auto-frissül? Szünet banner?', '/kijelzo'],
+    ['📱', 'QR kódok', 'QR generál, és a helyes /terem/{szam}-ra visz?', '/qr'],
 ];
 ?>
 <!DOCTYPE html>
@@ -194,22 +174,38 @@ $test_areas = [
   .chip.gray{color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.10)}
   .inp{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);padding:10px 12px;color:#fff;font-size:13px;}
   .inp:focus{outline:none;border-color:rgba(96,165,250,.45);box-shadow:0 0 0 3px rgba(96,165,250,.08);}
-  .btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;padding:10px 16px;border-radius:10px;font-size:13px;}
+  .btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;padding:10px 16px;border-radius:10px;font-size:13px;cursor:pointer;}
   .btn-blue:hover{background:linear-gradient(135deg,#60a5fa,#3b82f6);}
-  .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.78);padding:8px 14px;border-radius:10px;font-size:13px;}
+  .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.78);padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;}
   .btn-ghost:hover{background:rgba(255,255,255,.10);color:white;}
   .mono{font-family:'DM Mono',monospace;}
   .small{font-size:12px;color:rgba(255,255,255,.5);}
+  .sec-title{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.4);margin-bottom:14px;}
   .card-link{display:block;padding:18px;border-radius:14px;transition:all .15s;text-decoration:none;color:inherit;}
   .card-link:hover{transform:translateY(-2px);}
-  /* Honeypot – ember számára láthatatlan, botnak csábító */
   .hp-field{position:absolute!important;left:-9999px!important;top:-9999px!important;width:1px;height:1px;overflow:hidden;opacity:0;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+  .dot.ok{background:#4ade80;box-shadow:0 0 8px #4ade80;}
+  .dot.bad{background:#fb7185;box-shadow:0 0 8px #fb7185;}
+  .dot.wait{background:#fbbf24;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width .4s ease;}
+  .check-row{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .check-row:last-child{border-bottom:none;}
+  .check-row input{margin-top:3px;width:15px;height:15px;accent-color:#3b82f6;cursor:pointer;flex-shrink:0;}
+  .check-row.done label{color:rgba(255,255,255,.35);text-decoration:line-through;}
+  .qlink{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);color:#cfe0ff;font-size:12px;text-decoration:none;}
+  .qlink:hover{background:rgba(255,255,255,.10);color:#fff;}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:rgba(255,255,255,.45);}
+  .kv .v{color:rgba(255,255,255,.85);text-align:right;word-break:break-word;}
 </style>
 </head>
 <body>
 <div class="top"></div>
 
-<!-- Navbar (egyszerű, tester témájú) -->
 <nav class="sticky top-0 z-40 px-5 h-16 flex items-center justify-between glass border-x-0 border-t-0">
   <div class="flex items-center gap-3 min-w-0">
     <a href="/" class="text-white text-lg font-bold inline-flex items-center gap-2" style="font-family:'Playfair Display',serif;">
@@ -231,14 +227,13 @@ $test_areas = [
 
 <main class="max-w-6xl mx-auto px-5 py-8 relative z-10">
 
-  <!-- Welcome banner -->
   <header class="mb-8">
     <h1 class="text-4xl font-bold" style="font-family:'Playfair Display',serif;">
       Üdv, <?= htmlspecialchars($user['nev'] ?? $user['felhasznalonev'], ENT_QUOTES, 'UTF-8') ?>!
     </h1>
     <p class="small mt-3 max-w-2xl">
-      Ez a Ticky <strong>tester felülete</strong>. Itt a feladatod, hogy átfusd a fontosabb felhasználói folyamatokat,
-      kipróbáld a friss verziókat, és visszajelzéseket küldj a fejlesztőnek.
+      Ez a Ticky <strong>tester központja</strong>. Fent látod az élő állapotot és hogy mire figyelj most,
+      lent a checklistet és a visszajelzés-küldést.
     </p>
   </header>
 
@@ -259,27 +254,83 @@ $test_areas = [
     </div>
   </div>
 
-  <!-- Test areas -->
-  <section class="mb-10">
-    <h2 class="text-xs uppercase tracking-[0.16em] text-white/40 mb-4">📋 Tesztelendő területek</h2>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-      <?php foreach ($test_areas as $area): ?>
-        <a href="<?= htmlspecialchars($area['href'], ENT_QUOTES, 'UTF-8') ?>" class="glass card-link">
-          <div class="text-2xl mb-3"><?= $area['icon'] ?></div>
-          <div class="text-lg font-bold mb-1" style="font-family:'Playfair Display',serif;">
-            <?= htmlspecialchars($area['title'], ENT_QUOTES, 'UTF-8') ?>
+  <!-- Rendszer-állapot + Mit teszteljünk -->
+  <section class="grid lg:grid-cols-2 gap-6 mb-10">
+    <div class="glass rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="sec-title mb-0">🩺 Rendszer-állapot</h2>
+        <button id="health-refresh" class="btn-ghost" style="padding:5px 10px;font-size:12px;">Újraellenőriz</button>
+      </div>
+      <div id="health-list" class="space-y-1"></div>
+    </div>
+
+    <div class="glass rounded-2xl p-6">
+      <h2 class="sec-title">🎯 Mit teszteljünk most</h2>
+      <div class="space-y-3">
+        <?php foreach ($focus as $f): ?>
+          <div class="flex gap-3">
+            <span style="font-size:18px;flex-shrink:0;"><?= $f[0] ?></span>
+            <div>
+              <div class="text-sm font-semibold"><?= htmlspecialchars($f[1], ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="small"><?= htmlspecialchars($f[2], ENT_QUOTES, 'UTF-8') ?></div>
+            </div>
           </div>
-          <p class="text-sm text-white/65 mb-2"><?= htmlspecialchars($area['desc'], ENT_QUOTES, 'UTF-8') ?></p>
-          <p class="text-xs text-white/40">💡 <?= htmlspecialchars($area['check'], ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- Edge-case gyorslinkek -->
+  <section class="mb-10">
+    <h2 class="sec-title">⚡ Trükkös esetek (gyorslinkek)</h2>
+    <div class="flex flex-wrap gap-2">
+      <?php foreach ($quick as $q): ?>
+        <a href="<?= htmlspecialchars($q[2], ENT_QUOTES, 'UTF-8') ?>" class="qlink">
+          <span><?= $q[0] ?></span><?= htmlspecialchars($q[1], ENT_QUOTES, 'UTF-8') ?>
         </a>
       <?php endforeach; ?>
     </div>
   </section>
 
-  <!-- Feedback form + saját feedback-ek -->
-  <section class="grid lg:grid-cols-[1fr_400px] gap-6 mb-10">
+  <!-- Teszt-területek -->
+  <section class="mb-10">
+    <h2 class="sec-title">📋 Tesztelendő területek</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <?php foreach ($test_areas as $area): ?>
+        <a href="<?= htmlspecialchars($area[3], ENT_QUOTES, 'UTF-8') ?>" class="glass card-link">
+          <div class="text-2xl mb-3"><?= $area[0] ?></div>
+          <div class="text-lg font-bold mb-1" style="font-family:'Playfair Display',serif;">
+            <?= htmlspecialchars($area[1], ENT_QUOTES, 'UTF-8') ?>
+          </div>
+          <p class="text-sm text-white/65"><?= htmlspecialchars($area[2], ENT_QUOTES, 'UTF-8') ?></p>
+        </a>
+      <?php endforeach; ?>
+    </div>
+  </section>
 
-    <!-- Feedback form -->
+  <!-- Checklist + Környezet -->
+  <section class="grid lg:grid-cols-[1fr_360px] gap-6 mb-10">
+    <div class="glass rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="sec-title mb-0">✅ Teszt-checklist</h2>
+        <button id="check-reset" class="btn-ghost" style="padding:5px 10px;font-size:12px;">Nullázás</button>
+      </div>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="bar flex-1"><span id="check-bar"></span></div>
+        <span class="small mono" id="check-pct">0%</span>
+      </div>
+      <div id="check-list"></div>
+      <p class="small mt-3">A pipák a böngésződben tárolódnak (nem szerveroldal).</p>
+    </div>
+
+    <aside class="glass rounded-2xl p-6">
+      <h2 class="sec-title">🖥️ Környezet</h2>
+      <div id="env-list"></div>
+    </aside>
+  </section>
+
+  <!-- Feedback + saját feedbackek -->
+  <section class="grid lg:grid-cols-[1fr_400px] gap-6 mb-10">
     <div class="glass rounded-2xl p-6">
       <h2 class="text-xl font-bold mb-4" style="font-family:'Playfair Display',serif;">💬 Visszajelzés küldése</h2>
 
@@ -297,12 +348,8 @@ $test_areas = [
       <form method="POST" class="space-y-4" autocomplete="off" novalidate>
         <input type="hidden" name="action" value="feedback">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
-
-        <!-- Honeypot: hagyd üresen (ember nem látja) -->
         <div class="hp-field" aria-hidden="true">
-          <label>Ne töltsd ki ezt a mezőt
-            <input type="text" name="kapcsolat" tabindex="-1" autocomplete="off">
-          </label>
+          <label>Ne töltsd ki ezt a mezőt<input type="text" name="kapcsolat" tabindex="-1" autocomplete="off"></label>
         </div>
 
         <div>
@@ -316,8 +363,7 @@ $test_areas = [
 
         <div>
           <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Cím (rövid összefoglaló)</label>
-          <input name="title" class="inp" maxlength="200" required
-                 placeholder="Pl.: A 204-es terem státusza nem frissül">
+          <input name="title" class="inp" maxlength="200" required placeholder="Pl.: A 204-es terem státusza nem frissül">
         </div>
 
         <div>
@@ -329,17 +375,29 @@ $test_areas = [
 
         <div>
           <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Melyik oldalon? (opcionális)</label>
-          <input name="page_url" class="inp mono" maxlength="500" placeholder="/terem/204"
+          <input name="page_url" class="inp mono" maxlength="500" placeholder="/terem/204" list="pages"
                  pattern="^/[\w\-./%?=&]*$" title="Belső útvonal, pl. /terem/204">
+          <datalist id="pages">
+            <option value="/termek"><option value="/tanar"><option value="/osztaly">
+            <option value="/kijelzo"><option value="/qr">
+            <option value="/osztaly/12.e"><option value="/osztaly/13.a"><option value="/terem/104">
+          </datalist>
         </div>
 
         <button type="submit" class="btn-blue">Visszajelzés küldése</button>
       </form>
     </div>
 
-    <!-- Saját feedbackjeim -->
     <aside class="glass rounded-2xl p-6">
-      <h2 class="text-xl font-bold mb-4" style="font-family:'Playfair Display',serif;">📜 Visszajelzéseim</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold" style="font-family:'Playfair Display',serif;">📜 Visszajelzéseim</h2>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="chip blue"><?= (int) $fb_stats['new'] ?> új</span>
+        <span class="chip gold"><?= (int) $fb_stats['reviewed'] ?> átnézve</span>
+        <span class="chip green"><?= (int) $fb_stats['fixed'] ?> javítva</span>
+        <span class="chip red"><?= (int) $fb_stats['wont_fix'] ?> elutasítva</span>
+      </div>
 
       <?php if (empty($my_feedback)): ?>
         <p class="small">Még nem küldtél visszajelzést.</p>
@@ -348,10 +406,8 @@ $test_areas = [
           <?php foreach ($my_feedback as $fb):
             $cat_chips = ['bug' => '🐛 bug', 'feature' => '💡 ötlet', 'feedback' => '💬 vissza'];
             $status_chips = [
-              'new'      => ['chip blue',  'új'],
-              'reviewed' => ['chip gold',  'átnézve'],
-              'fixed'    => ['chip green', 'javítva'],
-              'wont_fix' => ['chip red',   'elutasítva'],
+              'new' => ['chip blue','új'], 'reviewed' => ['chip gold','átnézve'],
+              'fixed' => ['chip green','javítva'], 'wont_fix' => ['chip red','elutasítva'],
             ];
             $status = (string) ($fb['status'] ?? 'new');
             $status_info = $status_chips[$status] ?? ['chip gray', $status];
@@ -379,20 +435,130 @@ $test_areas = [
   </section>
 
   <p class="text-center small mt-12">
-    🧪 Ticky Tester · v1.0 · Ha bármi nem világos, írj a <a href="/support" class="text-blue-300 hover:text-blue-200">support</a> oldalon
+    🧪 Ticky Tester · v1.1 · Ha bármi nem világos, írj a <a href="/support" class="text-blue-300 hover:text-blue-200">support</a> oldalon
   </p>
 </main>
 
 <script nonce="<?= htmlspecialchars($csp_nonce, ENT_QUOTES, 'UTF-8') ?>">
-  // Karakterszámláló a leíráshoz
-  (function(){
-    var ta = document.querySelector('textarea[name="description"]');
-    var c  = document.getElementById('desc-count');
-    if (ta && c) {
-      var upd = function(){ c.textContent = ta.value.length; };
-      ta.addEventListener('input', upd); upd();
+(function(){
+  'use strict';
+  var SERVER_NOW_MS = <?= $server_now_ms ?>;
+
+  // ── Karakterszámláló ──────────────────────────────
+  var ta = document.querySelector('textarea[name="description"]'),
+      cc = document.getElementById('desc-count');
+  if (ta && cc) { var u = function(){ cc.textContent = ta.value.length; }; ta.addEventListener('input', u); u(); }
+
+  // ── Rendszer-állapot ──────────────────────────────
+  var endpoints = [
+    { label: 'Osztály lista API', url: '/api/osztalyok' },
+    { label: 'Órarend API (12.e)', url: '/api/osztaly/12.e/orarend' },
+    { label: 'Főoldal', url: '/' }
+  ];
+  var healthList = document.getElementById('health-list');
+
+  function renderHealth(states){
+    healthList.innerHTML = states.map(function(s){
+      var cls = s.status === 'ok' ? 'ok' : (s.status === 'wait' ? 'wait' : 'bad');
+      var info = s.status === 'wait' ? 'ellenőrzés…'
+               : (s.status === 'ok' ? (s.ms + ' ms') : (s.code ? ('HTTP ' + s.code) : 'hiba'));
+      return '<div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid rgba(255,255,255,.05)">'
+           + '<span class="flex items-center gap-2 text-sm"><span class="dot ' + cls + '"></span>' + s.label + '</span>'
+           + '<span class="small mono">' + info + '</span></div>';
+    }).join('');
+  }
+
+  async function ping(ep){
+    var ctrl = new AbortController();
+    var to = setTimeout(function(){ ctrl.abort(); }, 6000);
+    var t0 = performance.now();
+    try {
+      var r = await fetch(ep.url, { signal: ctrl.signal, headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+      clearTimeout(to);
+      return { label: ep.label, status: r.ok ? 'ok' : 'bad', code: r.status, ms: Math.round(performance.now() - t0) };
+    } catch (e) {
+      clearTimeout(to);
+      return { label: ep.label, status: 'bad', code: 0, ms: 0 };
     }
-  })();
+  }
+
+  async function runHealth(){
+    var states = endpoints.map(function(e){ return { label: e.label, status: 'wait' }; });
+    renderHealth(states);
+    for (var i = 0; i < endpoints.length; i++){
+      states[i] = await ping(endpoints[i]);
+      renderHealth(states);
+    }
+  }
+  document.getElementById('health-refresh').addEventListener('click', runHealth);
+  runHealth();
+
+  // ── Környezet ─────────────────────────────────────
+  var driftMs = Date.now() - SERVER_NOW_MS;
+  var driftTxt = (Math.abs(driftMs) < 4000 ? '≈ szinkronban' : (Math.round(driftMs/1000) + ' s eltérés'));
+  var env = [
+    ['Böngésző', navigator.userAgent.replace(/^Mozilla\/5\.0 /, '')],
+    ['Nyelv', navigator.language || '—'],
+    ['Ablak', window.innerWidth + ' × ' + window.innerHeight + ' px'],
+    ['Pixelarány', (window.devicePixelRatio || 1) + 'x'],
+    ['Kapcsolat', navigator.onLine ? 'online' : 'offline'],
+    ['Időzóna', (Intl.DateTimeFormat().resolvedOptions().timeZone || '—')],
+    ['Kliens↔szerver', driftTxt]
+  ];
+  document.getElementById('env-list').innerHTML = env.map(function(kv){
+    return '<div class="kv"><span class="k">' + kv[0] + '</span><span class="v mono">'
+         + String(kv[1]).replace(/</g,'&lt;') + '</span></div>';
+  }).join('');
+
+  // ── Checklist (localStorage) ──────────────────────
+  var CHECK = [
+    { area: '🏫 Termek', items: ['Minden terem listázódik', 'Foglalt/szabad helyes', 'Magától frissül', 'Mobil nézet OK'] },
+    { area: '👩‍🏫 Tanár', items: ['Tanár kiválasztható', 'Napi órarend helyes', 'Lyukasóra jól látszik', 'Csoportbontás OK'] },
+    { area: '🎓 Osztály', items: ['Órarend helyes', "Több órás blokk: 'N óra' badge + idősáv", 'Csoportsorok nem törnek szét', 'Aktuális óra kiemelve'] },
+    { area: '📺 Kijelző', items: ['Olvasható távolról', '~30 mp-enként frissül', 'Szünet banner OK'] },
+    { area: '📱 QR', items: ['QR generálódik', 'Beolvasva a jó oldalra visz'] },
+    { area: '🌐 Általános', items: ['Bejelentkezés/kilépés', 'Hibás URL kezelése', 'Sötét háttér olvasható'] }
+  ];
+  var KEY = 'ticky_tester_checklist_v1';
+  var listEl = document.getElementById('check-list');
+  var barEl = document.getElementById('check-bar');
+  var pctEl = document.getElementById('check-pct');
+
+  function loadState(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e){ return {}; } }
+  function saveState(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+
+  function renderChecklist(){
+    var state = loadState(), total = 0, done = 0, html = '';
+    CHECK.forEach(function(group, gi){
+      html += '<div class="text-sm font-semibold mt-3 mb-1">' + group.area + '</div>';
+      group.items.forEach(function(item, ii){
+        var id = 'c_' + gi + '_' + ii;
+        var checked = !!state[id];
+        total++; if (checked) done++;
+        html += '<div class="check-row' + (checked ? ' done' : '') + '">'
+              + '<input type="checkbox" id="' + id + '"' + (checked ? ' checked' : '') + '>'
+              + '<label for="' + id + '" class="text-sm" style="cursor:pointer;color:rgba(255,255,255,.8)">' + item + '</label></div>';
+      });
+    });
+    listEl.innerHTML = html;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    barEl.style.width = pct + '%';
+    pctEl.textContent = pct + '% (' + done + '/' + total + ')';
+
+    listEl.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var st = loadState();
+        if (cb.checked) st[cb.id] = 1; else delete st[cb.id];
+        saveState(st);
+        renderChecklist();
+      });
+    });
+  }
+  document.getElementById('check-reset').addEventListener('click', function(){
+    if (confirm('Biztosan nullázod a checklistet?')) { saveState({}); renderChecklist(); }
+  });
+  renderChecklist();
+})();
 </script>
 </body>
 </html>
