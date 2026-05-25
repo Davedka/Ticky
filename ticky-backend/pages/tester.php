@@ -4,6 +4,29 @@ require_once __DIR__ . '/../utils/helpers.php';
 
 send_security_headers(true);
 
+// ── Extra védelmi fejlécek (a tester egy bejelentkezett, érzékeny felület) ──
+// A header() alapból FELÜLÍRJA az azonos nevű korábbi fejlécet, így ha a
+// send_security_headers() is állít CSP-t, ez lesz az érvényes. Ha ott már van
+// egy szigorúbb globális CSP, egyeztesd a kettőt.
+// Megjegyzés: a Tailwind Play CDN (cdn.tailwindcss.com) 'unsafe-eval'-t igényel.
+// Élesben érdemes a Tailwindet build-időben fordítani, hogy ez elhagyható legyen.
+header("Content-Security-Policy: "
+    . "default-src 'self'; "
+    . "script-src 'self' https://cdn.tailwindcss.com 'unsafe-eval'; "
+    . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; "
+    . "font-src 'self' https://fonts.gstatic.com; "
+    . "img-src 'self' data:; "
+    . "connect-src 'self'; "
+    . "object-src 'none'; "
+    . "base-uri 'self'; "
+    . "form-action 'self'; "
+    . "frame-ancestors 'none'");
+header('Referrer-Policy: no-referrer');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Cache-Control: no-store, max-age=0');
+header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
+
 $user = ticky_current_user();
 if (!is_array($user)) {
     header('Location: /login?from=/tester');
@@ -20,9 +43,28 @@ $csrf = ticky_csrf_token();
 $feedback_sent  = false;
 $feedback_error = null;
 
+// ── Bemenet-tisztító segédfüggvények ───────────────────
+function tester_clean_text(string $value): string {
+    // Vezérlőkarakterek kiszűrése (tab/újsor marad), majd trim
+    $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? $value;
+    return trim($value);
+}
+
 // ── Feedback POST handler ──────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedback') {
-    if (!ticky_has_valid_csrf_token((string) ($_POST['csrf_token'] ?? ''))) {
+
+    // (1) Honeypot: a 'kapcsolat' mezőnek üresnek kell lennie (botok kitöltik).
+    //     Ha ki van töltve, csendben "sikert" jelzünk, de NEM mentünk.
+    $honeypot = (string) ($_POST['kapcsolat'] ?? '');
+
+    // (2) Minimális kitöltési idő (a render óta) – túl gyors submit = bot.
+    $rendered_at = (int) ($_SESSION['tester_form_render'] ?? 0);
+    $too_fast    = $rendered_at > 0 && (time() - $rendered_at) < 2;
+
+    if ($honeypot !== '' || $too_fast) {
+        // Ne áruljuk el a botnak, hogy kiszűrtük.
+        $feedback_sent = true;
+    } elseif (!ticky_has_valid_csrf_token((string) ($_POST['csrf_token'] ?? ''))) {
         $feedback_error = 'Érvénytelen CSRF token. Töltsd újra az oldalt.';
     } else {
         $wait = ticky_rate_limit_wait_seconds('tester_feedback', 600, 10, 600);
@@ -30,26 +72,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedb
             $feedback_error = 'Túl sok feedback rövid idő alatt. Várj ' . $wait . ' másodpercet.';
         } else {
             $category    = (string) ($_POST['category'] ?? '');
-            $title       = trim((string) ($_POST['title'] ?? ''));
-            $description = trim((string) ($_POST['description'] ?? ''));
-            $page_url    = trim((string) ($_POST['page_url'] ?? ''));
+            $title       = tester_clean_text((string) ($_POST['title'] ?? ''));
+            $description = tester_clean_text((string) ($_POST['description'] ?? ''));
+            $page_url    = tester_clean_text((string) ($_POST['page_url'] ?? ''));
 
-            if (!in_array($category, ['bug', 'feature', 'feedback'], true)) {
+            // UTF-8 érvényesség (a hibás bájtsorozat adatbázis/JSON hibát okozhat)
+            if (!mb_check_encoding($title, 'UTF-8') || !mb_check_encoding($description, 'UTF-8') || !mb_check_encoding($page_url, 'UTF-8')) {
+                $feedback_error = 'Érvénytelen karakterkódolás a bemenetben.';
+            } elseif (!in_array($category, ['bug', 'feature', 'feedback'], true)) {
                 $feedback_error = 'Érvénytelen kategória.';
             } elseif ($title === '' || $description === '') {
                 $feedback_error = 'Cím és leírás kötelező.';
-            } elseif (strlen($title) > 200) {
+            } elseif (mb_strlen($title, 'UTF-8') > 200) {
                 $feedback_error = 'A cím legfeljebb 200 karakter lehet.';
-            } elseif (strlen($description) > 5000) {
+            } elseif (mb_strlen($description, 'UTF-8') > 5000) {
                 $feedback_error = 'A leírás legfeljebb 5000 karakter lehet.';
+            } elseif ($page_url !== '' && !preg_match('#^/[\w\-./%?=&]*$#', $page_url)) {
+                // Csak belső, relatív útvonal engedett (nem teljes URL, nem //host)
+                $feedback_error = 'A megadott oldal csak belső útvonal lehet (pl. /terem/204).';
             } else {
                 $res = sb_request('POST', 'tester_feedback', [
                     'user_id'     => $user['id'],
                     'category'    => $category,
                     'title'       => $title,
                     'description' => $description,
-                    'page_url'    => $page_url !== '' ? substr($page_url, 0, 500) : null,
-                    'user_agent'  => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 500),
+                    'page_url'    => $page_url !== '' ? mb_substr($page_url, 0, 500, 'UTF-8') : null,
+                    'user_agent'  => mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 500, 'UTF-8'),
                 ], [], 'service');
 
                 if ($res['success']) {
@@ -62,6 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'feedb
         }
     }
 }
+
+// Új render-időbélyeg a (lassú-submit) bot-szűréshez
+$_SESSION['tester_form_render'] = time();
 
 // ── Saját feedback-ek lekérdezése (utolsó 10) ──────────
 $my_feedback = sb_get('tester_feedback', [
@@ -96,7 +147,7 @@ $test_areas = [
         'title' => 'Osztály nézet',
         'desc' => 'Válaszd ki a saját osztályod, ellenőrizd a megjelenő órarendet.',
         'href' => '/osztaly',
-        'check' => 'Hibás óraszám / terem / tanár?',
+        'check' => 'Hibás óraszám / terem / tanár? Több órás (összevont) blokk jól jelenik meg?',
     ],
     [
         'icon' => '📺',
@@ -119,6 +170,7 @@ $test_areas = [
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 <title>Tester – Ticky</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -152,6 +204,8 @@ $test_areas = [
   .small{font-size:12px;color:rgba(255,255,255,.5);}
   .card-link{display:block;padding:18px;border-radius:14px;transition:all .15s;text-decoration:none;color:inherit;}
   .card-link:hover{transform:translateY(-2px);}
+  /* Honeypot – ember számára láthatatlan, botnak csábító */
+  .hp-field{position:absolute!important;left:-9999px!important;top:-9999px!important;width:1px;height:1px;overflow:hidden;opacity:0;}
 </style>
 </head>
 <body>
@@ -242,9 +296,16 @@ $test_areas = [
         </div>
       <?php endif; ?>
 
-      <form method="POST" class="space-y-4">
+      <form method="POST" class="space-y-4" autocomplete="off" novalidate>
         <input type="hidden" name="action" value="feedback">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+
+        <!-- Honeypot: hagyd üresen (ember nem látja) -->
+        <div class="hp-field" aria-hidden="true">
+          <label>Ne töltsd ki ezt a mezőt
+            <input type="text" name="kapcsolat" tabindex="-1" autocomplete="off">
+          </label>
+        </div>
 
         <div>
           <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Kategória</label>
@@ -265,11 +326,13 @@ $test_areas = [
           <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Részletes leírás</label>
           <textarea name="description" class="inp" rows="6" maxlength="5000" required
                     placeholder="Mi történik? Mi kellene történjen? Mikor és hogyan reprodukálható?"></textarea>
+          <div class="small mt-1 text-right"><span id="desc-count">0</span>/5000</div>
         </div>
 
         <div>
           <label class="block text-xs uppercase tracking-[0.16em] text-white/40 mb-2">Melyik oldalon? (opcionális)</label>
-          <input name="page_url" class="inp mono" placeholder="/terem/204">
+          <input name="page_url" class="inp mono" maxlength="500" placeholder="/terem/204"
+                 pattern="^/[\w\-./%?=&]*$" title="Belső útvonal, pl. /terem/204">
         </div>
 
         <button type="submit" class="btn-blue">Visszajelzés küldése</button>
@@ -301,7 +364,7 @@ $test_areas = [
                 <span class="<?= $status_info[0] ?>" style="font-size:9px"><?= htmlspecialchars($status_info[1], ENT_QUOTES, 'UTF-8') ?></span>
               </div>
               <div class="flex items-center gap-2 text-xs text-white/40">
-                <span><?= $cat_chips[$fb['category']] ?? $fb['category'] ?></span>
+                <span><?= htmlspecialchars($cat_chips[$fb['category']] ?? (string) $fb['category'], ENT_QUOTES, 'UTF-8') ?></span>
                 <span>·</span>
                 <span class="mono"><?= htmlspecialchars(substr((string)($fb['created_at'] ?? ''), 0, 10), ENT_QUOTES, 'UTF-8') ?></span>
               </div>
@@ -321,5 +384,17 @@ $test_areas = [
     🧪 Ticky Tester · v1.0 · Ha bármi nem világos, írj a <a href="/support" class="text-blue-300 hover:text-blue-200">support</a> oldalon
   </p>
 </main>
+
+<script>
+  // Karakterszámláló a leíráshoz
+  (function(){
+    var ta = document.querySelector('textarea[name="description"]');
+    var c  = document.getElementById('desc-count');
+    if (ta && c) {
+      var upd = function(){ c.textContent = ta.value.length; };
+      ta.addEventListener('input', upd); upd();
+    }
+  })();
+</script>
 </body>
 </html>
