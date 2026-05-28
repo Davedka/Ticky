@@ -259,6 +259,17 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
           <div id="diag-comparison" class="small">Betoltes...</div>
         </div>
 
+        <div class="glass rounded-2xl p-5 mb-5">
+          <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">GitHub szinkronizálás</h3>
+          <p class="small mb-3">A friss <code>tanárok.js</code> letöltése GitHub-ról és a lokális fájl felülírása. Utána futtasd a Teljes importot a változások adatbázisba mentéséhez.</p>
+          <div id="github-info" class="small mb-3" style="color:rgba(255,255,255,.55)">Betöltés...</div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <button class="btn btn-ghost" id="run-github-sync">Friss tanárok.js letöltése GitHub-ról</button>
+            <span id="github-sync-status" class="small"></span>
+          </div>
+          <div id="github-sync-result" class="mt-3"></div>
+        </div>
+
         <div class="glass rounded-2xl p-5">
           <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Import</h3>
           <p class="small mb-4">Teljes ujraimportalas a tanarok.js forrásból. Minden tanár, terem és órarend sor törlődik, majd újra beíródik.</p>
@@ -316,7 +327,7 @@ function setSection(name){
   state.section=name;
   document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='section-'+name));
   document.querySelectorAll('.navbtn[data-section]').forEach(el=>el.classList.toggle('active',el.dataset.section===name));
-  const loaders={dashboard:loadDashboard,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:loadDiagnosztika};
+  const loaders={dashboard:loadDashboard,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:()=>{loadDiagnosztika();loadGithubInfo()}};
   loaders[name]?.();
 }
 document.querySelectorAll('.navbtn[data-section]').forEach(btn=>btn.addEventListener('click',()=>setSection(btn.dataset.section)));
@@ -545,8 +556,53 @@ async function runImport(){
   }finally{q('run-import').disabled=false}
 }
 
-q('reload-diag').addEventListener('click',loadDiagnosztika);
+async function loadGithubInfo(){
+  try{
+    const d=await adminFetch('/api/admin/github_sync',{method:'GET'});
+    const cfg=d.config||{};
+    const loc=d.local||{};
+    const url=d.raw_url||'';
+    const sizeKb=loc.size?(loc.size/1024).toFixed(1):'?';
+    q('github-info').innerHTML=
+      `<div><strong>Repo:</strong> ${esc(cfg.owner)}/${esc(cfg.repo)} <span style="color:rgba(255,255,255,.35)">(branch: ${esc(cfg.branch)})</span>${cfg.has_token?' 🔒':''}</div>`+
+      `<div class="mt-1"><strong>Lokális fájl:</strong> ${loc.exists?'✓ '+sizeKb+' KB':'✗ nincs'}${loc.mtime?' · módosítva: '+esc(loc.mtime):''}</div>`+
+      `<div class="mt-1" style="color:rgba(255,255,255,.3);word-break:break-all;font-size:11px;">${esc(url)}</div>`;
+  }catch(error){
+    q('github-info').innerHTML=`<span style="color:#fda4af">${esc(error.message)}</span>`;
+  }
+}
+
+async function runGithubSync(){
+  if(!confirm('Letölti és felülírja a lokális tanárok.js fájlt a GitHub branch tartalmával. Folytatod?')) return;
+  q('github-sync-status').textContent='Letöltés...';
+  q('github-sync-result').innerHTML='';
+  q('run-github-sync').disabled=true;
+  try{
+    const d=await adminFetch('/api/admin/github_sync',{method:'POST',body:{}});
+    q('github-sync-status').textContent='';
+    const changed=d.changed?'<strong style="color:#86efac">változott</strong>':'<strong style="color:rgba(255,255,255,.5)">változatlan</strong>';
+    let html=`<div class="glass rounded-xl p-4 mt-2">`
+      +`<p><strong style="color:#86efac">GitHub sync sikeres!</strong></p>`
+      +`<p class="small mt-1">Letöltve: ${(d.bytes/1024).toFixed(1)} KB · ${changed}</p>`
+      +`<p class="small" style="color:rgba(255,255,255,.4)">SHA1: ${esc((d.new_sha1||'').slice(0,12))}…</p>`;
+    if(d.changed){
+      html+=`<p class="small mt-2" style="color:#f0c76b">⚠️ Friss adatok! Most futtasd a Teljes importot lent.</p>`;
+    }
+    html+=`</div>`;
+    q('github-sync-result').innerHTML=html;
+    toast('GitHub szinkronizálva!');
+    loadGithubInfo();
+    loadDiagnosztika();
+  }catch(error){
+    q('github-sync-status').textContent='';
+    q('github-sync-result').innerHTML=`<div class="glass rounded-xl p-4 mt-2" style="border-color:rgba(244,63,94,.3)"><p style="color:#fda4af">${esc(error.message)}</p></div>`;
+    toast(error.message,'err');
+  }finally{q('run-github-sync').disabled=false}
+}
+
+q('reload-diag').addEventListener('click',()=>{loadDiagnosztika();loadGithubInfo()});
 q('run-import').addEventListener('click',runImport);
+q('run-github-sync').addEventListener('click',runGithubSync);
 q('reload-dashboard').addEventListener('click',loadDashboard);
 q('create-user').addEventListener('click',createUser);
 q('reload-users').addEventListener('click',loadUsers);
