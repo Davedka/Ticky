@@ -23,30 +23,30 @@ function aktualis_ido(): string {
 
 function ticky_group_merge_signature(array $groups): string {
     $normalized = [];
-
+ 
     foreach ($groups as $group) {
         if (!is_array($group)) {
             continue;
         }
-
+ 
         $item = [];
         foreach (['terem', 'osztaly', 'tanar', 'tanar_nev', 'tantargy'] as $key) {
             if (array_key_exists($key, $group)) {
                 $item[$key] = (string) ($group[$key] ?? '');
             }
         }
-
+ 
         ksort($item);
         $normalized[] = $item;
     }
-
+ 
     usort($normalized, static function (array $left, array $right): int {
         return strcmp(
             (string) json_encode($left, JSON_UNESCAPED_UNICODE),
             (string) json_encode($right, JSON_UNESCAPED_UNICODE)
         );
     });
-
+ 
     return (string) json_encode($normalized, JSON_UNESCAPED_UNICODE);
 }
 
@@ -58,6 +58,20 @@ function ticky_period_index_by_end(): array {
     return ['08:10'=>1,'09:05'=>2,'10:00'=>3,'11:00'=>4,'11:55'=>5,'12:50'=>6,'13:35'=>7,'14:20'=>8];
 }
 
+function ticky_lesson_merge_signature(array $lesson): string {
+    $groups = ticky_group_merge_signature($lesson['csoportok'] ?? []);
+ 
+    $top = [
+        'tantargy'   => (string) ($lesson['tantargy'] ?? ''),
+        'terem'      => (string) ($lesson['terem'] ?? ''),
+        'osztaly'    => (string) ($lesson['osztaly'] ?? ''),
+        'tanar'      => (string) ($lesson['tanar'] ?? ''),
+        'is_csoport' => !empty($lesson['is_csoport']) ? 1 : 0,
+    ];
+ 
+    return $groups . '#' . json_encode($top, JSON_UNESCAPED_UNICODE);
+}
+
 function merge_consecutive_orak(array $orak): array {
     if (count($orak) < 2) {
         foreach ($orak as &$o) {
@@ -66,7 +80,7 @@ function merge_consecutive_orak(array $orak): array {
         unset($o);
         return $orak;
     }
-
+ 
     usort($orak, static fn($a, $b) => strcmp((string) ($a['kezdes'] ?? ''), (string) ($b['kezdes'] ?? '')));
  
     $start_idx = ticky_period_index_by_start();
@@ -84,11 +98,14 @@ function merge_consecutive_orak(array $orak): array {
         $li   = count($result) - 1;
         $last = $result[$li];
  
-        $same_content = ticky_group_merge_signature($last['csoportok'] ?? [])
-                      === ticky_group_merge_signature($ora['csoportok'] ?? []);
+
+        $has_content  = ($last['csoportok'] ?? []) !== [] && ($ora['csoportok'] ?? []) !== [];
  
-        $last_end   = $end_idx[substr((string) ($last['vegzes'] ?? ''), 0, 5)] ?? null;
-        $this_start = $start_idx[substr((string) ($ora['kezdes'] ?? ''), 0, 5)] ?? null;
+        $same_content = $has_content
+                      && ticky_lesson_merge_signature($last) === ticky_lesson_merge_signature($ora);
+
+        $last_end    = $end_idx[substr((string) ($last['vegzes'] ?? ''), 0, 5)] ?? null;
+        $this_start  = $start_idx[substr((string) ($ora['kezdes'] ?? ''), 0, 5)] ?? null;
         $consecutive = $last_end !== null && $this_start !== null && $this_start === $last_end + 1;
  
         if ($same_content && $consecutive) {
