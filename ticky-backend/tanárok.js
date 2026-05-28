@@ -955,7 +955,7 @@ export const SCHEDULE_DATA = [
   { teacher: 'MMR', room: '105',  class: '9.c',  subject: 'mt', day: 'Szerda',   start: '10:15', end: '11:00' },
   { teacher: 'MMR', room: '21', class: '9.c',  subject: 'mt', day: 'Csütörtök',start: '12:55', end: '13:35' },
   { teacher: 'MMR', room: '21', class: '9.c',  subject: 'mt', day: 'Csütörtök',start: '12:55', end: '13:35' },
-  { teacher: 'MMR', room: '106',  class: '11.b', subject: 'mt', day: 'Csütörtök',start: '08:20', end: '09:05' },
+  { teacher: 'MMR', room: 'K1',  class: '11.b', subject: 'mt', day: 'Csütörtök',start: '12:05', end: '12:50' },
   { teacher: 'MMR', room: 'K1',  class: '10.e', subject: 'mt', day: 'Csütörtök',start: '12:55', end: '13:35' },
   { teacher: 'MMR', room: 'K3',  class: '9.c',  subject: 'mt', day: 'Péntek',   start: '08:20', end: '09:05' },
   { teacher: 'MMR', room: '21',  class: '10.e', subject: 'mt', day: 'Péntek',   start: '09:15', end: '10:00' },
@@ -1970,4 +1970,18 @@ export const SCHEDULE_DATA = [
   { teacher: 'ÁSZJ', room: '204', class: '9.c', subject: 'ir', day: 'Péntek', start: '12:55', end: '13:35' },
   // ÉCS
   { teacher: 'ÉCS', room: 'T2', class: '12.b', subject: 'tn.', day: 'Csütörtök', start: '12:55', end: '13:35' },
+
+  // ─────────────────────────────────────────────
+  // Kézi javítások a PDF alapján (csoport-bontás merge)
+  // ─────────────────────────────────────────────
+  // HI
+  { teacher: 'HI', room: '210/1', class: '12.a/12.b', subject: 'Wp', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  { teacher: 'HI', room: '210/1', class: '12.a/12.b', subject: 'Wp', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  // LZ
+  { teacher: 'LZ', room: '210/1', class: '12.a/12.b', subject: 'Wp', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  { teacher: 'LZ', room: '210/1', class: '12.a/12.b', subject: 'Wp', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  // PÁI
+  { teacher: 'PÁI', room: 'K101', class: '12.a/12.b', subject: 'sza', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  // SZZ
+  { teacher: 'SZZ', room: '209', class: '12.a/12.b', subject: 'lprl', day: 'Csütörtök', start: '10:15', end: '11:00' },
 ];
