@@ -91,7 +91,10 @@ async function deleteAll() {
   }
 
   console.log('│  Fallback: kézi törlés...')
-  const tables = ['aktualis_orak', 'napi_orarend', 'orak_rendje', 'orarendek', 'termek', 'tanarok']
+  // Csak alaptáblák, FK-helyes sorrendben (gyerek → szülő).
+  // A napi_orarend, aktualis_orak, orak_rendje VIEW-k, nem lehet törölni belőlük –
+  // automatikusan frissülnek az alaptáblák tartalmából.
+  const tables = ['orarendek', 'termek', 'tanarok']
   for (const table of tables) {
     const count = await countRows(table)
     if (count === 0) continue
