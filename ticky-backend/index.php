@@ -327,6 +327,7 @@ if ($uri === '/api/admin/felhasznalo' || $params !== false) {
 if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit; }
 if ($uri === '/api/admin/diagnosztika') { require __DIR__.'/api/admin_diagnosztika.php'; exit; }
 if ($uri === '/api/admin/import') { require __DIR__.'/api/admin_import.php'; exit; }
+if ($uri === '/api/admin/github_sync') { require __DIR__.'/api/admin_github_sync.php'; exit; }
 if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
 $params = match_route('/api/admin/szunet/{id}', $uri);
 if ($uri === '/api/admin/szunet' || $params !== false) {
