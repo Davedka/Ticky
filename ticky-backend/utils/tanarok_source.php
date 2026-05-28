@@ -461,11 +461,12 @@ function ticky_source_expected_lessons(): array
 }
 
 // ─────────────────────────────────────────────────────────────────
-// ÚJ LOGIKA: minden tanárok.js bejegyzés = EGY csoport, combined
+// OSZTÁLY NÉZET: minden tanárok.js bejegyzés = EGY csoport, combined
 // osztály/terem mezőkkel. Nem ZIP-elünk a megjelenítéshez.
 //
-// JAVÍTÁS: a több tanórát átfogó (összevont) blokkokat óránként
-// szétbontjuk, hogy a 2–4. óra ne egyetlen sorként jelenjen meg.
+// A több tanórát átfogó (összevont) blokkokat óránként szétbontjuk,
+// hogy a 2–4. óra ne egyetlen sorként jelenjen meg. A megjelenítésnél
+// a merge_consecutive_orak() vonja vissza össze az azonos szomszédokat.
 // ─────────────────────────────────────────────────────────────────
 function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?array
 {
@@ -522,8 +523,7 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
         $osztaly_str = implode('/', $class_codes);
         $terem_str   = implode('/', $room_codes);
 
-        // Több órát átfogó blokk → óránként külön idősávra bontjuk,
-        // így minden tanóra önálló sorként jelenik meg (2. óra, 3. óra, 4. óra…).
+        // Több órát átfogó blokk → óránként külön idősávra bontjuk.
         foreach (ticky_source_expand_period_slots($raw_start, $raw_end) as $slot) {
             [$start, $end] = $slot;
             $key = $start . '_' . $end;
@@ -659,8 +659,13 @@ function ticky_source_resolve_teacher_code(string $requested_teacher): ?string
 }
 
 // ─────────────────────────────────────────────────────────────────
-// ÚJ LOGIKA tanár nézethez: szintén a raw entries-eken iterálunk,
-// és minden source bejegyzés = EGY csoport combined adatokkal.
+// TANÁR NÉZET: szintén a raw entries-eken iterálunk, minden source
+// bejegyzés = EGY csoport combined adatokkal.
+//
+// JAVÍTÁS: itt is óránként szétbontjuk a több tanórát átfogó blokkokat
+// (ticky_source_expand_period_slots), hogy a tanár-nézet UGYANÚGY
+// viselkedjen, mint az osztály-nézet minden napon. A megjelenítésnél
+// a merge_consecutive_orak() vonja vissza össze az azonos szomszédokat.
 // ─────────────────────────────────────────────────────────────────
 function ticky_source_teacher_day_schedule(string $requested_teacher, int $day): ?array
 {
@@ -702,44 +707,50 @@ function ticky_source_teacher_day_schedule(string $requested_teacher, int $day):
             $room_codes = [ticky_source_normalize_token((string) ($entry['room'] ?? '?'))];
         }
 
-        $start   = substr(ticky_source_normalize_token((string) ($entry['start'] ?? '')), 0, 5);
-        $end     = substr(ticky_source_normalize_token((string) ($entry['end']   ?? '')), 0, 5);
-        $subject = ticky_source_normalize_token((string) ($entry['subject'] ?? ''));
-        $key     = $start . '_' . $end;
-
-        if (!isset($grouped[$key])) {
-            $grouped[$key] = [
-                'kezdes'      => $start,
-                'vegzes'      => $end,
-                'ora_sorszam' => ticky_source_period_number($start),
-                'tantargy'    => $subject,
-                'csoportok'   => [],
-            ];
-        }
+        $raw_start = substr(ticky_source_normalize_token((string) ($entry['start'] ?? '')), 0, 5);
+        $raw_end   = substr(ticky_source_normalize_token((string) ($entry['end']   ?? '')), 0, 5);
+        $subject   = ticky_source_normalize_token((string) ($entry['subject'] ?? ''));
 
         $osztaly_str = implode('/', $class_codes);
         $terem_str   = implode('/', $room_codes);
 
-        $exists = false;
-        foreach ($grouped[$key]['csoportok'] as $existing) {
-            if (
-                $existing['terem']    === $terem_str
-                && $existing['osztaly']  === $osztaly_str
-                && $existing['tantargy'] === $subject
-            ) {
-                $exists = true;
-                break;
-            }
-        }
-        if ($exists) {
-            continue;
-        }
+        // Több tanórát átfogó blokk → óránként szétbontjuk (mint az osztály-nézetnél).
+        foreach (ticky_source_expand_period_slots($raw_start, $raw_end) as $slot) {
+            [$start, $end] = $slot;
+            $key = $start . '_' . $end;
 
-        $grouped[$key]['csoportok'][] = [
-            'terem'    => $terem_str,
-            'osztaly'  => $osztaly_str,
-            'tantargy' => $subject,
-        ];
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'kezdes'      => $start,
+                    'vegzes'      => $end,
+                    'ora_sorszam' => ticky_source_period_number($start),
+                    'tantargy'    => $subject,
+                    'csoportok'   => [],
+                ];
+            }
+
+            // Deduplikáció az adott idősávon belül
+            $exists = false;
+            foreach ($grouped[$key]['csoportok'] as $existing) {
+                if (
+                    $existing['terem']    === $terem_str
+                    && $existing['osztaly']  === $osztaly_str
+                    && $existing['tantargy'] === $subject
+                ) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if ($exists) {
+                continue;
+            }
+
+            $grouped[$key]['csoportok'][] = [
+                'terem'    => $terem_str,
+                'osztaly'  => $osztaly_str,
+                'tantargy' => $subject,
+            ];
+        }
     }
 
     $lessons = [];
