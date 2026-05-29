@@ -2153,4 +2153,14 @@ export const SCHEDULE_DATA = [
   // ÁSZJ
   { teacher: 'ÁSZJ', room: '204', class: '12.e', subject: 'nny', day: 'Szerda', start: '13:40', end: '14:20' },
   { teacher: 'ÁSZJ', room: '204', class: '12.e', subject: 'nny', day: 'Csütörtök', start: '12:05', end: '12:50' },
+
+
+  // ─────────────────────────────────────────────
+  // 11.b Pé P7 + 13.a Pé P4-P5 (Excel sérült cellák értelmezése)
+  // ─────────────────────────────────────────────
+  { teacher: 'PMGY', room: '14', class: '11.b', subject: 'hl', day: 'Péntek', start: '12:55', end: '13:35' },
+  { teacher: 'PMG', room: '209', class: '13.a', subject: 'aémafét', day: 'Péntek', start: '10:15', end: '11:00' },
+  { teacher: 'PMG', room: '209', class: '13.a', subject: 'aémafét', day: 'Péntek', start: '11:10', end: '11:55' },
+  { teacher: 'VG', room: '310', class: '13.a', subject: 'h', day: 'Péntek', start: '10:15', end: '11:00' },
+  { teacher: 'VG', room: '310', class: '13.a', subject: 'hl', day: 'Péntek', start: '11:10', end: '11:55' },
 ];
