@@ -288,12 +288,14 @@ function buildTT() {
       const ak=isMa&&isAktiv(o.kezdes,o.vegzes)
       const mu=isMa&&isMult(o.vegzes)
       const p=ak?calcPct(o.kezdes,o.vegzes):0
-      col+=`<div class="ora-blk${ak?' aktiv':mu?' mult':''}" style="top:${top}px;height:${h}px;"
-        title="${o.tanar_nev||o.tanar} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
+      const osztKod=(o.osztaly||'').split('/')[0].trim()
+      const href=osztKod?'/osztaly/'+encodeURIComponent(osztKod):'#'
+      col+=`<a href="${href}" class="ora-blk${ak?' aktiv':mu?' mult':''}" style="top:${top}px;height:${h}px;text-decoration:none;"
+        title="${o.tanar_nev||o.tanar} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes} – Klikk: osztály nézet">
         <div class="ob-tanar">${o.tanar_nev||o.tanar}</div>
         ${h>32?`<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>`:''}
         ${ak?`<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>`:''}
-      </div>`
+      </a>`
     })
     col+=`</div>`
     html+=col
