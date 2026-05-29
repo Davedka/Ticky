@@ -17,7 +17,7 @@ A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
 - `Qr generátor`bug: az utobbi patchek illetve updatek után a qr-kódók nem töltöttek be átkerületek cloudbase-re tehát mostantol látszódnak az összes termeknek a qr-kódjai.
 - `Osztály nézet`bug: Miután meglett csinálva hogy az egymás utáni órákat külön órának vegye és ne egy óraként ergo nem váltott át ha pl 2 óra volt egymás után a 3.órára stb stb ezután azis felkerült hogy nagy bug volt végig az hogy a csoportbontásnak a logikája elcsuszott valahol mert a csoportbontásnál ha egyszerre két óra volt egymás után szintén egynek vette és itt születtek ilyen szemrelátható dolgok hogy ha volt egy ilyen 3-4.órába csoportbontás dupla óra egymás után akkor hirtelen 6-7 óra elcsuszott lett két 6.óra stb stb sikerült kiküszübölni a problémát illetve javitva lett.
 - `Összes terem` & `Kijelző`: Iskola bejárása szerint lett organizálva tehát ahogy megy az iskola ugy vannak benne a termek.
-- 'Új feature' mostantol az 'Osztály nézetbwn' van egy outline ami mutatja a csoportbontásos órát & az órának a tetején kiirja hogy hány óra csoportbontás van.
+- `Új feature`  mostantol az `Osztály nézetbwn` van egy outline ami mutatja a `csoportbontásos órát` & az órának a tetején kiirja hogy hány óra csoportbontás van.
 
 ### ⚙️ WIP [2026-09-01 - 2026-11-01]
 - Nos mivel az iskola átesett nem régiben érettségi előtt egy épület bövitésen következő tanévben várhatóak az uj termek is.
