@@ -2123,4 +2123,34 @@ export const SCHEDULE_DATA = [
   { teacher: 'ÁSZJ', room: '204', class: '13.b', subject: 'min', day: 'Csütörtök', start: '12:05', end: '12:50' },
   { teacher: 'ÁSZJ', room: '204', class: '12.c/12.e', subject: 'nny', day: 'Péntek', start: '09:15', end: '10:00' },
   { teacher: 'ÁSZJ', room: '204', class: '12.b', subject: 'nny', day: 'Péntek', start: '13:40', end: '14:20' },
+
+
+  // ─────────────────────────────────────────────
+  // További hiányzó órák (Excel v3 alapján, csoport továbbvitel)
+  // ─────────────────────────────────────────────
+  // BZ
+  { teacher: 'BZ', room: '19', class: '13.e', subject: 'min', day: 'Kedd', start: '10:15', end: '11:00' },
+  { teacher: 'BZ', room: '25', class: '9.b/9.e', subject: 'any', day: 'Szerda', start: '08:20', end: '09:05' },
+  // DA
+  { teacher: 'DA', room: '109', class: '12.b', subject: 'sé', day: 'Szerda', start: '09:15', end: '10:00' },
+  { teacher: 'DA', room: 'K106', class: '10.b', subject: 'géai', day: 'Csütörtök', start: '08:20', end: '09:05' },
+  // FJT
+  { teacher: 'FJT', room: '19', class: '12.b', subject: 'nny', day: 'Péntek', start: '13:40', end: '14:20' },
+  // FKZS
+  { teacher: 'FKZS', room: '110', class: '9.e', subject: 'nny', day: 'Kedd', start: '12:55', end: '13:35' },
+  // GYÁ
+  { teacher: 'GYÁ', room: 'K101', class: '11.b', subject: 'nny', day: 'Péntek', start: '10:15', end: '11:00' },
+  { teacher: 'GYÁ', room: '104', class: '11.b', subject: 'nny', day: 'Péntek', start: '13:40', end: '14:20' },
+  // JI
+  { teacher: 'JI', room: '14', class: '11.b', subject: 'lprl', day: 'Csütörtök', start: '11:10', end: '11:55' },
+  // NYMK
+  { teacher: 'NYMK', room: '203', class: '9.c', subject: 'any', day: 'Szerda', start: '09:15', end: '10:00' },
+  { teacher: 'NYMK', room: 'K102', class: '11.a', subject: 'any', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  // SZKÉ
+  { teacher: 'SZKÉ', room: 'K3/25/K2/19', class: '12.a/12.d/12.f', subject: 'any', day: 'Szerda', start: '09:15', end: '10:00' },
+  // UT
+  { teacher: 'UT', room: 'K3', class: '12.c', subject: 'Aigy', day: 'Péntek', start: '07:30', end: '08:10' },
+  // ÁSZJ
+  { teacher: 'ÁSZJ', room: '204', class: '12.e', subject: 'nny', day: 'Szerda', start: '13:40', end: '14:20' },
+  { teacher: 'ÁSZJ', room: '204', class: '12.e', subject: 'nny', day: 'Csütörtök', start: '12:05', end: '12:50' },
 ];
