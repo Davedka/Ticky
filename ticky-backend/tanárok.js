@@ -1976,4 +1976,151 @@ export const SCHEDULE_DATA = [
   { teacher: 'PÁI', room: 'K101', class: '12.a/12.b', subject: 'sza', day: 'Csütörtök', start: '09:15', end: '10:00' },
   // SZZ
   { teacher: 'SZZ', room: '209', class: '12.a/12.b', subject: 'lprl', day: 'Csütörtök', start: '10:15', end: '11:00' },
+
+
+  // ─────────────────────────────────────────────
+  // Excel csoport-bontásból hiányzó órák (PDF-fel ellenőrizve)
+  // ─────────────────────────────────────────────
+  // BI
+  { teacher: 'BI', room: '25', class: '10.b', subject: 'any', day: 'Szerda', start: '07:30', end: '08:10' },
+  { teacher: 'BI', room: '208', class: '10.b', subject: 'any', day: 'Péntek', start: '07:30', end: '08:10' },
+  // BO
+  { teacher: 'BO', room: '104', class: '13.e', subject: 'égi vagyon védelme', day: 'Péntek', start: '12:05', end: '12:50' },
+  // BSN
+  { teacher: 'BSN', room: 'K104', class: '13.f', subject: 'Si', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  { teacher: 'BSN', room: 'K105', class: '13.f', subject: 'Si', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  // BZ
+  { teacher: 'BZ', room: 'K202', class: '12.e', subject: 'Öv', day: 'Kedd', start: '08:20', end: '09:05' },
+  // BZS
+  { teacher: 'BZS', room: '109', class: '13.e', subject: 'szk', day: 'Kedd', start: '07:30', end: '08:10' },
+  { teacher: 'BZS', room: '110', class: '10.b', subject: 'Pséka', day: 'Kedd', start: '09:15', end: '10:00' },
+  // FEG
+  { teacher: 'FEG', room: '101', class: '13.e', subject: 'Szolgálati ismeretek', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'FEG', room: 'K1', class: '13.e', subject: 'Szolgálati ismeretek', day: 'Kedd', start: '12:05', end: '12:50' },
+  { teacher: 'FEG', room: 'K202', class: '11.e', subject: 'Öv', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'FEG', room: 'K314', class: '11.e', subject: 'Lö', day: 'Szerda', start: '08:20', end: '09:05' },
+  { teacher: 'FEG', room: 'K202', class: '11.e', subject: 'Öv', day: 'Szerda', start: '12:55', end: '13:35' },
+  { teacher: 'FEG', room: 'K314', class: '11.e', subject: 'Lö', day: 'Péntek', start: '12:05', end: '12:50' },
+  // FJT
+  { teacher: 'FJT', room: '109', class: '10.d/10.f', subject: 'nny', day: 'Kedd', start: '12:05', end: '12:50' },
+  { teacher: 'FJT', room: '109', class: '13.e', subject: 'nny', day: 'Kedd', start: '12:55', end: '13:35' },
+  // GR
+  { teacher: 'GR', room: 'K2', class: '12.b', subject: 'tö.', day: 'Kedd', start: '11:10', end: '11:55' },
+  // GYÁ
+  { teacher: 'GYÁ', room: '25', class: '10.d/10.f', subject: 'nny', day: 'Kedd', start: '12:05', end: '12:50' },
+  { teacher: 'GYÁ', room: '109', class: '10.c/10.e', subject: 'nny', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  // HI
+  { teacher: 'HI', room: '1', class: '12.b', subject: 'hl', day: 'Csütörtök', start: '07:30', end: '08:10' },
+  { teacher: 'HI', room: '209', class: '11.a', subject: 'hI', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  // IJ
+  { teacher: 'IJ', room: '104', class: '13.e', subject: 'szk', day: 'Kedd', start: '07:30', end: '08:10' },
+  // JI
+  { teacher: 'JI', room: '14', class: '12.a', subject: 'szt', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'JI', room: '14', class: '12.b', subject: 'sza', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'JI', room: '14', class: '12.b', subject: 'sza', day: 'Csütörtök', start: '07:30', end: '08:10' },
+  // JMK
+  { teacher: 'JMK', room: '1', class: '11.b', subject: 'aI', day: 'Szerda', start: '09:15', end: '10:00' },
+  // KIK
+  { teacher: 'KIK', room: 'K104', class: '11.b', subject: 'sza', day: 'Szerda', start: '08:20', end: '09:05' },
+  // KM
+  { teacher: 'KM', room: 'T1', class: '12.e', subject: 'tn.', day: 'Szerda', start: '12:55', end: '13:35' },
+  { teacher: 'KM', room: 'T1', class: '13.e', subject: 'E-áf', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  // KTT
+  { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Hétfő', start: '07:30', end: '08:10' },
+  { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Hétfő', start: '09:15', end: '10:00' },
+  // LK
+  { teacher: 'LK', room: '105', class: '13.b', subject: 'fi', day: 'Kedd', start: '09:15', end: '10:00' },
+  { teacher: 'LK', room: '105', class: '13.b', subject: 'fi', day: 'Kedd', start: '10:15', end: '11:00' },
+  // LKÁ
+  { teacher: 'LKÁ', room: 'K2', class: '10.c/10.e', subject: 'nny', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  { teacher: 'LKÁ', room: '21', class: '11.b', subject: 'nny', day: 'Péntek', start: '10:15', end: '11:00' },
+  { teacher: 'LKÁ', room: 'K3', class: '11.b', subject: 'nny', day: 'Péntek', start: '13:40', end: '14:20' },
+  // LTK
+  { teacher: 'LTK', room: 'K103', class: '12.f', subject: 'réák', day: 'Csütörtök', start: '11:10', end: '11:55' },
+  { teacher: 'LTK', room: 'K105', class: '12.f', subject: 'réák', day: 'Péntek', start: '11:10', end: '11:55' },
+  // LZ
+  { teacher: 'LZ', room: 'm18', class: '13.c', subject: 'aC-a', day: 'Szerda', start: '11:10', end: '11:55' },
+  { teacher: 'LZ', room: 'm18', class: '13.c', subject: 'aC-a', day: 'Csütörtök', start: '12:05', end: '12:50' },
+  // MMR
+  { teacher: 'MMR', room: '106', class: '11.b', subject: 'mt', day: 'Csütörtök', start: '08:20', end: '09:05' },
+  // MÉ
+  { teacher: 'MÉ', room: '19', class: '10.c/10.e', subject: 'any', day: 'Hétfő', start: '12:55', end: '13:35' },
+  { teacher: 'MÉ', room: 'K1', class: '10.c/10.e', subject: 'any', day: 'Kedd', start: '08:20', end: '09:05' },
+  { teacher: 'MÉ', room: 'K102', class: '11.d', subject: 'any', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'MÉ', room: 'K101', class: '11.b', subject: 'sza', day: 'Szerda', start: '10:15', end: '11:00' },
+  { teacher: 'MÉ', room: '109', class: '10.c/10.e', subject: 'any', day: 'Szerda', start: '11:10', end: '11:55' },
+  { teacher: 'MÉ', room: '306', class: '11.d', subject: 'any', day: 'Szerda', start: '12:55', end: '13:35' },
+  { teacher: 'MÉ', room: 'K3', class: '11.d', subject: 'any', day: 'Csütörtök', start: '12:05', end: '12:50' },
+  { teacher: 'MÉ', room: '306', class: '11.f', subject: 'any', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  // PE
+  { teacher: 'PE', room: '102', class: '12.d', subject: 'tö.', day: 'Hétfő', start: '08:20', end: '09:05' },
+  { teacher: 'PE', room: '205', class: '10.e', subject: 'tö.', day: 'Hétfő', start: '10:15', end: '11:00' },
+  // PMG
+  { teacher: 'PMG', room: '301', class: '11.a', subject: 'aI', day: 'Kedd', start: '09:15', end: '10:00' },
+  { teacher: 'PMG', room: '310', class: '11.a', subject: 'aI', day: 'Kedd', start: '12:05', end: '12:50' },
+  { teacher: 'PMG', room: '14', class: '11.a', subject: 'aI', day: 'Péntek', start: '12:05', end: '12:50' },
+  { teacher: 'PMG', room: '210', class: '13.b', subject: 'aI', day: 'Péntek', start: '13:40', end: '14:20' },
+  // PÁI
+  { teacher: 'PÁI', room: '24', class: '13.b', subject: 'min', day: 'Szerda', start: '11:10', end: '11:55' },
+  { teacher: 'PÁI', room: '24', class: '13.b', subject: 'min', day: 'Szerda', start: '12:05', end: '12:50' },
+  // SA
+  { teacher: 'SA', room: '102', class: '9.c', subject: 'géai', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  // SE
+  { teacher: 'SE', room: '202', class: '9.d', subject: 'of', day: 'Péntek', start: '10:15', end: '11:00' },
+  // SZBI
+  { teacher: 'SZBI', room: '110', class: '10.b', subject: 'b', day: 'Péntek', start: '09:15', end: '10:00' },
+  // SZG
+  { teacher: 'SZG', room: '110', class: '13.f', subject: 'any', day: 'Kedd', start: '07:30', end: '08:10' },
+  { teacher: 'SZG', room: '202', class: '13.f', subject: 'any', day: 'Kedd', start: '08:20', end: '09:05' },
+  { teacher: 'SZG', room: '110', class: '13.b', subject: 'any', day: 'Szerda', start: '07:30', end: '08:10' },
+  { teacher: 'SZG', room: '202', class: '13.b', subject: 'any', day: 'Szerda', start: '08:20', end: '09:05' },
+  // SZKÉ
+  { teacher: 'SZKÉ', room: '101', class: '11.d', subject: 'any', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'SZKÉ', room: '25', class: '13.e', subject: 'any', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'SZKÉ', room: '101', class: '11.d', subject: 'any', day: 'Csütörtök', start: '12:05', end: '12:50' },
+  { teacher: 'SZKÉ', room: '101', class: '11.f', subject: 'any', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  { teacher: 'SZKÉ', room: '101', class: '11.f', subject: 'any', day: 'Péntek', start: '12:05', end: '12:50' },
+  // SZZ
+  { teacher: 'SZZ', room: '211', class: '13.a', subject: 'dk', day: 'Kedd', start: '12:05', end: '12:50' },
+  { teacher: 'SZZ', room: '211', class: '11.b', subject: 'lprl', day: 'Szerda', start: '11:10', end: '11:55' },
+  { teacher: 'SZZ', room: '210', class: '12.b', subject: 'sza', day: 'Csütörtök', start: '07:30', end: '08:10' },
+  // SZÁ
+  { teacher: 'SZÁ', room: '209', class: '13.e', subject: 'kommunikáció', day: 'Csütörtök', start: '13:40', end: '14:20' },
+  // TM
+  { teacher: 'TM', room: '24', class: '13.b', subject: 'g', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'TM', room: '104', class: '13.c', subject: 'g', day: 'Csütörtök', start: '13:40', end: '14:20' },
+  // TPI
+  { teacher: 'TPI', room: '203', class: '11.e', subject: 'ir', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  // UME
+  { teacher: 'UME', room: '307', class: '11.d', subject: 'szv', day: 'Szerda', start: '11:10', end: '11:55' },
+  // UT
+  { teacher: 'UT', room: '24', class: '12.c', subject: 'Aigy', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  { teacher: 'UT', room: 'K3', class: '13.b', subject: 'm', day: 'Péntek', start: '11:10', end: '11:55' },
+  // VG
+  { teacher: 'VG', room: '211', class: '10.b', subject: 'dk', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'VG', room: '301', class: '11.b', subject: 'hl', day: 'Kedd', start: '08:20', end: '09:05' },
+  { teacher: 'VG', room: '1', class: '11.a', subject: 'hl', day: 'Szerda', start: '11:10', end: '11:55' },
+  { teacher: 'VG', room: '1', class: '11.b', subject: 'hl', day: 'Péntek', start: '11:10', end: '11:55' },
+  // VKJ
+  { teacher: 'VKJ', room: '21', class: '12.d/12.f', subject: 'nny', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'VKJ', room: 'K2', class: '13.f', subject: 'nny', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'VKJ', room: 'K2', class: '13.b', subject: 'nny', day: 'Kedd', start: '12:05', end: '12:50' },
+  { teacher: 'VKJ', room: '19', class: '13.b', subject: 'nny', day: 'Csütörtök', start: '07:30', end: '08:10' },
+  { teacher: 'VKJ', room: '19', class: '13.b', subject: 'nny', day: 'Csütörtök', start: '08:20', end: '09:05' },
+  // VZS
+  { teacher: 'VZS', room: '24', class: '12.c', subject: 'a', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'VZS', room: '24', class: '13.c', subject: 'g', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'VZS', room: '25', class: '13.c', subject: 'a', day: 'Szerda', start: '12:05', end: '12:50' },
+  { teacher: 'VZS', room: '25', class: '12.c', subject: 'a', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  { teacher: 'VZS', room: '25', class: '13.c', subject: 'a', day: 'Csütörtök', start: '11:10', end: '11:55' },
+  { teacher: 'VZS', room: '24', class: '13.b', subject: 'g', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  { teacher: 'VZS', room: '25', class: '13.c', subject: 'a', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  { teacher: 'VZS', room: '202', class: '13.b', subject: 'sé', day: 'Péntek', start: '10:15', end: '11:00' },
+  { teacher: 'VZS', room: '25', class: '13.b', subject: 'a', day: 'Péntek', start: '12:05', end: '12:50' },
+  { teacher: 'VZS', room: '204', class: '13.b', subject: 'sé', day: 'Péntek', start: '12:55', end: '13:35' },
+  // ÁSZJ
+  { teacher: 'ÁSZJ', room: '204', class: '13.b', subject: 'min', day: 'Csütörtök', start: '11:10', end: '11:55' },
+  { teacher: 'ÁSZJ', room: '204', class: '13.b', subject: 'min', day: 'Csütörtök', start: '12:05', end: '12:50' },
+  { teacher: 'ÁSZJ', room: '204', class: '12.c/12.e', subject: 'nny', day: 'Péntek', start: '09:15', end: '10:00' },
+  { teacher: 'ÁSZJ', room: '204', class: '12.b', subject: 'nny', day: 'Péntek', start: '13:40', end: '14:20' },
 ];
