@@ -316,14 +316,16 @@ function buildTT() {
       const p=ak?pct(o.kezdes,o.vegzes):0
       const cl=ak?'aktiv':mu?'mult':''
       const nm=o.tanar_nev||o.tanar
+      const osztKod=(o.osztaly||'').split('/')[0].trim()
+      const href=osztKod?'/osztaly/'+encodeURIComponent(osztKod):'#'
 
-      col+=`<div class="ora-blk ${cl}" style="top:${top}px;height:${h}px;"
-        title="${nm} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes}">
+      col+=`<a href="${href}" class="ora-blk ${cl}" style="top:${top}px;height:${h}px;text-decoration:none;"
+        title="${nm} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes} – Klikk: osztály nézet">
         <div class="ob-tanar">${nm}</div>
         ${h>38?`<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>`:''}
         ${h>56?`<div class="ob-meta">${o.kezdes}–${o.vegzes}</div>`:''}
         ${ak?`<div class="ob-prog"><div class="ob-prog-fill" style="width:${p}%;"></div></div>`:''}
-      </div>`
+      </a>`
     })
 
     col+=`</div>`
@@ -363,7 +365,9 @@ function buildMobList() {
     const ak=isMa&&isAktiv(o.kezdes,o.vegzes)
     const mu=isMa&&isMult(o.vegzes)
     const p=ak?pct(o.kezdes,o.vegzes):0
-    h+=`<div class="mob-row${ak?' aktiv':mu?' mult':''}">
+    const osztKod=(o.osztaly||'').split('/')[0].trim()
+    const href=osztKod?'/osztaly/'+encodeURIComponent(osztKod):'#'
+    h+=`<a href="${href}" class="mob-row${ak?' aktiv':mu?' mult':''}" style="text-decoration:none;color:inherit;display:flex;">
       <div class="mob-num">${o.ora_sorszam||i+1}</div>
       <div class="mob-body">
         <div class="mob-ido">${o.kezdes} – ${o.vegzes}</div>
@@ -371,7 +375,7 @@ function buildMobList() {
         <div class="mob-meta">${o.osztaly} · ${o.tantargy}</div>
       </div>
       <div class="mob-prog"><div class="mob-prog-fill" style="height:${p}%;"></div></div>
-    </div>`
+    </a>`
     const kov=orak[i+1]
     if(kov){const sz=toMin(kov.kezdes)-toMin(o.vegzes);if(sz>0)h+=`<div class="szu-row"><div class="szu-line"></div><span>${sz} perc szünet</span><div class="szu-line"></div></div>`}
   })
