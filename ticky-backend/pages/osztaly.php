@@ -49,9 +49,9 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   a{text-decoration:none;}
   /* Csoport badge */
   .csoport-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;}
-  /* Csoport-bontásos sor – lila/indigo háttér jelzi hogy a két csoport mást csinál */
-  .ora-row.bontas{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.18);}
-  .ora-row.bontas:hover{background:rgba(139,92,246,.13);}
+  /* Csoport-bontásos sor – halvány fehér háttér jelzi hogy a két csoport mást csinál */
+  .ora-row.bontas{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);}
+  .ora-row.bontas:hover{background:rgba(255,255,255,.08);}
   /* Időtartam badge (több órás összevont blokk) */
   .dur-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(96,165,250,.16);border:1px solid rgba(96,165,250,.3);color:#93c5fd;white-space:nowrap;}
   /* Csoportsorok – fix, sosem törik szét csúnyán (akárhány csoport) */
@@ -335,7 +335,7 @@ function renderAkt(a, k) {
     if (a.is_csoport) {
       // Csoportbontásos óra – sárga sávval és kitűzőkkel
       const csoportRows = a.csoportok.map((c,i) => `
-        <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.20);">
+        <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);">
           <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;min-width:0;">
               <span class="csoport-badge">${i+1}. csoport</span>
@@ -347,7 +347,7 @@ function renderAkt(a, k) {
         </div>`).join('')
 
       el.innerHTML = `
-        <div class="flex flex-col gap-3 aktiv-card" style="background:rgba(139,92,246,.04);border-radius:12px;padding:12px;border:1px solid rgba(139,92,246,.15);">
+        <div class="flex flex-col gap-3 aktiv-card" style="background:rgba(255,255,255,.03);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.10);">
           <div class="flex items-center justify-between gap-2">
             <div>
               <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p>
