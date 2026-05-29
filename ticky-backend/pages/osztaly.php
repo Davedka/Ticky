@@ -49,6 +49,9 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   a{text-decoration:none;}
   /* Csoport badge */
   .csoport-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;}
+  /* Csoport-bontásos sor – sárga háttér jelzi hogy a két csoport mást csinál */
+  .ora-row.bontas{background:rgba(240,199,107,.08);border:1px solid rgba(240,199,107,.18);}
+  .ora-row.bontas:hover{background:rgba(240,199,107,.12);}
   /* Időtartam badge (több órás összevont blokk) */
   .dur-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(96,165,250,.16);border:1px solid rgba(96,165,250,.3);color:#93c5fd;white-space:nowrap;}
   /* Csoportsorok – fix, sosem törik szét csúnyán (akárhány csoport) */
@@ -330,9 +333,9 @@ function renderAkt(a, k) {
     const dur = durBadgeHtml(a)
 
     if (a.is_csoport) {
-      // Csoportbontásos óra
+      // Csoportbontásos óra – sárga sávval és kitűzőkkel
       const csoportRows = a.csoportok.map((c,i) => `
-        <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);">
+        <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(240,199,107,.06);border:1px solid rgba(240,199,107,.20);">
           <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;min-width:0;">
               <span class="csoport-badge">${i+1}. csoport</span>
@@ -344,7 +347,7 @@ function renderAkt(a, k) {
         </div>`).join('')
 
       el.innerHTML = `
-        <div class="flex flex-col gap-3 aktiv-card">
+        <div class="flex flex-col gap-3 aktiv-card" style="background:rgba(240,199,107,.04);border-radius:12px;padding:12px;border:1px solid rgba(240,199,107,.15);">
           <div class="flex items-center justify-between gap-2">
             <div>
               <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p>
@@ -442,10 +445,10 @@ function renderLista(orak) {
 
     let body = ''
     if (o.is_csoport) {
-      // Csoportbontásos sor – minden csoport külön blokkban, tárgy felül, terem · tanár alul
+      // Csoportbontásos sor – minden csoport külön blokkban, csoport név + tárgy + terem · tanár
       const csRows = o.csoportok.map((c,ci) => `
         <div class="cs-row">
-          <span class="csoport-badge cs-mini">${ci+1}.</span>
+          <span class="csoport-badge cs-mini">${ci+1}. csoport</span>
           <div style="min-width:0;">
             <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(c.tantargy || o.tantargy)}</span>
             <span class="text-xs" style="display:block;color:rgba(255,255,255,.4);">${escHtml(c.terem)}. terem · ${escHtml(c.tanar_nev||c.tanar)}</span>
@@ -454,7 +457,7 @@ function renderLista(orak) {
       body = `
         <div class="flex items-center gap-1.5 flex-wrap mb-1">
           <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.tantargy)}</span>
-          <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">csoport</span>
+          <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">csoportbontás</span>
           ${dur}
         </div>
         <div class="cs-list">${csRows}</div>
@@ -469,8 +472,9 @@ function renderLista(orak) {
         <p class="text-xs" style="color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
     }
 
+    const bontasCls = o.is_csoport ? ' bontas' : ''
     return `
-      <div class="ora-row${ak?' aktiv':mu?' mult':''} flex items-start gap-3 px-2 py-2.5 -mx-1">
+      <div class="ora-row${ak?' aktiv':mu?' mult':''}${bontasCls} flex items-start gap-3 px-2 py-2.5 -mx-1">
         <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:${multi?'13px':'16px'};color:${numColor};min-width:22px;text-align:right;flex-shrink:0;margin-top:2px;white-space:nowrap;">${numLabel}</span>
         <div class="flex-1 min-w-0">${body}</div>
         ${ak ? `<span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#ff6b82;display:inline-block;margin-top:6px;"></span>` : ''}
