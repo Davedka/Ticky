@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 // orarend-generator.mjs — orarend_csoportonkent.xlsx  ->  tanárok.js (SCHEDULE_DATA, csoport-id-vel)
 //
 // Telepítés:  npm i xlsx
@@ -15,12 +15,18 @@
 //   -> WARNING stderr-re + "// ELLENŐRIZD" a generált sorban (vagy kihagyás).
 
 import * as XLSX from 'xlsx';
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const SRC = process.argv[2];
 const OUT = process.argv[3] ?? 'tanarok.generated.js';
 if (!SRC) {
-  console.error('Használat: node orarend-generator.mjs <xlsx> [kimenet.js]');
+  console.error('Használat: node orarend-generator.mjs "<xlsx>" [kimenet.js]');
+  process.exit(1);
+}
+if (!existsSync(SRC)) {
+  console.error(`Nem találom a fájlt: "${SRC}"`);
+  console.error('Tipp: ha szóköz van a névben, tedd idézőjelbe, pl.:');
+  console.error('  node orarend-generator.mjs "orarend_csoportonkent (2).xlsx" tanarok.generated.js');
   process.exit(1);
 }
 
@@ -68,7 +74,7 @@ function parseCell(text, ref) {
   return { teacher, room, subject, complex };
 }
 
-const wb = XLSX.readFile(SRC);
+const wb = XLSX.read(readFileSync(SRC), { type: 'buffer' });
 const out = [];
 let sheetsDone = 0, sheetsSkipped = 0;
 
