@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+
 // tanarok-ellenor.mjs — Ticky órarend adat-ellenőrző
 // Használat:  node tanarok-ellenor.mjs [útvonal/tanárok.js]
 // Nincs külső függőség. A tanárok.js-t ESM-ként importálja (export const ...).
