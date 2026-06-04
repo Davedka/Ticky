@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+
 // orarend-generator.mjs — orarend_csoportonkent.xlsx  ->  tanárok.js (SCHEDULE_DATA, csoport-id-vel)
 //
 // Telepítés:  npm i xlsx
