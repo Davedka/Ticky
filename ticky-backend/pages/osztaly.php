@@ -49,6 +49,8 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   a{text-decoration:none;}
   /* Csoport badge */
   .csoport-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.3);color:#f0c76b;letter-spacing:.04em;}
+  /* "Csak az egyik csoport" – a másik csoport lyukas ezen az órán */
+  .reszleges-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.35);color:#f5a623;}
   /* Csoport-bontásos sor – halvány fehér háttér jelzi hogy a két csoport mást csinál */
   .ora-row.bontas{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);}
   .ora-row.bontas:hover{background:rgba(255,255,255,.08);}
@@ -266,6 +268,11 @@ function durBadgeHtml(o){
   const n = oraSzam(o)
   return n > 1 ? `<span class="dur-badge">${n} óra</span>` : ''
 }
+function reszlegesBadgeHtml(o){
+  return (o && o.reszleges_csoport)
+    ? `<span class="reszleges-badge">${escHtml(o.reszleges_szoveg)}</span>`
+    : ''
+}
 function sorszamLabel(o, fallback){
   const tol = o.ora_sorszam || fallback
   if (oraSzam(o) > 1 && o.ora_sorszam_ig) return `${tol}–${o.ora_sorszam_ig}`
@@ -353,8 +360,9 @@ function renderAkt(a, k) {
               <p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p>
               <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;">${escHtml(a.tantargy)}</p>
             </div>
-            <div class="flex items-center gap-1.5 flex-shrink-0">
+            <div class="flex items-center gap-1.5 flex-shrink-0 flex-wrap" style="justify-content:flex-end;">
               ${dur}
+              ${reszlegesBadgeHtml(a)}
               <span class="csoport-badge" style="font-size:11px;padding:4px 10px;">Csoportbontás</span>
             </div>
           </div>
@@ -375,9 +383,10 @@ function renderAkt(a, k) {
       el.innerHTML = `
         <div class="flex flex-col gap-4 aktiv-card">
           <div>
-            <div class="flex items-center gap-2 mb-0.5">
+            <div class="flex items-center gap-2 mb-0.5 flex-wrap">
               <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Most itt van</p>
               ${dur}
+              ${reszlegesBadgeHtml(a)}
             </div>
             <a href="/terem/${encodeURIComponent(a.terem)}" style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:white;line-height:1.1;display:block;">${escHtml(a.terem)}. terem <span style="font-size:18px;color:#f0c76b;">→</span></a>
           </div>
@@ -458,6 +467,7 @@ function renderLista(orak) {
         <div class="flex items-center gap-1.5 flex-wrap mb-1">
           <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.tantargy)}</span>
           <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">csoportbontás</span>
+          ${reszlegesBadgeHtml(o)}
           ${dur}
         </div>
         <div class="cs-list">${csRows}</div>
@@ -467,6 +477,7 @@ function renderLista(orak) {
         <div class="flex items-baseline gap-1.5 flex-wrap">
           <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.terem)}. terem</span>
           <span class="text-xs" style="color:rgba(255,255,255,.35);">${escHtml(o.tantargy)} · ${escHtml(o.tanar_nev||o.tanar)}</span>
+          ${reszlegesBadgeHtml(o)}
           ${dur}
         </div>
         <p class="text-xs" style="color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
