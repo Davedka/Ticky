@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/osztaly.php';
+require_once __DIR__ . '/csoport_terkep.php';
 
 function ticky_source_path(): string
 {
