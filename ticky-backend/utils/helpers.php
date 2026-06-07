@@ -61,12 +61,14 @@ function ticky_period_index_by_end(): array {
 function ticky_lesson_merge_signature(array $lesson): string {
     $groups = ticky_group_merge_signature($lesson['csoportok'] ?? []);
  
-    $top = [
-        'tantargy'   => (string) ($lesson['tantargy'] ?? ''),
-        'terem'      => (string) ($lesson['terem'] ?? ''),
-        'osztaly'    => (string) ($lesson['osztaly'] ?? ''),
-        'tanar'      => (string) ($lesson['tanar'] ?? ''),
-        'is_csoport' => !empty($lesson['is_csoport']) ? 1 : 0,
+     $top = [
+        'tantargy'            => (string) ($lesson['tantargy'] ?? ''),
+        'terem'               => (string) ($lesson['terem'] ?? ''),
+        'osztaly'             => (string) ($lesson['osztaly'] ?? ''),
+        'tanar'               => (string) ($lesson['tanar'] ?? ''),
+        'is_csoport'          => !empty($lesson['is_csoport']) ? 1 : 0,
+        'reszleges'           => !empty($lesson['reszleges_csoport']) ? 1 : 0,
+        'reszleges_csoportok' => implode(',', array_map('intval', (array) ($lesson['reszleges_csoportok'] ?? []))),
     ];
  
     return $groups . '#' . json_encode($top, JSON_UNESCAPED_UNICODE);
