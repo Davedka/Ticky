@@ -392,7 +392,7 @@ function ticky_source_expected_lessons(): array
         return $cache;
     }
 
-    $lessons = [];
+    ons = [];
     $teacher_names = ticky_source_teacher_names();
     foreach (ticky_source_load_schedule_entries() as $entry) {
         $day = ticky_source_day_to_index((string) ($entry['day'] ?? ''));
@@ -587,17 +587,30 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
             }
         }
 
+        // Csak-egyik-csoport sáv: az Excelből tudjuk, hogy a másik csoport lyukas.
+        $reszleges = ticky_reszleges_csoportok($class_code, $day, (string) $g['kezdes']);
+        if (count($reszleges) === 1) {
+            foreach ($cs as &$cc) {
+                $cc['csoport_szam'] = (int) $reszleges[0];
+            }
+            unset($cc);
+        }
+
         $lessons[] = [
-            'kezdes'      => $g['kezdes'],
-            'vegzes'      => $g['vegzes'],
-            'ora_sorszam' => $g['ora_sorszam'],
-            'is_csoport'  => count($cs) > 1,
-            'terem'       => implode(' / ', $all_rooms),
-            'tanar'       => implode(' / ', $all_teachers),
-            'tanar_nev'   => count($cs) === 1 ? ($cs[0]['tanar_nev'] ?? null) : null,
-            'tantargy'    => implode(' / ', $all_subjects),
-            'csoportok'   => $cs,
+            'kezdes'              => $g['kezdes'],
+            'vegzes'              => $g['vegzes'],
+            'ora_sorszam'         => $g['ora_sorszam'],
+            'is_csoport'          => count($cs) > 1,
+            'terem'               => implode(' / ', $all_rooms),
+            'tanar'               => implode(' / ', $all_teachers),
+            'tanar_nev'           => count($cs) === 1 ? ($cs[0]['tanar_nev'] ?? null) : null,
+            'tantargy'            => implode(' / ', $all_subjects),
+            'csoportok'           => $cs,
+            'reszleges_csoport'   => $reszleges !== [],
+            'reszleges_csoportok' => $reszleges,
+            'reszleges_szoveg'    => ticky_reszleges_szoveg($reszleges),
         ];
+    }
     }
 
     usort($lessons, static fn(array $a, array $b): int => strcmp((string) ($a['kezdes'] ?? ''), (string) ($b['kezdes'] ?? '')));
