@@ -278,6 +278,12 @@ if ($params !== false) {
     require __DIR__.'/api/osztaly_orarend.php'; exit;
 }
 
+$params = match_route('/api/osztaly/{kod}/het', $uri);
+if ($params !== false) {
+    $_GET['kod'] = $params['kod'];
+    require __DIR__.'/api/osztaly_het.php'; exit;
+}
+
 $params = match_route('/api/terem/{szam}', $uri);
 if ($params !== false) {
     $_GET['szam'] = $params['szam'];
