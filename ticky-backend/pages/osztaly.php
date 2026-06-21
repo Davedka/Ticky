@@ -60,6 +60,22 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   .cs-list{display:flex;flex-direction:column;gap:5px;}
   .cs-row{display:flex;align-items:flex-start;gap:6px;min-width:0;}
   .cs-mini{font-size:9px;padding:1px 6px;flex-shrink:0;margin-top:1px;}
+  /* View toggle */
+  .view-toggle{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:9999px;padding:3px;gap:2px;}
+  .view-tab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:5px 11px;border:none;background:transparent;border-radius:9999px;cursor:pointer;transition:background .15s,color .15s;font-family:'DM Sans',sans-serif;}
+  .view-tab:hover{color:rgba(255,255,255,.75);}
+  .view-tab.active{background:rgba(200,151,42,.18);color:#f0c76b;}
+  /* Heti nézet */
+  .het-wrap{display:flex;flex-direction:column;gap:14px;}
+  .het-nap{border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.02);}
+  .het-nap-fej{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
+  .het-nap-nev{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.02em;}
+  .het-nap-nev.ma{color:#f0c76b;}
+  .het-nap-szam{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.32);}
+  .het-orak{display:flex;flex-direction:column;padding:6px 4px 8px;}
+  .het-empty{padding:14px;font-size:12px;color:rgba(255,255,255,.32);text-align:center;}
+  /* Hiányzó csoport label (a sárga "csak X csoport" mellett) */
+  .hianyzo-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.18);color:rgba(255,255,255,.55);}
   /* Floating sidebar */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
   .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
@@ -128,9 +144,15 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
       </div>
     </div>
 
-    <!-- Mai napirend -->
+    <!-- Mai napirend / Heti nézet -->
     <div class="px-5 sm:px-6 py-5">
-      <p class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:rgba(255,255,255,.28);">Mai napirend</p>
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <p id="lista-cim" class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.28);">Mai napirend</p>
+        <div class="view-toggle" role="tablist" aria-label="Nézet választó">
+          <button id="tab-nap" type="button" class="view-tab active" onclick="setView('nap')">Mai nap</button>
+          <button id="tab-het" type="button" class="view-tab" onclick="setView('het')">Hét</button>
+        </div>
+      </div>
       <div id="lista"><p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kiválasztva osztály</p></div>
     </div>
 
@@ -155,6 +177,19 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
 const REFRESH = 60_000
 function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 let curKod = null
+let curView = 'nap'  // 'nap' | 'het'
+const NAP_NEVEK = ['', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek']
+// Csoportcímke: ha tudjuk a tényleges csoport-számot, azt használjuk, különben az indexet.
+function csLabel(c, idx) {
+  const v = c && c.csoport_szam
+  if (Array.isArray(v) && v.length) return v.map(n => `${n}.`).join(' és ') + ' csoport'
+  if (typeof v === 'number') return `${v}. csoport`
+  return `${idx+1}. csoport`
+}
+function hianyzoBadgeHtml(o){
+  if (!o || !o.hianyzo_szoveg) return ''
+  return `<span class="hianyzo-badge">${escHtml(o.hianyzo_szoveg)}</span>`
+}
 
 function updateTime() {
   document.getElementById('ido').textContent = window.TickyTime ? window.TickyTime.formatHM() : new Date().toLocaleTimeString('hu-HU', { hour:'2-digit', minute:'2-digit' })
@@ -210,7 +245,8 @@ async function loadOsztalyok() {
         if (o.value.toLowerCase() === url.toLowerCase()) {
           sel.value = o.value
           curKod = o.value
-          loadData()
+          if (curView === 'het') loadHet()
+          else loadData()
           break
         }
       }
@@ -224,7 +260,8 @@ function onSelect() {
   curKod = v
   history.replaceState(null, '', '/osztaly/' + encodeURIComponent(v))
   document.title = 'Ticky – ' + v
-  loadData()
+  if (curView === 'het') loadHet()
+  else loadData()
 }
 
 function reset() {
@@ -345,7 +382,7 @@ function renderAkt(a, k) {
         <div class="flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);">
           <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-              <span class="csoport-badge">${i+1}. csoport</span>
+              <span class="csoport-badge">${escHtml(csLabel(c,i))}</span>
               <span class="text-sm font-medium" style="color:rgba(255,255,255,.8);">${escHtml(c.tanar_nev||c.tanar)}</span>
             </div>
             <span class="text-xs" style="color:rgba(255,255,255,.4);">${escHtml(c.tantargy || a.tantargy)}</span>
@@ -363,6 +400,7 @@ function renderAkt(a, k) {
             <div class="flex items-center gap-1.5 flex-shrink-0 flex-wrap" style="justify-content:flex-end;">
               ${dur}
               ${reszlegesBadgeHtml(a)}
+              ${hianyzoBadgeHtml(a)}
               <span class="csoport-badge" style="font-size:11px;padding:4px 10px;">Csoportbontás</span>
             </div>
           </div>
@@ -387,6 +425,7 @@ function renderAkt(a, k) {
               <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Most itt van</p>
               ${dur}
               ${reszlegesBadgeHtml(a)}
+              ${hianyzoBadgeHtml(a)}
             </div>
             <a href="/terem/${encodeURIComponent(a.terem)}" style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:white;line-height:1.1;display:block;">${escHtml(a.terem)}. terem <span style="font-size:18px;color:#f0c76b;">→</span></a>
           </div>
@@ -457,7 +496,7 @@ function renderLista(orak) {
       // Csoportbontásos sor – minden csoport külön blokkban, csoport név + tárgy + terem · tanár
       const csRows = o.csoportok.map((c,ci) => `
         <div class="cs-row">
-          <span class="csoport-badge cs-mini">${ci+1}. csoport</span>
+          <span class="csoport-badge cs-mini">${escHtml(csLabel(c,ci))}</span>
           <div style="min-width:0;">
             <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(c.tantargy || o.tantargy)}</span>
             <span class="text-xs" style="display:block;color:rgba(255,255,255,.4);">${escHtml(c.terem)}. terem · ${escHtml(c.tanar_nev||c.tanar)}</span>
@@ -468,6 +507,7 @@ function renderLista(orak) {
           <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.tantargy)}</span>
           <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">csoportbontás</span>
           ${reszlegesBadgeHtml(o)}
+          ${hianyzoBadgeHtml(o)}
           ${dur}
         </div>
         <div class="cs-list">${csRows}</div>
@@ -478,6 +518,7 @@ function renderLista(orak) {
           <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.terem)}. terem</span>
           <span class="text-xs" style="color:rgba(255,255,255,.35);">${escHtml(o.tantargy)} · ${escHtml(o.tanar_nev||o.tanar)}</span>
           ${reszlegesBadgeHtml(o)}
+          ${hianyzoBadgeHtml(o)}
           ${dur}
         </div>
         <p class="text-xs" style="color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
@@ -493,16 +534,127 @@ function renderLista(orak) {
   }).join('') + `</div>`
 }
 
+function setView(v) {
+  if (v !== 'nap' && v !== 'het') return
+  curView = v
+  document.getElementById('tab-nap').classList.toggle('active', v === 'nap')
+  document.getElementById('tab-het').classList.toggle('active', v === 'het')
+  document.getElementById('lista-cim').textContent = v === 'het' ? 'Heti órarend' : 'Mai napirend'
+  if (curKod) {
+    if (v === 'het') loadHet()
+    else loadData()
+  }
+}
+
+// ─── Heti nézet ───────────────────────────────────────────────────────
+async function loadHet() {
+  if (!curKod) return
+  const el = document.getElementById('lista')
+  el.innerHTML = `<div class="flex flex-col gap-3">
+    <div class="skel h-6 w-1/3"></div>
+    <div class="skel h-20 w-full"></div>
+    <div class="skel h-20 w-full"></div>
+  </div>`
+  try {
+    const d = await fetch('/api/osztaly/' + encodeURIComponent(curKod) + '/het').then(r => r.json())
+    renderHet(d.het || [])
+  } catch (e) {
+    el.innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.35);">Heti betöltési hiba</p>`
+  }
+}
+
+function renderHet(het) {
+  const el = document.getElementById('lista')
+  if (!het.length) {
+    el.innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.35);">Nincs hét adat</p>`
+    return
+  }
+  const today = (window.TickyTime && window.TickyTime.schoolDayIndex)
+    ? window.TickyTime.schoolDayIndex()
+    : ((new Date().getDay() === 0 || new Date().getDay() === 6) ? 1 : new Date().getDay())
+
+  el.innerHTML = `<div class="het-wrap lista-in">` + het.map(nap => {
+    const napNum = nap.nap
+    const napNev = NAP_NEVEK[napNum] || ('' + napNum + '.')
+    const isToday = napNum === today
+    const orak = nap.orak || []
+    const orakHtml = orak.length
+      ? orak.map((o, i) => hetOraRow(o, i, napNum === today)).join('')
+      : `<div class="het-empty">Nincs óra ezen a napon</div>`
+    return `
+      <section class="het-nap">
+        <header class="het-nap-fej">
+          <span class="het-nap-nev ${isToday ? 'ma' : ''}">${escHtml(napNev)}${isToday ? ' • Ma' : ''}</span>
+          <span class="het-nap-szam">${orak.length} óra</span>
+        </header>
+        <div class="het-orak">${orakHtml}</div>
+      </section>`
+  }).join('') + `</div>`
+}
+
+function hetOraRow(o, i, isToday) {
+  const ak = isToday && isAktiv(o.kezdes, o.vegzes)
+  const mu = isToday && isMult(o.vegzes)
+  const numColor = mu ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.85)'
+  const multi = oraSzam(o) > 1
+  const numLabel = sorszamLabel(o, i + 1)
+  const dur = durBadgeHtml(o)
+
+  let body = ''
+  if (o.is_csoport) {
+    const csRows = o.csoportok.map((c,ci) => `
+      <div class="cs-row">
+        <span class="csoport-badge cs-mini">${escHtml(csLabel(c,ci))}</span>
+        <div style="min-width:0;">
+          <span class="text-xs font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(c.tantargy || o.tantargy)}</span>
+          <span class="text-xs" style="display:block;color:rgba(255,255,255,.4);">${escHtml(c.terem)}. terem · ${escHtml(c.tanar_nev||c.tanar)}</span>
+        </div>
+      </div>`).join('')
+    body = `
+      <div class="flex items-center gap-1.5 flex-wrap mb-1">
+        <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.tantargy)}</span>
+        <span class="csoport-badge" style="font-size:9px;padding:1px 6px;">csoportbontás</span>
+        ${reszlegesBadgeHtml(o)}
+        ${hianyzoBadgeHtml(o)}
+        ${dur}
+      </div>
+      <div class="cs-list">${csRows}</div>
+      <p class="text-xs" style="color:rgba(255,255,255,.28);margin-top:3px;">${o.kezdes} – ${o.vegzes}</p>`
+  } else {
+    body = `
+      <div class="flex items-baseline gap-1.5 flex-wrap">
+        <span class="text-sm font-medium" style="color:${mu?'rgba(255,255,255,.3)':'rgba(255,255,255,.8)'};">${escHtml(o.terem)}. terem</span>
+        <span class="text-xs" style="color:rgba(255,255,255,.35);">${escHtml(o.tantargy)} · ${escHtml(o.tanar_nev||o.tanar)}</span>
+        ${reszlegesBadgeHtml(o)}
+        ${dur}
+      </div>
+      <p class="text-xs" style="color:rgba(255,255,255,.28);">${o.kezdes} – ${o.vegzes}</p>`
+  }
+
+  const bontasCls = o.is_csoport ? ' bontas' : ''
+  return `
+    <div class="ora-row${ak?' aktiv':mu?' mult':''}${bontasCls} flex items-start gap-3 px-2 py-2.5 -mx-1">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:${multi?'13px':'16px'};color:${numColor};min-width:22px;text-align:right;flex-shrink:0;margin-top:2px;white-space:nowrap;">${numLabel}</span>
+      <div class="flex-1 min-w-0">${body}</div>
+      ${ak ? `<span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#ff6b82;display:inline-block;margin-top:6px;"></span>` : ''}
+    </div>`
+}
+
 function refresh() {
   const ic = document.getElementById('ri')
   ic.classList.add('spinning')
-  loadData().finally(() => setTimeout(() => ic.classList.remove('spinning'), 600))
+  const p = curView === 'het' ? loadHet() : loadData()
+  p.finally(() => setTimeout(() => ic.classList.remove('spinning'), 600))
 }
 
 updateTime()
 setInterval(updateTime, 60_000)
 loadOsztalyok()
-setInterval(() => { if (curKod) loadData() }, REFRESH)
+setInterval(() => {
+  if (!curKod) return
+  if (curView === 'het') loadHet()
+  else loadData()
+}, REFRESH)
 </script>
 </body>
 </html>
