@@ -1595,3 +1595,46 @@ function ticky_hianyzo_csoport_szoveg(array $present, int $max_groups = 2): stri
     $parts = array_map(static fn($n) => (int) $n . '.', $hianyzo);
     return 'a ' . implode(' és ', $parts) . ' csoportnak nincs órája';
 }
+
+// Az adott osztály ÖSSZES valós csoportszáma az Excel tanár→csoport térkép
+// alapján (pl. [1,2]). Ha csak egy csoport létezik (nincs valódi bontás), [1].
+// Ezt használjuk annak eldöntésére, hány csoportja van egyáltalán az osztálynak,
+// így nem állítunk "csak a 2. csoport"-ot ott, ahol nincs is 2. csoport.
+function ticky_csoport_osztaly_csoportszamok(string $class): array {
+    static $cache = [];
+    if (isset($cache[$class])) {
+        return $cache[$class];
+    }
+    $map = ticky_csoport_teacher_groups();
+    $set = [];
+    foreach (($map[$class] ?? []) as $starts) {
+        foreach ($starts as $teachers) {
+            foreach ($teachers as $groups) {
+                foreach ($groups as $g) {
+                    $set[(int) $g] = true;
+                }
+            }
+        }
+    }
+    $out = array_keys($set);
+    sort($out);
+    $cache[$class] = $out;
+    return $out;
+}
+
+// Címke egy KONKRÉT hiányzó-lista alapján (a komplementer-számolás nélkül).
+// Pl. [1] => "az 1. csoportnak nincs órája".
+function ticky_hianyzo_csoport_szoveg_lista(array $missing): string {
+    $missing = array_values(array_unique(array_map('intval', $missing)));
+    sort($missing);
+    if ($missing === []) {
+        return '';
+    }
+    if (count($missing) === 1) {
+        $n   = (int) $missing[0];
+        $art = in_array($n, [1, 5], true) ? 'az' : 'a';
+        return $art . ' ' . $n . '. csoportnak nincs órája';
+    }
+    $parts = array_map(static fn($n) => (int) $n . '.', $missing);
+    return 'a ' . implode(' és ', $parts) . ' csoportnak nincs órája';
+}
