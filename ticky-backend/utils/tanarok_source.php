@@ -569,31 +569,73 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
         }
     }
 
+    // Az osztály ÖSSZES valós csoportja (pl. [1,2]). Ha csak 1 csoport van,
+    // nincs értelme "csak a X. csoport" jelzésnek.
+    $class_groups = function_exists('ticky_csoport_osztaly_csoportszamok')
+        ? ticky_csoport_osztaly_csoportszamok($class_code)
+        : [];
+    if (count($class_groups) < 2) {
+        $class_groups = []; // nincs valódi bontás → sosem jelzünk részleges csoportot
+    }
+
     // Output: minden idősáv csoportokkal + aggregált info
     $lessons = [];
     foreach ($grouped as $g) {
         $cs = $g['csoportok'];
 
-        // Csak-egyik-csoport sáv: az Excelből tudjuk, hogy a másik csoport lyukas.
-        $reszleges = function_exists('ticky_reszleges_csoportok')
-            ? ticky_reszleges_csoportok($class_code, $day, (string) $g['kezdes'])
-            : [];
-
         // Excel alapján: tanár → tényleges csoport(ok). Ezzel a "1. csoport / 2. csoport"
         // címke a TANÁROK.JS sorrend helyett a VALÓS Excel-hozzárendelést követi.
+        // Egyúttal pontosan megállapítjuk, MELY csoportoknak van itt órája.
+        $present = [];          // csoportok, amelyeknek BIZTOSAN van itt órája
+        $has_unknown = false;   // van-e olyan al-óra, aminek nem ismerjük a csoportját
         foreach ($cs as &$cc) {
             $cs_groups = function_exists('ticky_csoport_szam_tanarbol')
                 ? ticky_csoport_szam_tanarbol($class_code, $day, (string) $g['kezdes'], (string) $cc['tanar'])
                 : [];
             if ($cs_groups !== []) {
-                // Ha a tanár több csoporthoz tartozik, akkor azokat felsoroljuk.
-                $cc['csoport_szam'] = count($cs_groups) === 1 ? (int) $cs_groups[0] : $cs_groups;
-            } elseif (count($reszleges) === 1) {
-                // Egyetlen "jelen lévő" csoport van → minden alszakasz oda tartozik.
-                $cc['csoport_szam'] = (int) $reszleges[0];
+                $cc['csoport_szam'] = count($cs_groups) === 1
+                    ? (int) $cs_groups[0]
+                    : array_map('intval', $cs_groups);
+                foreach ($cs_groups as $gg) {
+                    $present[(int) $gg] = true;
+                }
+            } else {
+                $has_unknown = true;
             }
         }
         unset($cc);
+
+        $present_groups = array_keys($present);
+        sort($present_groups);
+
+        // RÉSZLEGES (csak-egyik-csoport) DÖNTÉS — kizárólag a tényleges tanárok.js
+        // adatból: CSAK akkor jelezzük, ha
+        //   (a) minden al-óra csoportja ismert (nincs bizonytalan), ÉS
+        //   (b) az osztálynak van >1 valódi csoportja, ÉS
+        //   (c) a jelenlévő csoportok valódi RÉSZHALMAZA az összes csoportnak
+        //       (pl. {2} ⊊ {1,2} → az 1. csoportnak tényleg nincs itt órája).
+        $reszleges = [];
+        $hianyzo   = [];
+        if (
+            !$has_unknown
+            && $present_groups !== []
+            && count($class_groups) > 1
+            && count($present_groups) < count($class_groups)
+        ) {
+            $reszleges = $present_groups;
+            $hianyzo   = array_values(array_diff($class_groups, $present_groups));
+        }
+
+        // Ha pontosan egy csoport van jelen, a csoport-szám nélküli al-órákat is
+        // ehhez a csoporthoz rendeljük (megjelenítési címkéhez).
+        if (count($present_groups) === 1) {
+            foreach ($cs as &$cc) {
+                if (!isset($cc['csoport_szam'])) {
+                    $cc['csoport_szam'] = (int) $present_groups[0];
+                }
+            }
+            unset($cc);
+        }
 
         // Rendezzük a csoportokat a tényleges csoport-szám szerint (1, 2, 3),
         // hogy a megjelenítés is sorrendben legyen.
@@ -621,8 +663,8 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
         }
 
         // Hiányzó csoport(ok) szövege: "az 1. csoportnak nincs órája"
-        $hianyzo_szoveg = ($reszleges !== [] && function_exists('ticky_hianyzo_csoport_szoveg'))
-            ? ticky_hianyzo_csoport_szoveg($reszleges)
+        $hianyzo_szoveg = ($hianyzo !== [] && function_exists('ticky_hianyzo_csoport_szoveg_lista'))
+            ? ticky_hianyzo_csoport_szoveg_lista($hianyzo)
             : '';
 
         $lessons[] = [
@@ -637,7 +679,7 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
             'csoportok'           => $cs,
             'reszleges_csoport'   => $reszleges !== [],
             'reszleges_csoportok' => $reszleges,
-            'reszleges_szoveg'    => function_exists('ticky_reszleges_szoveg') ? ticky_reszleges_szoveg($reszleges) : '',
+            'reszleges_szoveg'    => ($reszleges !== [] && function_exists('ticky_reszleges_szoveg')) ? ticky_reszleges_szoveg($reszleges) : '',
             'hianyzo_szoveg'      => $hianyzo_szoveg,
         ];
     }
