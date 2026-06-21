@@ -65,15 +65,20 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   .view-tab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:5px 11px;border:none;background:transparent;border-radius:9999px;cursor:pointer;transition:background .15s,color .15s;font-family:'DM Sans',sans-serif;}
   .view-tab:hover{color:rgba(255,255,255,.75);}
   .view-tab.active{background:rgba(200,151,42,.18);color:#f0c76b;}
-  /* Heti nézet */
-  .het-wrap{display:flex;flex-direction:column;gap:14px;}
-  .het-nap{border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.02);}
-  .het-nap-fej{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
-  .het-nap-nev{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.02em;}
-  .het-nap-nev.ma{color:#f0c76b;}
-  .het-nap-szam{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.32);}
-  .het-orak{display:flex;flex-direction:column;padding:6px 4px 8px;}
-  .het-empty{padding:14px;font-size:12px;color:rgba(255,255,255,.32);text-align:center;}
+  /* Heti nézet – teljes szélességű, napok egymás mellett */
+  .het-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 6px 14px;}
+  .het-grid{display:grid;gap:14px;grid-template-columns:repeat(5,minmax(0,1fr));align-items:start;}
+  @media(max-width:1280px){.het-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+  @media(max-width:860px){.het-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media(max-width:560px){.het-grid{grid-template-columns:1fr;}}
+  .het-nap{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.035);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden;}
+  .het-nap.ma{border-color:rgba(200,151,42,.4);background:rgba(200,151,42,.06);box-shadow:0 10px 30px rgba(6,15,30,.3);}
+  .het-nap-fej{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
+  .het-nap-nev{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.88);letter-spacing:.02em;}
+  .het-nap.ma .het-nap-nev{color:#f0c76b;}
+  .het-nap-szam{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);white-space:nowrap;}
+  .het-orak{display:flex;flex-direction:column;padding:6px 8px 10px;gap:1px;}
+  .het-empty{padding:18px 12px;font-size:12px;color:rgba(255,255,255,.3);text-align:center;}
   /* Hiányzó csoport label (a sárga "csak X csoport" mellett) */
   .hianyzo-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.18);color:rgba(255,255,255,.55);}
   /* Floating sidebar */
@@ -157,7 +162,7 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
     </div>
 
     <!-- Footer -->
-    <div class="px-5 sm:px-6 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
+    <div id="card-footer" class="px-5 sm:px-6 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
       <span class="text-xs" style="color:rgba(255,255,255,.35);" id="ido">–</span>
       <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
               style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;font-size:12px;">
@@ -170,6 +175,19 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
 
   </div>
 </div>
+
+<!-- TELJES SZÉLESSÉGŰ HETI NÉZET -->
+<div id="het-panel" class="w-full" style="display:none;max-width:1500px;margin:18px auto 0;">
+  <div class="het-panel-head">
+    <div>
+      <p class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,.3);">Heti órarend</p>
+      <h2 id="het-osztaly" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.1;">–</h2>
+    </div>
+    <span id="het-frissit" class="text-xs" style="color:rgba(255,255,255,.35);"></span>
+  </div>
+  <div id="het-grid" class="het-grid"></div>
+</div>
+
 </div>
 
 <?php render_time_sync_bootstrap(); ?>
@@ -271,6 +289,9 @@ function reset() {
       <p class="text-sm" style="color:rgba(255,255,255,.4);">Válassz osztályt a legördülő menüből</p>
     </div>`
   document.getElementById('lista').innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.3);">Nincs kiválasztva osztály</p>`
+  document.getElementById('het-osztaly').textContent = '–'
+  document.getElementById('het-grid').innerHTML =
+    `<div class="het-empty" style="grid-column:1/-1;">Válassz osztályt a fenti menüből a heti órarendhez.</div>`
   setAllapot('idle')
 }
 
@@ -540,56 +561,70 @@ function setView(v) {
   document.getElementById('tab-nap').classList.toggle('active', v === 'nap')
   document.getElementById('tab-het').classList.toggle('active', v === 'het')
   document.getElementById('lista-cim').textContent = v === 'het' ? 'Heti órarend' : 'Mai napirend'
+
+  const het = v === 'het'
+  // Heti nézetben a keskeny kártyából csak a választó + váltó marad, a többit
+  // elrejtjük, és a teljes szélességű napi rács veszi át a helyet.
+  document.getElementById('aktblock').style.display = het ? 'none' : ''
+  document.getElementById('card-footer').style.display = het ? 'none' : ''
+  document.getElementById('lista').style.display = het ? 'none' : ''
+  document.getElementById('het-panel').style.display = het ? 'block' : 'none'
+
   if (curKod) {
-    if (v === 'het') loadHet()
+    if (het) loadHet()
     else loadData()
+  } else if (het) {
+    document.getElementById('het-osztaly').textContent = '–'
+    document.getElementById('het-grid').innerHTML =
+      `<div class="het-empty" style="grid-column:1/-1;">Válassz osztályt a fenti menüből a heti órarendhez.</div>`
   }
 }
 
-// ─── Heti nézet ───────────────────────────────────────────────────────
+// ─── Heti nézet (teljes szélességű, napok egymás mellett) ──────────────
 async function loadHet() {
   if (!curKod) return
-  const el = document.getElementById('lista')
-  el.innerHTML = `<div class="flex flex-col gap-3">
-    <div class="skel h-6 w-1/3"></div>
-    <div class="skel h-20 w-full"></div>
-    <div class="skel h-20 w-full"></div>
-  </div>`
+  const grid = document.getElementById('het-grid')
+  document.getElementById('het-osztaly').textContent = curKod
+  grid.innerHTML = [1,2,3,4,5].map(() => `
+    <div class="het-nap"><div class="het-nap-fej"><span class="skel h-4 w-16"></span></div>
+    <div class="het-orak"><div class="skel h-10 w-full" style="margin:6px 0"></div><div class="skel h-10 w-full" style="margin:6px 0"></div></div></div>`).join('')
   try {
     const d = await fetch('/api/osztaly/' + encodeURIComponent(curKod) + '/het').then(r => r.json())
     renderHet(d.het || [])
   } catch (e) {
-    el.innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.35);">Heti betöltési hiba</p>`
+    grid.innerHTML = `<div class="het-empty" style="grid-column:1/-1;">Heti betöltési hiba</div>`
   }
+  const f = document.getElementById('het-frissit')
+  if (f) f.textContent = (window.TickyTime ? window.TickyTime.formatHM() : '') + ' • frissítve'
 }
 
 function renderHet(het) {
-  const el = document.getElementById('lista')
+  const grid = document.getElementById('het-grid')
   if (!het.length) {
-    el.innerHTML = `<p class="text-sm" style="color:rgba(255,255,255,.35);">Nincs hét adat</p>`
+    grid.innerHTML = `<div class="het-empty" style="grid-column:1/-1;">Nincs heti adat</div>`
     return
   }
   const today = (window.TickyTime && window.TickyTime.schoolDayIndex)
     ? window.TickyTime.schoolDayIndex()
     : ((new Date().getDay() === 0 || new Date().getDay() === 6) ? 1 : new Date().getDay())
 
-  el.innerHTML = `<div class="het-wrap lista-in">` + het.map(nap => {
+  grid.innerHTML = het.map(nap => {
     const napNum = nap.nap
     const napNev = NAP_NEVEK[napNum] || ('' + napNum + '.')
     const isToday = napNum === today
     const orak = nap.orak || []
     const orakHtml = orak.length
-      ? orak.map((o, i) => hetOraRow(o, i, napNum === today)).join('')
-      : `<div class="het-empty">Nincs óra ezen a napon</div>`
+      ? orak.map((o, i) => hetOraRow(o, i, isToday)).join('')
+      : `<div class="het-empty">Nincs óra</div>`
     return `
-      <section class="het-nap">
+      <section class="het-nap${isToday ? ' ma' : ''} lista-in">
         <header class="het-nap-fej">
-          <span class="het-nap-nev ${isToday ? 'ma' : ''}">${escHtml(napNev)}${isToday ? ' • Ma' : ''}</span>
+          <span class="het-nap-nev">${escHtml(napNev)}${isToday ? ' • Ma' : ''}</span>
           <span class="het-nap-szam">${orak.length} óra</span>
         </header>
         <div class="het-orak">${orakHtml}</div>
       </section>`
-  }).join('') + `</div>`
+  }).join('')
 }
 
 function hetOraRow(o, i, isToday) {
