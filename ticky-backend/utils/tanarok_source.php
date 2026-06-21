@@ -87,16 +87,25 @@ function ticky_source_split_compound_value(string $value): array
 
 function ticky_source_day_to_index(string $value): ?int
 {
+    // Ékezet-érzéketlen kulcsok: így a 'Hétfő' ÉS a 'Hétfo' (sima o) is működik,
+    // a 'HÉTFŐ', 'hetfo' stb. is. Korábban a 'Hétfo' írásmód miatt a HÉTFŐ
+    // összes órája kiesett (üres nap), mert a map csak 'hétfő'-t fogadott el.
     static $map = [
-        'hétfő' => 1,
+        'hetfo' => 1,
         'kedd' => 2,
         'szerda' => 3,
-        'csütörtök' => 4,
-        'péntek' => 5,
+        'csutortok' => 4,
+        'pentek' => 5,
     ];
 
     $normalized = osztaly_lower(ticky_source_normalize_token($value));
-    return $map[$normalized] ?? null;
+    $folded = strtr($normalized, [
+        'á' => 'a', 'é' => 'e', 'í' => 'i',
+        'ó' => 'o', 'ö' => 'o', 'ő' => 'o',
+        'ú' => 'u', 'ü' => 'u', 'ű' => 'u',
+    ]);
+
+    return $map[$folded] ?? null;
 }
 
 function ticky_source_period_number(string $start): ?int
