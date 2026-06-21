@@ -573,6 +573,36 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
     $lessons = [];
     foreach ($grouped as $g) {
         $cs = $g['csoportok'];
+
+        // Csak-egyik-csoport sáv: az Excelből tudjuk, hogy a másik csoport lyukas.
+        $reszleges = function_exists('ticky_reszleges_csoportok')
+            ? ticky_reszleges_csoportok($class_code, $day, (string) $g['kezdes'])
+            : [];
+
+        // Excel alapján: tanár → tényleges csoport(ok). Ezzel a "1. csoport / 2. csoport"
+        // címke a TANÁROK.JS sorrend helyett a VALÓS Excel-hozzárendelést követi.
+        foreach ($cs as &$cc) {
+            $cs_groups = function_exists('ticky_csoport_szam_tanarbol')
+                ? ticky_csoport_szam_tanarbol($class_code, $day, (string) $g['kezdes'], (string) $cc['tanar'])
+                : [];
+            if ($cs_groups !== []) {
+                // Ha a tanár több csoporthoz tartozik, akkor azokat felsoroljuk.
+                $cc['csoport_szam'] = count($cs_groups) === 1 ? (int) $cs_groups[0] : $cs_groups;
+            } elseif (count($reszleges) === 1) {
+                // Egyetlen "jelen lévő" csoport van → minden alszakasz oda tartozik.
+                $cc['csoport_szam'] = (int) $reszleges[0];
+            }
+        }
+        unset($cc);
+
+        // Rendezzük a csoportokat a tényleges csoport-szám szerint (1, 2, 3),
+        // hogy a megjelenítés is sorrendben legyen.
+        usort($cs, static function (array $a, array $b): int {
+            $sa = is_array($a['csoport_szam'] ?? null) ? min($a['csoport_szam']) : ($a['csoport_szam'] ?? 999);
+            $sb = is_array($b['csoport_szam'] ?? null) ? min($b['csoport_szam']) : ($b['csoport_szam'] ?? 999);
+            return $sa <=> $sb;
+        });
+
         $all_rooms = $all_teachers = $all_subjects = [];
 
         foreach ($cs as $c) {
@@ -590,16 +620,10 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
             }
         }
 
-        // Csak-egyik-csoport sáv: az Excelből tudjuk, hogy a másik csoport lyukas.
-        $reszleges = function_exists('ticky_reszleges_csoportok')
-            ? ticky_reszleges_csoportok($class_code, $day, (string) $g['kezdes'])
-            : [];
-        if (count($reszleges) === 1) {
-            foreach ($cs as &$cc) {
-                $cc['csoport_szam'] = (int) $reszleges[0];
-            }
-            unset($cc);
-        }
+        // Hiányzó csoport(ok) szövege: "az 1. csoportnak nincs órája"
+        $hianyzo_szoveg = ($reszleges !== [] && function_exists('ticky_hianyzo_csoport_szoveg'))
+            ? ticky_hianyzo_csoport_szoveg($reszleges)
+            : '';
 
         $lessons[] = [
             'kezdes'              => $g['kezdes'],
@@ -614,6 +638,7 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
             'reszleges_csoport'   => $reszleges !== [],
             'reszleges_csoportok' => $reszleges,
             'reszleges_szoveg'    => function_exists('ticky_reszleges_szoveg') ? ticky_reszleges_szoveg($reszleges) : '',
+            'hianyzo_szoveg'      => $hianyzo_szoveg,
         ];
     }
 
@@ -622,6 +647,35 @@ function ticky_source_class_lessons_for_day(string $requested_code, int $day): ?
     return [
         'osztaly' => $class_code,
         'orak'    => $lessons,
+    ];
+}
+
+// Egy hét összes napjára visszaadja az osztály óráit. A merge_consecutive_orak()
+// is rajta van futtatva (ahogy a napi nézetnél), hogy az összevont blokkok ne
+// külön soronként jelenjenek meg.
+function ticky_source_class_lessons_for_week(string $requested_code): ?array
+{
+    $class_code = ticky_source_resolve_class_code($requested_code);
+    if ($class_code === null) {
+        return null;
+    }
+
+    $week = [];
+    for ($day = 1; $day <= 5; $day++) {
+        $daily = ticky_source_class_lessons_for_day($class_code, $day);
+        $orak = $daily['orak'] ?? [];
+        if (function_exists('merge_consecutive_orak')) {
+            $orak = merge_consecutive_orak($orak);
+        }
+        $week[] = [
+            'nap' => $day,
+            'orak' => $orak,
+        ];
+    }
+
+    return [
+        'osztaly' => $class_code,
+        'het' => $week,
     ];
 }
 
