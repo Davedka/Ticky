@@ -13,7 +13,7 @@ export const TIME_SLOTS = [
   { period: 8, start: '13:40', end: '14:20' },
 ];
 
-export const DAYS = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek'];
+export const DAYS = ['Hétfo', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek'];
 
 export const TEACHERS = [
   'ÁSZJ', 'AZ', 'BCS', 'BI', 'BKA', 'BO', 'BSN', 'BUP', 'BZ', 'BZS',
@@ -46,11 +46,11 @@ export const TEACHER_NAMES = {
   'BSN':  'Balogh Sándorné',
   'BUP':  'Barkováné Uzonyi Pálma Erzsébet',
   'BZS':  'Bene Zsolt',
-  'CSMM': 'Csontosné Mezőfényi Mónika',
+  'CSMM': 'Csontosné Mezofényi Mónika',
   'CSV':  'Csirpák Viktória',
   'DA':   'Dankó Attila',
   'ÉCS':  'Énekes Csaba',
-  'FEG':  'Fekete Gergő',
+  'FEG':  'Fekete Gergo',
   'FG':   'Fejér Gábor Zoltán',
   'FKZS': 'Fejérné Kósa Zsuzsanna Gabriella',
   'FL':   'Filep László',
@@ -73,7 +73,7 @@ export const TEACHER_NAMES = {
   'LKÁ':  'Lakatosné Kádár Ágnes',
   'LKJ':  'Láposiné Kiss Judit Erzsébet',
   'LTCS': 'Lengyelné Turgyán Csilla',
-  'LTK':  'Lőrinczné Tóth Klaudia',
+  'LTK':  'Lorinczné Tóth Klaudia',
   'LZ':   'Láposi Zoltán',
   'MÉ':   'Mózes Éva',
   'MMR':  'Mándi-Mike Renáta',
@@ -81,14 +81,14 @@ export const TEACHER_NAMES = {
   'NYMK': 'Nyiregyháziné Misley Katalin Lilla',
   'PÁ':   'Plesu Ádám Csaba',
   'PÁI':  'Dr. Pálinkás István',
-  'PE':   'Pecséri Enikő',
+  'PE':   'Pecséri Eniko',
   'PMG':  'Pálfi Máté Gergely',
   'PMGY': 'Papné Márton Gyöngyi',
   'PZ':   'Pénzes Zoltán',
   'SA':   'Sultész Attila',
   'SE':   'Sukta Erzsébet',
   'SZÁ':  'Szabó Ágnes',
-  'SZAI': 'Szűcsné Kerti Éva',
+  'SZAI': 'Szucsné Kerti Éva',
   'SZBI': 'Szemánné Bulyáki Ildikó',
   'SZG':  'Szabó Gábor',
   'SZI':  'Szabó István',
@@ -109,15 +109,15 @@ export const TEACHER_NAMES = {
 
 export const SCHEDULE_DATA = [
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // ÁSZJ tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'ÁSZJ', room: '204',    class: '9.b',          subject: 'mny', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'ÁSZJ', room: '204',    class: '10.c',         subject: 'mny', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'ÁSZJ', room: '204',    class: '12.e',         subject: 'ir',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'ÁSZJ', room: '204',    class: '12.e',         subject: 'ir',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'ÁSZJ', room: '204',    class: '9.c',          subject: 'ir',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'ÁSZJ', room: '204',    class: '10.c',         subject: 'ir',  day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'ÁSZJ', room: '204',    class: '9.b',          subject: 'mny', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'ÁSZJ', room: '204',    class: '10.c',         subject: 'mny', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'ÁSZJ', room: '204',    class: '12.e',         subject: 'ir',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'ÁSZJ', room: '204',    class: '12.e',         subject: 'ir',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'ÁSZJ', room: '204',    class: '9.c',          subject: 'ir',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'ÁSZJ', room: '204',    class: '10.c',         subject: 'ir',  day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'ÁSZJ', room: '204',    class: '10.c',         subject: 'mny', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'ÁSZJ', room: '204',    class: '13.c/13.b',    subject: 'min', day: 'Kedd',     start: '11:10', end: '11:55' },
   { teacher: 'ÁSZJ', room: '204',    class: '13.c/13.b',    subject: 'min', day: 'Kedd',     start: '12:05', end: '12:50' },
@@ -137,13 +137,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'ÁSZJ', room: '204',    class: '12.a',         subject: 'ir',  day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'ÁSZJ', room: '204',    class: '12.a',         subject: 'ir',  day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // AZ tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'AZ', room: '310', class: '12.a/12.b',  subject: 'szf',   day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'AZ', room: '310', class: '13.a',        subject: 'hl2',   day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'AZ', room: '310', class: '13.a',        subject: 'hl2',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'AZ', room: '202', class: '13.a',        subject: 'hl2',   day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -167,14 +167,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'AZ', room: '310', class: 'HT_13.ir',   subject: 'i',     day: 'Péntek',   start: '08:20', end: '09:05' },
   { teacher: 'AZ', room: '310', class: 'HT_13.ir',   subject: 'i',     day: 'Péntek',   start: '09:15', end: '10:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BCS tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'BCS', room: 'm18', class: '11.c',       subject: 'fm',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'BCS', room: 'm18', class: '11.c',       subject: 'fm',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'BCS', room: 'm18', class: '11.c',       subject: 'fm',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'BCS', room: 'm22', class: '11.c',       subject: 'fm',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'BCS', room: 'm22', class: '11.c',       subject: 'fm',  day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'BCS', room: 'm18', class: '11.c',       subject: 'fm',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'BCS', room: 'm18', class: '11.c',       subject: 'fm',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'BCS', room: 'm18', class: '11.c',       subject: 'fm',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'BCS', room: 'm22', class: '11.c',       subject: 'fm',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'BCS', room: 'm22', class: '11.c',       subject: 'fm',  day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'BCS', room: '204', class: '13.c',       subject: 'of',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BCS', room: 'm18', class: '11.b',       subject: 'fm',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'BCS', room: 'm18', class: '11.b',       subject: 'fm',  day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -191,14 +191,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'BCS', room: 'm17', class: '13.c_du',    subject: 'C-é', day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'BCS', room: 'm17', class: '13.c_du',    subject: 'C-é', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BKA tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'BKA', room: 'K105', class: '14.f', subject: 'Eeg',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BKA', room: 'K105', class: '14.f', subject: 'Eeg',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'BKA', room: 'K3',   class: '11.f', subject: 'T',    day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'BKA', room: '24',   class: '12.f', subject: 'szkba',day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'BKA', room: 'K2',   class: '13.f', subject: 'ji',   day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'BKA', room: 'K105', class: '14.f', subject: 'Eeg',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BKA', room: 'K105', class: '14.f', subject: 'Eeg',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'BKA', room: 'K3',   class: '11.f', subject: 'T',    day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'BKA', room: '24',   class: '12.f', subject: 'szkba',day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'BKA', room: 'K2',   class: '13.f', subject: 'ji',   day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'BKA', room: 'K2',   class: '11.f', subject: 'a',    day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'BKA', room: 'K2',   class: '11.f', subject: 'T',    day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'BKA', room: 'K103',   class: '14.f', subject: 'Szát', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -221,15 +221,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'BKA', room: '207',  class: '10.f', subject: 'of',   day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'BKA', room: 'K101', class: '12.f', subject: 's',    day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BSN tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'BSN', room: 'K1',   class: '10.f',    subject: 'ag',   day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BSN', room: 'K103', class: '10.f',    subject: 'sa',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'BSN', room: 'K103', class: '10.f',    subject: 'sag',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'BSN', room: 'K103', class: '13.f',    subject: 'Si',   day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'BSN', room: 'K107', class: 'HT_13.ap',subject: 'Réák', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'BSN', room: 'K106', class: '13.f',    subject: 'Si',   day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'BSN', room: 'K1',   class: '10.f',    subject: 'ag',   day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BSN', room: 'K103', class: '10.f',    subject: 'sa',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'BSN', room: 'K103', class: '10.f',    subject: 'sag',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'BSN', room: 'K103', class: '13.f',    subject: 'Si',   day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'BSN', room: 'K107', class: 'HT_13.ap',subject: 'Réák', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'BSN', room: 'K106', class: '13.f',    subject: 'Si',   day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'BSN', room: 'K108', class: '1/9 Déri',subject: 'ag',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BSN', room: 'K103', class: '13.f',    subject: 'Si',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'BSN', room: 'K103', class: '13.f',    subject: 'Si',   day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -251,15 +251,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'BSN', room: 'K103', class: '13.f',    subject: 'Si',   day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'BSN', room: 'K106', class: '13.f',    subject: 'Si',   day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BUP tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'BUP', room: '202', class: '9.a',  subject: 'mt', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'BUP', room: '202', class: '11.e', subject: 'mt', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BUP', room: '202', class: '12.c', subject: 'mt', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'BUP', room: '19',  class: '9.a',  subject: 'mt', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'BUP', room: '207', class: '10.a', subject: 'mt', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'BUP', room: '207', class: '12.f', subject: 'mt', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'BUP', room: '202', class: '9.a',  subject: 'mt', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'BUP', room: '202', class: '11.e', subject: 'mt', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BUP', room: '202', class: '12.c', subject: 'mt', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'BUP', room: '19',  class: '9.a',  subject: 'mt', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'BUP', room: '207', class: '10.a', subject: 'mt', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'BUP', room: '207', class: '12.f', subject: 'mt', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'BUP', room: '20',  class: '9.a',  subject: 'mt', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BUP', room: '20',  class: '10.a', subject: 'mt', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'BUP', room: '20',  class: '11.e', subject: 'mt', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -280,15 +280,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'BUP', room: '19',  class: '9.a',  subject: 'mt', day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'BUP', room: '19',  class: '9.a',  subject: 'mt', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BZ tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'BZ', room: 'K101',     class: '12.f',    subject: 'min',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'BZ', room: 'K202',     class: '9.e',     subject: 'stö',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BZ', room: 'K101',     class: '13.e',    subject: 'min',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'BZ', room: 'K1',       class: '10.e',    subject: 'of',   day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'BZ', room: 'K202',     class: '12.e',    subject: 'Öv',   day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'BZ', room: 'K101/K102',class: '9.b/9.e', subject: 'any',  day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'BZ', room: 'K101',     class: '12.f',    subject: 'min',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'BZ', room: 'K202',     class: '9.e',     subject: 'stö',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BZ', room: 'K101',     class: '13.e',    subject: 'min',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'BZ', room: 'K1',       class: '10.e',    subject: 'of',   day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'BZ', room: 'K202',     class: '12.e',    subject: 'Öv',   day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'BZ', room: 'K101/K102',class: '9.b/9.e', subject: 'any',  day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'BZ', room: 'K202',     class: '12.e',    subject: 'Öv',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BZ', room: 'K202',     class: '12.e',    subject: 'Öv',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BZ', room: 'K104',     class: '13.e',    subject: 'Sziny',day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -311,9 +311,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'BZ', room: 'K3',       class: '12.f',    subject: 'min',  day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'BZ', room: 'K202',     class: '10.e',    subject: 'stö',  day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // CSMM tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   { teacher: 'CSMM', room: '20', class: '12.e', subject: 'Matek', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'CSMM', room: '20', class: '11.d', subject: 'se',    day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'CSMM', room: '20', class: '12.e', subject: 'Matek', day: 'Szerda',   start: '09:15', end: '10:00' },
@@ -321,13 +321,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'CSMM', room: '20', class: '12.e', subject: 'Matek', day: 'Csütörtök',start: '09:15', end: '10:00' },
   { teacher: 'CSMM', room: '20', class: '11.d', subject: 'se',    day: 'Csütörtök',start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // DA tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'DA', room: 'K1',   class: '9.c',       subject: 'of',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'DA', room: 'm22',  class: '9.c',       subject: 'géai', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'DA', room: 'm22',  class: '9.c',       subject: 'géai', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'DA', room: '208',  class: '10.b',      subject: 'géai', day: 'Hétfő',    start: '10:15', end: '11:00' },
+  // ---------------------------------------------
+  { teacher: 'DA', room: 'K1',   class: '9.c',       subject: 'of',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'DA', room: 'm22',  class: '9.c',       subject: 'géai', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'DA', room: 'm22',  class: '9.c',       subject: 'géai', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'DA', room: '208',  class: '10.b',      subject: 'géai', day: 'Hétfo',    start: '10:15', end: '11:00' },
   { teacher: 'DA', room: '105',  class: '9.c',       subject: 'of',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'DA', room: '208',  class: '10.b',      subject: 'géai', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'DA', room: '109',  class: '12.c/12.b', subject: 'sék',  day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -347,14 +347,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'DA', room: 'K102', class: '10.c',      subject: 'géai', day: 'Csütörtök',start: '11:10', end: '11:55' },
   { teacher: 'DA', room: 'K102', class: '10.c',      subject: 'géai', day: 'Csütörtök',start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // ÉCS tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'ÉCS', room: 'T3', class: '12.b', subject: 'tn', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'ÉCS', room: 'T3', class: '10.b', subject: 'tn', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'ÉCS', room: 'T1', class: '10.d', subject: 'tn', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'ÉCS', room: 'T1', class: '9.b',  subject: 'tn', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'ÉCS', room: 'T3', class: '11.a', subject: 'tn', day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'ÉCS', room: 'T3', class: '12.b', subject: 'tn', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'ÉCS', room: 'T3', class: '10.b', subject: 'tn', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'ÉCS', room: 'T1', class: '10.d', subject: 'tn', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'ÉCS', room: 'T1', class: '9.b',  subject: 'tn', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'ÉCS', room: 'T3', class: '11.a', subject: 'tn', day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'ÉCS', room: 'T2', class: '10.d', subject: 'tn', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'ÉCS', room: 'T3', class: '9.b',  subject: 'tn', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'ÉCS', room: 'T2', class: '10.b', subject: 'tn', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -376,20 +376,20 @@ export const SCHEDULE_DATA = [
   { teacher: 'ÉCS', room: 'T2', class: '11.c', subject: 'tn', day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'ÉCS', room: 'T2', class: '12.b', subject: 'tn', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // FB tanár  (forrás: edupage – üres órarend)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // Nincs bejegyzett óra
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // FEG tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'FEG', room: 'K2',  class: '10.e', subject: 'stö',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'FEG', room: '1',     class: '13.e', subject: 'Sism', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'FEG', room: 'K314',  class: '11.e', subject: 'Lö',   day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'FEG', room: 'K202',  class: '10.b', subject: 'stö',  day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'FEG', room: 'K2',  class: '10.e', subject: 'stö',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'FEG', room: '1',     class: '13.e', subject: 'Sism', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'FEG', room: 'K314',  class: '11.e', subject: 'Lö',   day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'FEG', room: 'K202',  class: '10.b', subject: 'stö',  day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'FEG', room: 'K314',  class: '11.e', subject: 'Lö',   day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'FEG', room: '1',     class: '13.e', subject: 'Sism', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -409,18 +409,18 @@ export const SCHEDULE_DATA = [
   { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'FEG', room: 'K202',  class: '11.e', subject: 'Öv',   day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // FG tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   { teacher: 'FG', room: '105', class: '13.d', subject: 'ÁPI', day: 'Szerda', start: '08:20', end: '09:05' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // FKZS tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
-  { teacher: 'FKZS', room: '208/19',   class: '12.d/12.f', subject: 'mny',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'FKZS', room: '101',      class: '11.e',      subject: 'tö',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'FKZS', room: '307',      class: '12.e',      subject: 'tö',   day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'FKZS', room: '19/24',    class: '9.b/9.e',   subject: 'mny',  day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'FKZS', room: '208/19',   class: '12.d/12.f', subject: 'mny',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'FKZS', room: '101',      class: '11.e',      subject: 'tö',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'FKZS', room: '307',      class: '12.e',      subject: 'tö',   day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'FKZS', room: '19/24',    class: '9.b/9.e',   subject: 'mny',  day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'FKZS', room: '101',      class: '11.e',      subject: 'tö',   day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'FKZS', room: '101',      class: '9.a',       subject: 'tö',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'FKZS', room: '25',       class: '13.e',      subject: 'Sziny',day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -443,12 +443,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'FKZS', room: '20',       class: '9.a',       subject: 'tö',   day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'FKZS', room: '106',      class: '12.e',      subject: 'tö',   day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // FJT tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'FJT', room: '110',      class: '13.e',           subject: 'nny',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'FJT', room: '25',       class: '13.d',           subject: 'nny',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'FJT', room: '105',      class: '13.e',           subject: 'min',  day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'FJT', room: '110',      class: '13.e',           subject: 'nny',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'FJT', room: '25',       class: '13.d',           subject: 'nny',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'FJT', room: '105',      class: '13.e',           subject: 'min',  day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'FJT', room: 'K101',     class: '13.d',           subject: 'nny',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'FJT', room: 'K101',     class: '13.d',           subject: 'min',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'FJT', room: '109',      class: '13.d',           subject: 'nny',  day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -470,13 +470,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'FJT', room: 'K104',     class: '13.e',           subject: 'nny',  day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'FJT', room: '110/25',   class: '11.d/11.f',      subject: 'nny',  day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // GR tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'GR', room: '102', class: '9.d',  subject: 'to.', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'GR', room: '104', class: '12.b', subject: 'to.', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'GR', room: '202', class: '9.e',  subject: 'to.', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'GR', room: '20',  class: '10.c', subject: 'to.', day: 'Hétfő',    start: '11:10', end: '11:55' },
+  // ---------------------------------------------
+  { teacher: 'GR', room: '102', class: '9.d',  subject: 'to.', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'GR', room: '104', class: '12.b', subject: 'to.', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'GR', room: '202', class: '9.e',  subject: 'to.', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'GR', room: '20',  class: '10.c', subject: 'to.', day: 'Hétfo',    start: '11:10', end: '11:55' },
   { teacher: 'GR', room: '203', class: '9.d',  subject: 'to.', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'GR', room: '306', class: '9.e',  subject: 'to.', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'GR', room: '306', class: '10.a', subject: 'to.', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -498,9 +498,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'GR', room: '105', class: '9.c',  subject: 'ttfo.',day: 'Péntek',  start: '11:10', end: '11:55' },
   { teacher: 'GR', room: '105', class: '9.e',  subject: 'to.', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // GYÁ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   { teacher: 'GYÁ', room: '21/111',    class: '10.c/10.e',      subject: 'nny', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'GYÁ', room: 'K3',        class: '12.f',           subject: 'min', day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'GYÁ', room: '109/25',    class: '10.d/10.f',      subject: 'nny', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -515,13 +515,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'GYÁ', room: '20',   class: '10.d/10.f',      subject: 'nny', day: 'Csütörtök',start: '13:40', end: '14:20' },
   { teacher: 'GYÁ', room: '25/K3',     class: '10.d/10.f',      subject: 'nny', day: 'Péntek',   start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // HI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'HI', room: '211',    class: '9.a',       subject: 'Pra',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'HI', room: '310',    class: '12.a/12.b', subject: 'hl',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'HI', room: '209',    class: 'HT_13.ir',  subject: 'i',    day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'HI', room: '209',    class: 'HT_13.ir',  subject: 'i',    day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'HI', room: '211',    class: '9.a',       subject: 'Pra',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'HI', room: '310',    class: '12.a/12.b', subject: 'hl',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'HI', room: '209',    class: 'HT_13.ir',  subject: 'i',    day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'HI', room: '209',    class: 'HT_13.ir',  subject: 'i',    day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'HI', room: '303',    class: '13.a',      subject: 'hpél', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'HI', room: '209',    class: '11.a',      subject: 'hl',   day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'HI', room: '14',     class: '12.a/12.b', subject: 'hl',   day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -540,14 +540,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'HI', room: '14',     class: '11.a',      subject: 'hl',   day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'HI', room: '211',    class: '11.a',      subject: 'hl',   day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // HZN tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'HZN', room: 'K107', class: 'HT_13.ap', subject: 'áa',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'HZN', room: 'K104', class: '9.b',      subject: 'ek',   day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'HZN', room: 'K101', class: '9.b',      subject: 'áa',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'HZN', room: 'K102', class: '11.f',     subject: 'Ka',   day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'HZN', room: 'K105', class: '11.f',     subject: 'klgy', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'HZN', room: 'K107', class: 'HT_13.ap', subject: 'áa',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'HZN', room: 'K104', class: '9.b',      subject: 'ek',   day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'HZN', room: 'K101', class: '9.b',      subject: 'áa',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'HZN', room: 'K102', class: '11.f',     subject: 'Ka',   day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'HZN', room: 'K105', class: '11.f',     subject: 'klgy', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'HZN', room: 'K2',  class: '12.f',     subject: 'kli',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'HZN', room: 'K108', class: '1/9 Déri', subject: 'ea',   day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'HZN', room: 'K104', class: '9.b',      subject: 'áa',   day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -570,13 +570,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'HZN', room: 'K104', class: '11.f',     subject: 'Ka',   day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'HZN', room: 'K102', class: '14.f',     subject: 'Si',   day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // JI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'JI', room: '14',      class: '9.b',       subject: 'dk',     day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'JI', room: '301',     class: '12.a/12.b', subject: 'dk',     day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'JI', room: '301',     class: '9.d',       subject: 'dk',     day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'JI', room: '14',      class: '11.a/11.b', subject: 'lprl',   day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'JI', room: '14',      class: '9.b',       subject: 'dk',     day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'JI', room: '301',     class: '12.a/12.b', subject: 'dk',     day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'JI', room: '301',     class: '9.d',       subject: 'dk',     day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'JI', room: '14',      class: '11.a/11.b', subject: 'lprl',   day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'JI', room: '211/210', class: '12.a/12.b', subject: 'lprl',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'JI', room: '301',     class: '13.b',      subject: 'dk',     day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'JI', room: '1',       class: '11.b',      subject: 'lprl',   day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -595,14 +595,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'JI', room: '211',     class: '11.b',      subject: 'lprl',   day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'JI', room: '210',     class: '11.a/11.b', subject: 'lprl',   day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // JMK tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'JMK', room: '14',   class: '10.a',      subject: 'lprl', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'JMK', room: 'K101', class: 'HT_13.ir',  subject: 'i',    day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'JMK', room: '209',  class: '10.a',      subject: 'lprl', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'JMK', room: '308',  class: '10.a',      subject: 'Pra',  day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'JMK', room: '1',    class: '10.a',      subject: 'lprl', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'JMK', room: '14',   class: '10.a',      subject: 'lprl', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'JMK', room: 'K101', class: 'HT_13.ir',  subject: 'i',    day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'JMK', room: '209',  class: '10.a',      subject: 'lprl', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'JMK', room: '308',  class: '10.a',      subject: 'Pra',  day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'JMK', room: '1',    class: '10.a',      subject: 'lprl', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'JMK', room: '1',    class: '11.a/11.b', subject: 'al',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'JMK', room: '24',   class: '9.a',       subject: 'lprl', day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'JMK', room: '14',   class: '10.a',      subject: 'lprl', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -622,15 +622,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'JMK', room: '303',  class: '11.a/11.b', subject: 'al',   day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'JMK', room: '202',  class: '10.a',      subject: 'of',   day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // KIK tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'KIK', room: '106',         class: '13.a',           subject: 'any',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'KIK', room: '106',         class: '13.a',           subject: 'any',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'KIK', room: '106',         class: '13.a',           subject: 'of',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'KIK', room: '102',         class: '10.a',           subject: 'any',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'KIK', room: '208',         class: '10.b',           subject: 'any',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'KIK', room: 'K1/20/21',    class: '10.d/10.f',      subject: 'any',  day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'KIK', room: '106',         class: '13.a',           subject: 'any',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'KIK', room: '106',         class: '13.a',           subject: 'any',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'KIK', room: '106',         class: '13.a',           subject: 'of',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'KIK', room: '102',         class: '10.a',           subject: 'any',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'KIK', room: '208',         class: '10.b',           subject: 'any',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'KIK', room: 'K1/20/21',    class: '10.d/10.f',      subject: 'any',  day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'KIK', room: 'K104',        class: '11.a',           subject: 'any',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'KIK', room: 'K104',        class: '11.a/11.b',      subject: 'sza',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'KIK', room: 'K3',          class: '10.b',           subject: 'any',  day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -654,13 +654,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'KIK', room: '306',         class: '13.a',           subject: 'any',  day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'KIK', room: '306',         class: '13.a',           subject: 'any',  day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // KM tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'KM', room: 'T1', class: '12.e', subject: 'eéáf', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'KM', room: 'T2', class: '9.e',  subject: 'tn.',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'KM', room: '205',class: '12.e', subject: 'of',   day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'KM', room: 'T2', class: '13.e', subject: 'E-áf', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'KM', room: 'T1', class: '12.e', subject: 'eéáf', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'KM', room: 'T2', class: '9.e',  subject: 'tn.',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'KM', room: '205',class: '12.e', subject: 'of',   day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'KM', room: 'T2', class: '13.e', subject: 'E-áf', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'KM', room: 'T3', class: '12.e', subject: 'eéáf', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'KM', room: 'T3', class: '13.e', subject: 'E-áf', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'KM', room: 'T2', class: '10.e', subject: 'tn.',  day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -686,15 +686,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'KM', room: 'T2', class: '11.e', subject: 'tn.',  day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'KM', room: 'T1', class: '12.e', subject: 'tn.',  day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // KÖS tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'KÖS', room: '211', class: '13.d', subject: 'se',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'KÖS', room: '20',  class: '13.d', subject: 'szv', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'KÖS', room: '303', class: '13.d', subject: 'eb',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'KÖS', room: '210', class: '13.d', subject: 'ad',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'KÖS', room: '210', class: '13.d', subject: 'se',  day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'KÖS', room: '210', class: '13.d', subject: 'eb',  day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'KÖS', room: '211', class: '13.d', subject: 'se',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'KÖS', room: '20',  class: '13.d', subject: 'szv', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'KÖS', room: '303', class: '13.d', subject: 'eb',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'KÖS', room: '210', class: '13.d', subject: 'ad',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'KÖS', room: '210', class: '13.d', subject: 'se',  day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'KÖS', room: '210', class: '13.d', subject: 'eb',  day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'KÖS', room: '102', class: '13.d', subject: 'szv', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'KÖS', room: 'K1', class: '11.d', subject: 'szv', day: 'Kedd',     start: '11:10', end: '11:55' },
   { teacher: 'KÖS', room: '307', class: '13.d', subject: 'szv', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -715,9 +715,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'KÖS', room: '303', class: '13.d', subject: 'ad',  day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'KÖS', room: '303', class: '13.d', subject: 'eb',  day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // KT tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   { teacher: 'KT', room: '308', class: '13.a', subject: 'bpét', day: 'Kedd',   start: '07:30', end: '08:10' },
   { teacher: 'KT', room: '308', class: '13.a', subject: 'bpét', day: 'Kedd',   start: '08:20', end: '09:05' },
   { teacher: 'KT', room: '308', class: '13.a', subject: 'bpét', day: 'Kedd',   start: '09:15', end: '10:00' },
@@ -725,14 +725,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'KT', room: '308', class: '13.a', subject: 'bpét', day: 'Szerda', start: '08:20', end: '09:05' },
   { teacher: 'KT', room: '308', class: '13.a', subject: 'bpét', day: 'Szerda', start: '09:15', end: '10:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // KTT tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'KTT', room: 'K104', class: '10.f',    subject: 'ag',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'KTT', room: 'K2',   class: '10.f',    subject: 'sa',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'KTT', room: 'K105', class: '11.f',    subject: 'kgy',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'KTT', room: 'K101', class: '9.b',     subject: 'áa',   day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'KTT', room: 'K103', class: '14.f',    subject: 'Kgy',  day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'KTT', room: 'K104', class: '10.f',    subject: 'ag',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'KTT', room: 'K2',   class: '10.f',    subject: 'sa',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'KTT', room: 'K105', class: '11.f',    subject: 'kgy',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'KTT', room: 'K101', class: '9.b',     subject: 'áa',   day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'KTT', room: 'K103', class: '14.f',    subject: 'Kgy',  day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'KTT', room: 'K105', class: '14.f',    subject: 'Kgy',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'KTT', room: 'K102', class: '9.b',     subject: 'áa',   day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'KTT', room: 'K105', class: '14.f',    subject: 'Kgy',  day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -755,9 +755,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'KTT', room: 'K102', class: '11.f',    subject: 'sa',   day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'KTT', room: 'K103', class: '9.b',     subject: 'áa',   day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LI tanár  (forrás: Excel)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   { teacher: 'LI', room: '308', class: '13.b', subject: 'bpét', day: 'Szerda',   start: '10:15', end: '11:00' },
   { teacher: 'LI', room: '308', class: '13.b', subject: 'bpét', day: 'Szerda',   start: '11:10', end: '11:55' },
   { teacher: 'LI', room: '308', class: '13.b', subject: 'bpét', day: 'Szerda',   start: '12:05', end: '12:50' },
@@ -765,13 +765,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'LI', room: '308', class: '13.b', subject: 'bpét', day: 'Péntek',   start: '08:20', end: '09:05' },
   { teacher: 'LI', room: '308', class: '13.b', subject: 'bpét', day: 'Péntek',   start: '09:15', end: '10:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LKÁ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'LKÁ', room: '21',       class: '13.c',           subject: 'nny', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'LKÁ', room: '109',      class: '13.c',           subject: 'nny', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'LKÁ', room: '109',      class: '13.c',           subject: 'nny', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'LKÁ', room: '19/24',    class: '9.b/9.e',        subject: 'nny', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'LKÁ', room: '21',       class: '13.c',           subject: 'nny', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'LKÁ', room: '109',      class: '13.c',           subject: 'nny', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'LKÁ', room: '109',      class: '13.c',           subject: 'nny', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'LKÁ', room: '19/24',    class: '9.b/9.e',        subject: 'nny', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'LKÁ', room: '21/111',   class: '10.c/10.e',      subject: 'nny', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'LKÁ', room: 'K106',     class: '13.c',           subject: 'nny', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'LKÁ', room: 'K106',     class: '13.c',           subject: 'nny', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -785,12 +785,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'LKÁ', room: '109',   class: '10.c/10.e',      subject: 'nny', day: 'Csütörtök',start: '09:15', end: '10:00' },
   { teacher: 'LKÁ', room: '109',   class: '11.b/11.c/11.e', subject: 'nny', day: 'Csütörtök',start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LKJ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'LKJ', room: '301', class: '11.e', subject: 'dk',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'LKJ', room: '1',   class: '9.b',  subject: 'dk',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'LKJ', room: '1',   class: '10.b', subject: 'kgy', day: 'Hétfő',    start: '10:15', end: '11:00' },
+  // ---------------------------------------------
+  { teacher: 'LKJ', room: '301', class: '11.e', subject: 'dk',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'LKJ', room: '1',   class: '9.b',  subject: 'dk',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'LKJ', room: '1',   class: '10.b', subject: 'kgy', day: 'Hétfo',    start: '10:15', end: '11:00' },
   { teacher: 'LKJ', room: '301', class: '11.e', subject: 'dk',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'LKJ', room: '301', class: '13.e', subject: 'dk',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'LKJ', room: '1',   class: '10.b', subject: 'Ki',  day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -810,14 +810,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'LKJ', room: '1',   class: '10.e', subject: 'da',  day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'LKJ', room: '1',   class: '9.d',  subject: 'da',  day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LTCS tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'LTCS', room: '306', class: '10.b', subject: 'mt', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'LTCS', room: 'K102',  class: '9.e',  subject: 'mt', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'LTCS', room: '306', class: '9.b',  subject: 'mt', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'LTCS', room: '306', class: '13.a', subject: 'mt', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'LTCS', room: '19',  class: '9.b',  subject: 'mt', day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'LTCS', room: '306', class: '10.b', subject: 'mt', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'LTCS', room: 'K102',  class: '9.e',  subject: 'mt', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'LTCS', room: '306', class: '9.b',  subject: 'mt', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'LTCS', room: '306', class: '13.a', subject: 'mt', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'LTCS', room: '19',  class: '9.b',  subject: 'mt', day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'LTCS', room: 'K3',  class: '9.b',  subject: 'mt', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'LTCS', room: '110', class: '9.b',  subject: 'mt', day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'LTCS', room: '110', class: '9.e',  subject: 'mt', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -835,12 +835,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'LTCS', room: '307', class: '9.e',  subject: 'mt', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'LTCS', room: '307', class: '10.b', subject: 'mt', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LZ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'LZ', room: '1',     class: '11.a/11.b', subject: 'Aaf',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'LZ', room: '308',   class: '13.b',      subject: 'fpét', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'LZ', room: '1',     class: '12.a/12.b', subject: 'Aaf',  day: 'Hétfő',    start: '11:10', end: '11:55' },
+  // ---------------------------------------------
+  { teacher: 'LZ', room: '1',     class: '11.a/11.b', subject: 'Aaf',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'LZ', room: '308',   class: '13.b',      subject: 'fpét', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'LZ', room: '1',     class: '12.a/12.b', subject: 'Aaf',  day: 'Hétfo',    start: '11:10', end: '11:55' },
   { teacher: 'LZ', room: '1',     class: '12.a/12.b', subject: 'Aaf',  day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'LZ', room: '1',     class: '11.a/11.b', subject: 'Wp',   day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'LZ', room: '308',   class: '11.a/11.b', subject: 'fpét', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -854,16 +854,16 @@ export const SCHEDULE_DATA = [
   { teacher: 'LZ', room: 'm17',   class: '13.c_du',   subject: 'aC-a', day: 'Péntek',   start: '08:20', end: '09:05' },
   { teacher: 'LZ', room: '308',   class: '13.b',      subject: 'fpét', day: 'Péntek',   start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LK tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'LK', room: '105',  class: '9.e',       subject: 'ttké', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'LK', room: '105',  class: '10.b',      subject: 'fi',   day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'LK', room: '105',  class: '13.c/13.b', subject: 'fi',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'LK', room: '105',  class: '13.c/13.b', subject: 'ttfi', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'LK', room: '105',  class: '9.e',       subject: 'ttké', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'LK', room: '105',  class: '9.c',       subject: 'ttké', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'LK', room: '204',  class: '9.b',       subject: 'ttfi', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'LK', room: '105',  class: '9.e',       subject: 'ttké', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'LK', room: '105',  class: '10.b',      subject: 'fi',   day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'LK', room: '105',  class: '13.c/13.b', subject: 'fi',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'LK', room: '105',  class: '13.c/13.b', subject: 'ttfi', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'LK', room: '105',  class: '9.e',       subject: 'ttké', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'LK', room: '105',  class: '9.c',       subject: 'ttké', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'LK', room: '204',  class: '9.b',       subject: 'ttfi', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'LK', room: '101',  class: '10.a',      subject: 'fi',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'LK', room: '208',  class: '10.b',      subject: 'fi',   day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'LK', room: '306',  class: '10.c',      subject: 'fi',   day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -881,12 +881,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'LK', room: 'K1',   class: '11.b',      subject: 'fi',   day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'LK', room: '202',  class: '10.c',      subject: 'fi',   day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // LTK tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'LTK', room: 'K105', class: '12.f',     subject: 'réák', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'LTK', room: 'K106', class: '13.f',     subject: 'Si',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'LTK', room: 'K107', class: 'HT_13.ap', subject: 'ag',   day: 'Hétfő',    start: '11:10', end: '11:55' },
+  // ---------------------------------------------
+  { teacher: 'LTK', room: 'K105', class: '12.f',     subject: 'réák', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'LTK', room: 'K106', class: '13.f',     subject: 'Si',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'LTK', room: 'K107', class: 'HT_13.ap', subject: 'ag',   day: 'Hétfo',    start: '11:10', end: '11:55' },
   { teacher: 'LTK', room: 'K105', class: '14.f',     subject: 'Szát', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'LTK', room: 'K105', class: '12.f',     subject: 'réák', day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'LTK', room: 'K105', class: '14.f',     subject: 'Szát', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -901,14 +901,14 @@ export const SCHEDULE_DATA = [
 
  
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // MÉ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'MÉ', room: 'K102',            class: 'HT_13.ir',       subject: 'i',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'MÉ', room: '24/110',          class: '12.a/12.b',      subject: 'sza', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'MÉ', room: '208',             class: '10.a',           subject: 'any', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'MÉ', room: 'K1/20/21',        class: '10.c/10.e',      subject: 'any', day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'MÉ', room: 'K1/20/21',        class: '10.d/10.f',      subject: 'any', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'MÉ', room: 'K102',            class: 'HT_13.ir',       subject: 'i',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'MÉ', room: '24/110',          class: '12.a/12.b',      subject: 'sza', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'MÉ', room: '208',             class: '10.a',           subject: 'any', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'MÉ', room: 'K1/20/21',        class: '10.c/10.e',      subject: 'any', day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'MÉ', room: 'K1/20/21',        class: '10.d/10.f',      subject: 'any', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'MÉ', room: '205/109',         class: '10.c/10.e',      subject: 'any', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'MÉ', room: '208/K101/202/203',class: '9.c/9.d',        subject: 'any', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'MÉ', room: 'K101',            class: '11.b/11.a',      subject: 'sza', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -933,15 +933,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'MÉ', room: '109',             class: '10.a',           subject: 'any', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'MÉ', room: '101/K3',          class: '11.d/11.f',      subject: 'any', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // MMR tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'MMR', room: '306', class: '11.d', subject: 'mt', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'MMR', room: '306', class: '11.b', subject: 'mt', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'MMR', room: '109', class: '9.c',  subject: 'mt', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'MMR', room: '106', class: '10.e', subject: 'mt', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'MMR', room: '106', class: '10.f', subject: 'mt', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'MMR', room: '109', class: '9.c',  subject: 'mt', day: 'Hétfő',    start: '10:15', end: '11:00' },
+  // ---------------------------------------------
+  { teacher: 'MMR', room: '306', class: '11.d', subject: 'mt', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'MMR', room: '306', class: '11.b', subject: 'mt', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'MMR', room: '109', class: '9.c',  subject: 'mt', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'MMR', room: '106', class: '10.e', subject: 'mt', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'MMR', room: '106', class: '10.f', subject: 'mt', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'MMR', room: '109', class: '9.c',  subject: 'mt', day: 'Hétfo',    start: '10:15', end: '11:00' },
   { teacher: 'MMR', room: '24', class: '10.f', subject: 'mt', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'MMR', room: '106', class: '9.c',  subject: 'mt', day: 'Kedd',     start: '12:55', end: '13:35' },
   { teacher: 'MMR', room: '106', class: '11.d', subject: 'mt', day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -961,12 +961,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'MMR', room: '21',  class: '10.f', subject: 'mt', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'MMR', room: '21',  class: '9.c',  subject: 'mt', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // NA tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'NA', room: 'T1', class: '12.c', subject: 'tn.', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'NA', room: 'T3', class: '12.f', subject: 'tn.', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'NA', room: 'T2', class: '11.b', subject: 'tn.', day: 'Hétfő',    start: '11:10', end: '11:55' },
+  // ---------------------------------------------
+  { teacher: 'NA', room: 'T1', class: '12.c', subject: 'tn.', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'NA', room: 'T3', class: '12.f', subject: 'tn.', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'NA', room: 'T2', class: '11.b', subject: 'tn.', day: 'Hétfo',    start: '11:10', end: '11:55' },
   { teacher: 'NA', room: 'T1', class: '10.f', subject: 'tn.', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'NA', room: 'T3', class: '11.d', subject: 'tn.', day: 'Kedd',     start: '12:05', end: '12:50' },
   { teacher: 'NA', room: 'T2', class: '9.d',  subject: 'tn.', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -989,14 +989,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'NA', room: 'T3', class: '9.d',  subject: 'tn.', day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'NA', room: 'T1', class: '10.f', subject: 'tn.', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // NYMK tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'NYMK', room: 'T2',              class: '11.f',      subject: 'tn.', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'NYMK', room: 'T2',              class: '12.d',      subject: 'tn.', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'NYMK', room: 'K2',              class: '9.a',       subject: 'any', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'NYMK', room: '205',             class: '9.a',       subject: 'of',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'NYMK', room: '19/20',           class: '10.c/10.e', subject: 'any', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'NYMK', room: 'T2',              class: '11.f',      subject: 'tn.', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'NYMK', room: 'T2',              class: '12.d',      subject: 'tn.', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'NYMK', room: 'K2',              class: '9.a',       subject: 'any', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'NYMK', room: '205',             class: '9.a',       subject: 'of',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'NYMK', room: '19/20',           class: '10.c/10.e', subject: 'any', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'NYMK', room: '102',             class: '11.a',      subject: 'any', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'NYMK', room: '205/109',         class: '10.c/10.e', subject: 'any', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'NYMK', room: '208/K101/202/203',class: '9.c/9.d',   subject: 'any', day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -1019,13 +1019,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'NYMK', room: 'K104',             class: '9.a',       subject: 'any', day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'NYMK', room: 'T3',              class: '12.d',      subject: 'tn.', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // PÁ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'PÁ', room: '20',  class: '10.a', subject: 'mny', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'PÁ', room: '110',  class: '11.f', subject: 'mny', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'PÁ', room: '110',  class: '11.f', subject: 'ir',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'PÁ', room: '106',  class: '11.a', subject: 'of',  day: 'Hétfő',    start: '10:15', end: '11:00' },
+  // ---------------------------------------------
+  { teacher: 'PÁ', room: '20',  class: '10.a', subject: 'mny', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'PÁ', room: '110',  class: '11.f', subject: 'mny', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'PÁ', room: '110',  class: '11.f', subject: 'ir',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'PÁ', room: '106',  class: '11.a', subject: 'of',  day: 'Hétfo',    start: '10:15', end: '11:00' },
   { teacher: 'PÁ', room: '205',   class: '12.d', subject: 'mny', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'PÁ', room: '205',   class: '12.d', subject: 'ir',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'PÁ', room: '207',  class: '9.c',  subject: 'mny', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -1044,15 +1044,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'PÁ', room: '207',  class: '11.a', subject: 'ir',  day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'PÁ', room: '19',   class: '12.b', subject: 'ir',  day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // PÁI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'PÁI', room: '25',                class: '13.c',           subject: 'any', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'PÁI', room: '25/102/109/K2',     class: '12.a/12.d/12.f', subject: 'any', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'PÁI', room: 'K3',                class: '13.c',           subject: 'any', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'PÁI', room: 'K3',                class: '13.c',           subject: 'any', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'PÁI', room: '110',               class: '13.d',           subject: 'any', day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'PÁI', room: 'K101/102',          class: '9.b/9.e',        subject: 'any', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'PÁI', room: '25',                class: '13.c',           subject: 'any', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'PÁI', room: '25/102/109/K2',     class: '12.a/12.d/12.f', subject: 'any', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'PÁI', room: 'K3',                class: '13.c',           subject: 'any', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'PÁI', room: 'K3',                class: '13.c',           subject: 'any', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'PÁI', room: '110',               class: '13.d',           subject: 'any', day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'PÁI', room: 'K101/102',          class: '9.b/9.e',        subject: 'any', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'PÁI', room: 'K102',              class: '13.d',           subject: 'any', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'PÁI', room: 'K1',                class: '13.c',           subject: 'any', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'PÁI', room: 'K1',                class: '13.c',           subject: 'any', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1077,15 +1077,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'PÁI', room: 'K101',              class: '13.d',           subject: 'any', day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'PÁI', room: 'K101',              class: '13.d',           subject: 'min', day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // PE tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'PE', room: '205', class: '12.d', subject: 'to.', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'PE', room: '205', class: '11.a', subject: 'to.', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'PE', room: '102', class: '10.e', subject: 'of',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'PE', room: '102', class: '12.d', subject: 'to.', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'PE', room: '202', class: '12.f', subject: 'to.', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'PE', room: '204', class: '12.f', subject: 'Ápi', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'PE', room: '205', class: '12.d', subject: 'to.', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'PE', room: '205', class: '11.a', subject: 'to.', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'PE', room: '102', class: '10.e', subject: 'of',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'PE', room: '102', class: '12.d', subject: 'to.', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'PE', room: '202', class: '12.f', subject: 'to.', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'PE', room: '204', class: '12.f', subject: 'Ápi', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'PE', room: '207', class: '10.e', subject: 'to.', day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'PE', room: '203', class: '10.e', subject: 'to.', day: 'Szerda',   start: '07:30', end: '08:10' },
   { teacher: 'PE', room: '202', class: '10.f', subject: 'to.', day: 'Szerda',   start: '09:15', end: '10:00' },
@@ -1104,13 +1104,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'PE', room: '20',  class: '12.d', subject: 'to.', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'PE', room: '20',  class: '12.f', subject: 'to.', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // PMGY tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'PMGY', room: '211', class: '13.d', subject: 'isa',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'PMGY', room: '210', class: '10.a', subject: 'Itall', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'PMGY', room: '303', class: '10.a', subject: 'Itall', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'PMGY', room: '303', class: '10.d', subject: 'dk',    day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'PMGY', room: '211', class: '13.d', subject: 'isa',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'PMGY', room: '210', class: '10.a', subject: 'Itall', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'PMGY', room: '303', class: '10.a', subject: 'Itall', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'PMGY', room: '303', class: '10.d', subject: 'dk',    day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'PMGY', room: '310', class: '9.e',  subject: 'dk',    day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'PMGY', room: '303', class: '11.b', subject: 'hl',    day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'PMGY', room: '303', class: '10.d', subject: 'dk',    day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -1127,13 +1127,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'PMGY', room: '301', class: '9.e',  subject: 'dk',    day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'PMGY', room: '211', class: '13.d', subject: 'isa',   day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // PMG tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'PMG', room: '1/308', class: '12.a/12.b', subject: 'Aaf',    day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'PMG', room: '1',     class: '11.b',      subject: 'al',     day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'PMG', room: '1',     class: '11.b',      subject: 'al',     day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'PMG', room: '14',    class: '11.b',      subject: 'al',     day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'PMG', room: '1/308', class: '12.a/12.b', subject: 'Aaf',    day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'PMG', room: '1',     class: '11.b',      subject: 'al',     day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'PMG', room: '1',     class: '11.b',      subject: 'al',     day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'PMG', room: '14',    class: '11.b',      subject: 'al',     day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'PMG', room: '1/14',  class: '12.a/12.b', subject: 'Aaf',    day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'PMG', room: '301',   class: '11.a',      subject: 'al',     day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'PMG', room: '310',   class: '13.a',      subject: 'aémafét',day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -1152,12 +1152,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'PMG', room: '301',   class: '13.b',      subject: 'al',     day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'PMG', room: '301',   class: '13.b',      subject: 'al',     day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // PZ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'PZ', room: '303', class: '13.d', subject: 'sk',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'PZ', room: '301', class: '13.d', subject: 'sk',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'PZ', room: '110', class: '12.d', subject: 'pü',  day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'PZ', room: '303', class: '13.d', subject: 'sk',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'PZ', room: '301', class: '13.d', subject: 'sk',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'PZ', room: '110', class: '12.d', subject: 'pü',  day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'PZ', room: '301', class: '13.d', subject: 'sk',  day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'PZ', room: '109', class: '13.d', subject: 'pü',  day: 'Kedd',     start: '11:10', end: '11:55' },
   { teacher: 'PZ', room: '205', class: '12.d', subject: 'pü',  day: 'Kedd',     start: '12:05', end: '12:50' },
@@ -1176,12 +1176,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'PZ', room: '24',  class: '12.d', subject: 'pü',  day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'PZ', room: '111', class: '13.d', subject: 'pü',  day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SA tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SA', room: '207', class: '10.c', subject: 'viai', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SA', room: '207', class: '9.c',  subject: 'géai', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SA', room: '111', class: '11.c', subject: 'mr',   day: 'Hétfő',    start: '11:10', end: '11:55' },
+  // ---------------------------------------------
+  { teacher: 'SA', room: '207', class: '10.c', subject: 'viai', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SA', room: '207', class: '9.c',  subject: 'géai', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SA', room: '111', class: '11.c', subject: 'mr',   day: 'Hétfo',    start: '11:10', end: '11:55' },
   { teacher: 'SA', room: '111', class: '10.b', subject: 'viai', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SA', room: '21',  class: '11.c', subject: 'mr',   day: 'Kedd',     start: '11:10', end: '11:55' },
   { teacher: 'SA', room: '106', class: '9.c',  subject: 'viai', day: 'Kedd',     start: '12:05', end: '12:50' },
@@ -1195,12 +1195,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'SA', room: '207', class: '10.c', subject: 'of',   day: 'Csütörtök',start: '12:55', end: '13:35' },
   { teacher: 'SA', room: '21',  class: '10.c', subject: 'viai', day: 'Péntek',   start: '07:30', end: '08:10' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SE tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SE', room: '205', class: '12.d', subject: 'mt', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SE', room: '205', class: '12.a', subject: 'mt', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SE', room: '20',  class: '9.d',  subject: 'mt', day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'SE', room: '205', class: '12.d', subject: 'mt', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SE', room: '205', class: '12.a', subject: 'mt', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SE', room: '20',  class: '9.d',  subject: 'mt', day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'SE', room: '106', class: '11.f', subject: 'mt', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SE', room: '106', class: '13.c', subject: 'mt', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'SE', room: '205', class: '12.d', subject: 'mt', day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -1223,15 +1223,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'SE', room: '102', class: '12.d', subject: 'mt', day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'SE', room: '102', class: '9.d',  subject: 'mt', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZAI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZAI', room: '21',  class: '10.d', subject: 'vma',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZAI', room: '21',  class: '10.d', subject: 'vma',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'SZAI', room: '21',  class: '11.d', subject: 'gi',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'SZAI', room: '21',  class: '9.d',  subject: 'géja', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZAI', room: '21',  class: '10.d', subject: 'vma',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'SZAI', room: '21',  class: '10.f', subject: 'pvi',  day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'SZAI', room: '21',  class: '10.d', subject: 'vma',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZAI', room: '21',  class: '10.d', subject: 'vma',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'SZAI', room: '21',  class: '11.d', subject: 'gi',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'SZAI', room: '21',  class: '9.d',  subject: 'géja', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZAI', room: '21',  class: '10.d', subject: 'vma',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'SZAI', room: '21',  class: '10.f', subject: 'pvi',  day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'SZAI', room: '306', class: '10.d', subject: 'pvi',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'SZAI', room: '102', class: '12.d', subject: 'ad',   day: 'Kedd',     start: '11:10', end: '11:55' },
   { teacher: 'SZAI', room: '20',  class: '12.d', subject: 'gi',   day: 'Szerda',   start: '07:30', end: '08:10' },
@@ -1250,13 +1250,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZAI', room: '24',  class: '9.d',  subject: 'géja', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'SZAI', room: '24',  class: '10.c', subject: 'pvi',  day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZÁ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZÁ', room: '209', class: '11.e', subject: 'dk',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZÁ', room: '209', class: '12.e', subject: 'dk',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZÁ', room: '209', class: '10.d', subject: 'da',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'SZÁ', room: '209', class: '9.c',  subject: 'dk',  day: 'Hétfő',    start: '10:15', end: '11:00' },
+  // ---------------------------------------------
+  { teacher: 'SZÁ', room: '209', class: '11.e', subject: 'dk',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZÁ', room: '209', class: '12.e', subject: 'dk',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZÁ', room: '209', class: '10.d', subject: 'da',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'SZÁ', room: '209', class: '9.c',  subject: 'dk',  day: 'Hétfo',    start: '10:15', end: '11:00' },
   { teacher: 'SZÁ', room: '209', class: '10.e', subject: 'kgy', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SZÁ', room: '209', class: '13.e', subject: 'dk',  day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'SZÁ', room: '209', class: '9.c',  subject: 'dk',  day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1277,15 +1277,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZÁ', room: '109', class: '10.e', subject: 'Ki',  day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'SZÁ', room: '209', class: '11.e', subject: 'dk',  day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZG tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZG', room: '109',              class: '13.f/13.b',      subject: 'any', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZG', room: '109',              class: '13.f/13.b',      subject: 'any', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZG', room: '25/102/109/K2',    class: '12.a/12.d/12.f', subject: 'any', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'SZG', room: '24/110',           class: '12.a/12.b',      subject: 'sza', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'SZG', room: '203',              class: '11.d',           subject: 'to.', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZG', room: '102',              class: '13.f/13.b',      subject: 'any', day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'SZG', room: '109',              class: '13.f/13.b',      subject: 'any', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZG', room: '109',              class: '13.f/13.b',      subject: 'any', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZG', room: '25/102/109/K2',    class: '12.a/12.d/12.f', subject: 'any', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'SZG', room: '24/110',           class: '12.a/12.b',      subject: 'sza', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'SZG', room: '203',              class: '11.d',           subject: 'to.', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZG', room: '102',              class: '13.f/13.b',      subject: 'any', day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'SZG', room: '24',               class: '13.f/13.b',      subject: 'any', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SZG', room: '24',               class: '13.f/13.b',      subject: 'any', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'SZG', room: '208/K101/202/203', class: '9.c/9.d',        subject: 'any', day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -1308,28 +1308,28 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZG', room: 'K106/19/K3',       class: '12.c/12.b/12.e', subject: 'any', day: 'Péntek',   start: '09:15', end: '10:00' },
   { teacher: 'SZG', room: '105',              class: '9.b',            subject: 'to.', day: 'Péntek',   start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZIN tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZIN', room: '307', class: '13.c', subject: 'ir',  day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZIN', room: '307', class: '11.c', subject: 'ir',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZIN', room: '307', class: '9.d',  subject: 'mny', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'SZIN', room: '307', class: '9.d',  subject: 'ir',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'SZIN', room: '307', class: '10.f', subject: 'mny', day: 'Hétfő',    start: '11:10', end: '11:55' },
+  // ---------------------------------------------
+  { teacher: 'SZIN', room: '307', class: '13.c', subject: 'ir',  day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZIN', room: '307', class: '11.c', subject: 'ir',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZIN', room: '307', class: '9.d',  subject: 'mny', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'SZIN', room: '307', class: '9.d',  subject: 'ir',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'SZIN', room: '307', class: '10.f', subject: 'mny', day: 'Hétfo',    start: '11:10', end: '11:55' },
   { teacher: 'SZIN', room: '307', class: '11.c', subject: 'mny', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SZIN', room: '307', class: '9.d',  subject: 'ir',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'SZIN', room: '307', class: '10.f', subject: 'mny', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'SZIN', room: '307', class: '9.d',  subject: 'mny', day: 'Szerda',   start: '07:30', end: '08:10' },
   { teacher: 'SZIN', room: '307', class: '11.c', subject: 'ir',  day: 'Szerda',   start: '08:20', end: '09:05' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZI', room: 'K101', class: '12.f',     subject: 'réák',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZI', room: 'K1',   class: '11.d',     subject: 'fo',    day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'SZI', room: 'K106', class: '13.f',     subject: 'b',     day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'SZI', room: '306',  class: '9.e',      subject: 'ttfo',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZI', room: 'K107', class: 'HT_13.ap', subject: 'a',     day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'SZI', room: 'K101', class: '12.f',     subject: 'réák',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZI', room: 'K1',   class: '11.d',     subject: 'fo',    day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'SZI', room: 'K106', class: '13.f',     subject: 'b',     day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'SZI', room: '306',  class: '9.e',      subject: 'ttfo',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZI', room: 'K107', class: 'HT_13.ap', subject: 'a',     day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'SZI', room: '306',  class: '11.d',     subject: 'fo',    day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SZI', room: 'K108', class: '1/9 Déri', subject: 'szfba', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'SZI', room: 'K108', class: '1/9 Déri', subject: 'ei',    day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1352,15 +1352,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZI', room: '106',  class: '9.e',      subject: 'b',     day: 'Péntek',   start: '08:20', end: '09:05' },
   { teacher: 'SZI', room: '106',  class: '9.d',      subject: 'ttbi',  day: 'Péntek',   start: '09:15', end: '10:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZBI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZBI', room: 'K104', class: '14.f',     subject: 'of',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZBI', room: 'K106', class: '9.b',      subject: 'ek',   day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZBI', room: 'K104', class: '14.f',     subject: 'Eeg',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'SZBI', room: 'K104', class: '14.f',     subject: 'Eeg',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZBI', room: 'K103', class: '14.f',     subject: 'Eeg',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'SZBI', room: 'K103', class: '14.f',     subject: 'Eeg',  day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'SZBI', room: 'K104', class: '14.f',     subject: 'of',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZBI', room: 'K106', class: '9.b',      subject: 'ek',   day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZBI', room: 'K104', class: '14.f',     subject: 'Eeg',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'SZBI', room: 'K104', class: '14.f',     subject: 'Eeg',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZBI', room: 'K103', class: '14.f',     subject: 'Eeg',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'SZBI', room: 'K103', class: '14.f',     subject: 'Eeg',  day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'SZBI', room: 'K1',  class: '9.b',      subject: 'b',    day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SZBI', room: '204',  class: '10.f',     subject: 'b',    day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'SZBI', room: 'K107', class: 'HT_13.ap', subject: 'szkba',day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -1382,13 +1382,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZBI', room: '106',  class: '9.c',      subject: 'ttbi', day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'SZBI', room: '106',  class: '9.b',      subject: 'ttke', day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZZ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZZ', room: '310',     class: '11.a',      subject: 'lprl',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZZ', room: '14',      class: 'HT_13.ir',  subject: 'i',      day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZZ', room: '14',      class: '9.a',       subject: 'dk',     day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZZ', room: '14',      class: '13.a',      subject: 'dk',     day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'SZZ', room: '310',     class: '11.a',      subject: 'lprl',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZZ', room: '14',      class: 'HT_13.ir',  subject: 'i',      day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZZ', room: '14',      class: '9.a',       subject: 'dk',     day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZZ', room: '14',      class: '13.a',      subject: 'dk',     day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'SZZ', room: '210',     class: '12.a/12.b', subject: 'lprl',   day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'SZZ', room: '211/210', class: '12.a/12.b', subject: 'lprl',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'SZZ', room: '211',     class: '11.a/11.b', subject: 'lprl',   day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -1406,14 +1406,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZZ', room: '210',     class: 'HT_13.ir',  subject: 'i',      day: 'Péntek',   start: '09:15', end: '10:00' },
   { teacher: 'SZZ', room: '210',     class: 'HT_13.ir',  subject: 'i',      day: 'Péntek',   start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZiÁ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZiÁ', room: '24',   class: '12.a', subject: 'to.', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZiÁ', room: '24',   class: '12.c', subject: 'to.', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZiÁ', room: 'K1',   class: '11.b', subject: 'to.', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'SZiÁ', room: 'K1',   class: '10.b', subject: 'to.', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZiÁ', room: 'K102', class: '11.f', subject: 'to.', day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'SZiÁ', room: '24',   class: '12.a', subject: 'to.', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZiÁ', room: '24',   class: '12.c', subject: 'to.', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZiÁ', room: 'K1',   class: '11.b', subject: 'to.', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'SZiÁ', room: 'K1',   class: '10.b', subject: 'to.', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZiÁ', room: 'K102', class: '11.f', subject: 'to.', day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'SZiÁ', room: '21',   class: '11.b', subject: 'to.', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'SZiÁ', room: '106',  class: '10.d', subject: 'to.', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'SZiÁ', room: '106',  class: '11.f', subject: 'to.', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1433,15 +1433,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZiÁ', room: '204',  class: '12.a', subject: 'to.', day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'SZiÁ', room: '306',  class: '10.b', subject: 'to.', day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZKÉ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'SZKÉ', room: '25',           class: '13.e',           subject: 'any', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'SZKÉ', room: '101',          class: '10.d',           subject: 'ir',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'SZKÉ', room: '25/102/109/K2',class: '12.a/12.d/12.f', subject: 'any', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'SZKÉ', room: '101',          class: '10.d',           subject: 'of',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'SZKÉ', room: '101',          class: '11.b',           subject: 'ir',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'SZKÉ', room: 'K1/20/21',     class: '10.d/10.f',      subject: 'any', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'SZKÉ', room: '25',           class: '13.e',           subject: 'any', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'SZKÉ', room: '101',          class: '10.d',           subject: 'ir',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'SZKÉ', room: '25/102/109/K2',class: '12.a/12.d/12.f', subject: 'any', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'SZKÉ', room: '101',          class: '10.d',           subject: 'of',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'SZKÉ', room: '101',          class: '11.b',           subject: 'ir',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'SZKÉ', room: 'K1/20/21',     class: '10.d/10.f',      subject: 'any', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'SZKÉ', room: '105',          class: '12.f',           subject: 'ir',  day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'SZKÉ', room: '104',          class: '12.f',           subject: 'mny', day: 'Kedd',     start: '11:10', end: '11:55' },
   { teacher: 'SZKÉ', room: '20',           class: '12.f',           subject: 'ir',  day: 'Szerda',   start: '11:10', end: '11:55' },
@@ -1460,13 +1460,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZKÉ', room: '101',           class: '10.d',           subject: 'ir',  day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'SZKÉ', room: '101/K3',        class: '11.d/11.f',      subject: 'any', day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // TM tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'TM', room: '24',  class: '10.c',      subject: 'géai', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'TM', room: '211', class: '12.c',      subject: 'mr',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'TM', room: '24',  class: '13.c/13.b', subject: 'g',    day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'TM', room: '111', class: '10.b',      subject: 'viai', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'TM', room: '24',  class: '10.c',      subject: 'géai', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'TM', room: '211', class: '12.c',      subject: 'mr',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'TM', room: '24',  class: '13.c/13.b', subject: 'g',    day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'TM', room: '111', class: '10.b',      subject: 'viai', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'TM', room: '211', class: '12.c/12.b', subject: 'mr',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'TM', room: '25',  class: '12.c',      subject: 'a',    day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'TM', room: '111', class: '10.c',      subject: 'viai', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1482,14 +1482,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'TM', room: '111', class: '10.b',      subject: 'viai', day: 'Péntek',   start: '09:15', end: '10:00' },
   { teacher: 'TM', room: '111', class: '10.b',      subject: 'viai', day: 'Péntek',   start: '10:15', end: '11:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // TJB tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'TJB', room: '20',  class: '12.b', subject: 'mt', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'TJB', room: '20',  class: '13.d', subject: 'of', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'TJB', room: '207', class: '10.c', subject: 'mt', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'TJB', room: '207', class: '11.a', subject: 'mt', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'TJB', room: '101', class: '10.d', subject: 'mt', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'TJB', room: '20',  class: '12.b', subject: 'mt', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'TJB', room: '20',  class: '13.d', subject: 'of', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'TJB', room: '207', class: '10.c', subject: 'mt', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'TJB', room: '207', class: '11.a', subject: 'mt', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'TJB', room: '101', class: '10.d', subject: 'mt', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'TJB', room: '207', class: '10.c', subject: 'mt', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'TJB', room: '207', class: '11.c', subject: 'mt', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'TJB', room: '207', class: '13.d', subject: 'mt', day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -1509,13 +1509,13 @@ export const SCHEDULE_DATA = [
   { teacher: 'TJB', room: '306', class: '10.c', subject: 'mt', day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'TJB', room: '106', class: '10.d', subject: 'mt', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // TPI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'TPI', room: '203', class: '9.a',  subject: 'ir',  day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'TPI', room: '203', class: '11.e', subject: 'ir',  day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'TPI', room: '203', class: '13.a', subject: 'ir',  day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'TPI', room: '203', class: '11.d', subject: 'ir',  day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'TPI', room: '203', class: '9.a',  subject: 'ir',  day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'TPI', room: '203', class: '11.e', subject: 'ir',  day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'TPI', room: '203', class: '13.a', subject: 'ir',  day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'TPI', room: '203', class: '11.d', subject: 'ir',  day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'TPI', room: '203', class: '9.a',  subject: 'mny', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'TPI', room: '203', class: '10.d', subject: 'mny', day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'TPI', room: '203', class: '10.e', subject: 'ir',  day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -1536,14 +1536,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'TPI', room: '203', class: '10.e', subject: 'ir',  day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'TPI', room: '203', class: '12.c', subject: 'mny', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // UT tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'UT', room: '203',  class: '11.c/11.b', subject: 'fm',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'UT', room: '111',  class: '11.b',      subject: 'G-',   day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'UT', room: '111',  class: '11.c',      subject: 'G-',   day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'UT', room: '25',   class: '12.c/12.b', subject: 'm',    day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'UT', room: '202',  class: '12.c/12.b', subject: 'Aigy', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'UT', room: '203',  class: '11.c/11.b', subject: 'fm',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'UT', room: '111',  class: '11.b',      subject: 'G-',   day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'UT', room: '111',  class: '11.c',      subject: 'G-',   day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'UT', room: '25',   class: '12.c/12.b', subject: 'm',    day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'UT', room: '202',  class: '12.c/12.b', subject: 'Aigy', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'UT', room: '25',   class: '12.c',      subject: 'm',    day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'UT', room: '21',   class: '11.c',      subject: 'G-',   day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'UT', room: '102',  class: '12.c/12.b', subject: 'sék',  day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1564,11 +1564,11 @@ export const SCHEDULE_DATA = [
   { teacher: 'UT', room: '205',  class: '13.c/13.b', subject: 'sék',  day: 'Péntek',   start: '12:05', end: '12:50' },
   { teacher: 'UT', room: '205',  class: '13.c/13.b', subject: 'sék',  day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // UME tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'UME', room: 'K106', class: '12.d', subject: 'gs',  day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'UME', room: '109',  class: '12.d', subject: 'szv', day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'UME', room: 'K106', class: '12.d', subject: 'gs',  day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'UME', room: '109',  class: '12.d', subject: 'szv', day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'UME', room: 'K102', class: '11.d', subject: 'se',  day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'UME', room: 'K102', class: '11.d', subject: 'pü',  day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'UME', room: '306',  class: '11.d', subject: 'szv', day: 'Kedd',     start: '11:10', end: '11:55' },
@@ -1588,17 +1588,17 @@ export const SCHEDULE_DATA = [
   { teacher: 'UME', room: 'K2',   class: '12.d', subject: 'szv', day: 'Péntek',   start: '10:15', end: '11:00' },
   { teacher: 'UME', room: 'K2',   class: '11.d', subject: 'pü',  day: 'Péntek',   start: '11:10', end: '11:55' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // VG tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'VG', room: '210',  class: '10.f',      subject: 'dk',   day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'VG', room: '301',  class: '11.a/11.b', subject: 'hl',   day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'VG', room: '210',  class: '9.a',       subject: 'dk',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'VG', room: '210',  class: '9.a',       subject: 'dk',   day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'VG', room: '211',  class: '10.b',      subject: 'Ital', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'VG', room: '211',  class: '9.a',       subject: 'Ital', day: 'Hétfő',    start: '12:05', end: '12:50' },
-  { teacher: 'VG', room: '211',  class: '9.a',       subject: 'Ital', day: 'Hétfő',    start: '12:55', end: '13:35' },
-  { teacher: 'VG', room: '211',  class: '9.a',       subject: 'Ital', day: 'Hétfő',    start: '13:40', end: '14:20' },
+  // ---------------------------------------------
+  { teacher: 'VG', room: '210',  class: '10.f',      subject: 'dk',   day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'VG', room: '301',  class: '11.a/11.b', subject: 'hl',   day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'VG', room: '210',  class: '9.a',       subject: 'dk',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'VG', room: '210',  class: '9.a',       subject: 'dk',   day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'VG', room: '211',  class: '10.b',      subject: 'Ital', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'VG', room: '211',  class: '9.a',       subject: 'Ital', day: 'Hétfo',    start: '12:05', end: '12:50' },
+  { teacher: 'VG', room: '211',  class: '9.a',       subject: 'Ital', day: 'Hétfo',    start: '12:55', end: '13:35' },
+  { teacher: 'VG', room: '211',  class: '9.a',       subject: 'Ital', day: 'Hétfo',    start: '13:40', end: '14:20' },
   { teacher: 'VG', room: '303',  class: '9.a',       subject: 'Ital', day: 'Szerda',   start: '09:15', end: '10:00' },
   { teacher: 'VG', room: '1',    class: '11.a/11.b', subject: 'hl',   day: 'Szerda',   start: '10:15', end: '11:00' },
   { teacher: 'VG', room: '310',  class: 'HT_13.ir',  subject: 'i',    day: 'Szerda',   start: '11:10', end: '11:55' },
@@ -1612,12 +1612,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'VG', room: '210',  class: '13.a',      subject: 'dk',   day: 'Péntek',   start: '09:15', end: '10:00' },
   { teacher: 'VG', room: '14',   class: '9.a',       subject: 'Ital', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // VZS tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'VZS', room: 'K3',   class: '9.c',       subject: 'géai', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'VZS', room: '24',   class: '12.c/12.b', subject: 'a',    day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'VZS', room: '25',   class: '13.c/13.b', subject: 'a',    day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'VZS', room: 'K3',   class: '9.c',       subject: 'géai', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'VZS', room: '24',   class: '12.c/12.b', subject: 'a',    day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'VZS', room: '25',   class: '13.c/13.b', subject: 'a',    day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'VZS', room: 'm22',  class: '11.c',      subject: 'fm',   day: 'Kedd',     start: '10:15', end: '11:00' },
   { teacher: 'VZS', room: '24',   class: '13.c/13.b', subject: 'g',    day: 'Kedd',     start: '13:40', end: '14:20' },
   { teacher: 'VZS', room: '202',  class: '13.c/13.b', subject: 'sék',  day: 'Szerda',   start: '10:15', end: '11:00' },
@@ -1632,15 +1632,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'VZS', room: '105',  class: '13.c/13.b', subject: 'a',    day: 'Péntek',   start: '09:15', end: '10:00' },
   { teacher: 'VZS', room: '105',  class: '12.c/12.b', subject: 'a',    day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // VKJ tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'VKJ', room: '19',       class: '13.f/13.b', subject: 'nny', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'VKJ', room: '19',       class: '13.f/13.b', subject: 'nny', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'VKJ', room: '208/19',   class: '12.d/12.f', subject: 'nny', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'VKJ', room: '19',       class: '13.b',      subject: 'of',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'VKJ', room: 'K2',       class: '13.f/13.b', subject: 'ir',  day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'VKJ', room: '205',      class: '10.b',      subject: 'ir',  day: 'Hétfő',    start: '12:55', end: '13:35' },
+  // ---------------------------------------------
+  { teacher: 'VKJ', room: '19',       class: '13.f/13.b', subject: 'nny', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'VKJ', room: '19',       class: '13.f/13.b', subject: 'nny', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'VKJ', room: '208/19',   class: '12.d/12.f', subject: 'nny', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'VKJ', room: '19',       class: '13.b',      subject: 'of',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'VKJ', room: 'K2',       class: '13.f/13.b', subject: 'ir',  day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'VKJ', room: '205',      class: '10.b',      subject: 'ir',  day: 'Hétfo',    start: '12:55', end: '13:35' },
   { teacher: 'VKJ', room: '19',       class: '13.f/13.b', subject: 'nny', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'VKJ', room: '19',       class: '13.f/13.b', subject: 'nny', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'VKJ', room: '19',       class: '13.b',      subject: 'ir',  day: 'Kedd',     start: '09:15', end: '10:00' },
@@ -1662,14 +1662,14 @@ export const SCHEDULE_DATA = [
   { teacher: 'VKJ', room: '207',      class: '13.f',      subject: 'nny', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'VKJ', room: '110/25',   class: '11.d/11.f', subject: 'nny', day: 'Péntek',   start: '12:05', end: '12:50' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BO tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'BO', room: '104', class: '12.e', subject: 'rsza', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'BO', room: '104', class: '13.e', subject: 'Kizg', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BO', room: '104', class: '13.e', subject: 'rsza', day: 'Hétfő',    start: '10:15', end: '11:00' },
-  { teacher: 'BO', room: '104', class: '11.e', subject: 'Jirt', day: 'Hétfő',    start: '11:10', end: '11:55' },
-  { teacher: 'BO', room: '104', class: '12.e', subject: 'Szvv', day: 'Hétfő',    start: '12:05', end: '12:50' },
+  // ---------------------------------------------
+  { teacher: 'BO', room: '104', class: '12.e', subject: 'rsza', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'BO', room: '104', class: '13.e', subject: 'Kizg', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BO', room: '104', class: '13.e', subject: 'rsza', day: 'Hétfo',    start: '10:15', end: '11:00' },
+  { teacher: 'BO', room: '104', class: '11.e', subject: 'Jirt', day: 'Hétfo',    start: '11:10', end: '11:55' },
+  { teacher: 'BO', room: '104', class: '12.e', subject: 'Szvv', day: 'Hétfo',    start: '12:05', end: '12:50' },
   { teacher: 'BO', room: '208', class: '10.b', subject: 'ka',   day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BO', room: '104', class: '11.e', subject: 'Jirt', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'BO', room: '104', class: '12.e', subject: 'Jirt', day: 'Kedd',     start: '10:15', end: '11:00' },
@@ -1687,12 +1687,12 @@ export const SCHEDULE_DATA = [
   { teacher: 'BO', room: '104', class: '13.e', subject: 'Kizg', day: 'Péntek',   start: '11:10', end: '11:55' },
   { teacher: 'BO', room: '104', class: '13.e', subject: 'Kizg', day: 'Péntek',   start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BI tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
-  { teacher: 'BI', room: '208',         class: '9.a',       subject: 'any', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'BI', room: '208',         class: '10.b',      subject: 'any', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BI', room: '25/102/109/K2',class: '12.a/12.d/12.f',subject:'any', day: 'Hétfő', start: '09:15', end: '10:00' },
+  // ---------------------------------------------
+  { teacher: 'BI', room: '208',         class: '9.a',       subject: 'any', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'BI', room: '208',         class: '10.b',      subject: 'any', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BI', room: '25/102/109/K2',class: '12.a/12.d/12.f',subject:'any', day: 'Hétfo', start: '09:15', end: '10:00' },
   { teacher: 'BI', room: 'K3',          class: '9.a',       subject: 'any', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'BI', room: '204',         class: '10.b',      subject: 'any', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'BI', room: '208/K101/202/203', class: '9.c/9.d', subject: 'any', day: 'Kedd',  start: '09:15', end: '10:00' },
@@ -1708,26 +1708,26 @@ export const SCHEDULE_DATA = [
 
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BZS tanár  (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
 
 
 
-  { teacher: 'BZS', room: '109',         class: '13.e',       subject: 'szk', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'BZS', room: '110',         class: '12.e',      subject: 'Szvv', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'BZS', room: '110',         class: '10.b',     subject:'Pséka', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'BZS', room: '109',         class: '13.e',       subject: 'szk', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'BZS', room: '110',         class: '12.e',      subject: 'Szvv', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'BZS', room: '110',         class: '10.b',     subject:'Pséka', day: 'Hétfo', start: '09:15', end: '10:00' },
   { teacher: 'BZS', room: '110',          class: '12.e',       subject: 'Szvv', day: 'Csütörtök',     start: '07:30', end: '08:10' },
   { teacher: 'BZS', room: '110',         class: '13.e',      subject: 'szk', day: 'Csütörtök',     start: '08:20', end: '09:05' },
   { teacher: 'BZS', room: '110',         class: '10.b', subject: 'Pséka', day: 'Csütörtök',  start: '09:15', end: '10:00' },
 
-   // ─────────────────────────────────────────────
+   // ---------------------------------------------
   // CSV  (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
 
-  { teacher: 'CSV', room: 'K107',         class: 'HT_13.ap',       subject: 'i', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'CSV', room: 'K107',         class: 'HT_13.ap',      subject: 'i', day: 'Hétfő',    start: '09:15', end: '10:00' },
-  { teacher: 'CSV', room: 'K107',        class: 'HT_13.ap',       subject:'i', day: 'Hétfő',          start: '10:15', end: '11:00' },
+  { teacher: 'CSV', room: 'K107',         class: 'HT_13.ap',       subject: 'i', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'CSV', room: 'K107',         class: 'HT_13.ap',      subject: 'i', day: 'Hétfo',    start: '09:15', end: '10:00' },
+  { teacher: 'CSV', room: 'K107',        class: 'HT_13.ap',       subject:'i', day: 'Hétfo',          start: '10:15', end: '11:00' },
   { teacher: 'CSV', room: 'K107',          class: 'HT_13.ap',       subject: 'i', day: 'Kedd',     start: '07:30', end: '08:10' },
   { teacher: 'CSV', room: 'K107',         class: 'HT_13.ap',      subject: 'i', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'CSV', room: 'K107',         class: 'HT_13.ap',      subject: 'i', day: 'Kedd',  start: '09:15', end: '10:00' },
@@ -1745,26 +1745,26 @@ export const SCHEDULE_DATA = [
 
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // IJ (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
 
-  { teacher: 'IJ', room: '104',         class: '13.e',       subject: 'szk', day: 'Hétfő',    start: '07:30', end: '08:10' },
-  { teacher: 'IJ', room: '104',         class: '9.e',      subject: 'ka', day: 'Hétfő',    start: '08:20', end: '09:05' },
+  { teacher: 'IJ', room: '104',         class: '13.e',       subject: 'szk', day: 'Hétfo',    start: '07:30', end: '08:10' },
+  { teacher: 'IJ', room: '104',         class: '9.e',      subject: 'ka', day: 'Hétfo',    start: '08:20', end: '09:05' },
   { teacher: 'IJ', room: '104',         class: '9.e',     subject:'ka', day: 'Kedd', start: '08:20', end: '09:05' },
   { teacher: 'IJ', room: '19',          class: '10.e',       subject: 'Pséka', day: 'Kedd',     start: '08:20', end: '09:05' },
 
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // FL (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
 
 
 
 
-  { teacher: 'FL', room: 'T2',         class: '9.d',      subject: 'tn', day: 'Hétfő',    start: '08:20', end: '09:05' },
-  { teacher: 'FL', room: 'T1',         class: '10.e',     subject:'tn', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'FL', room: 'T2',         class: '9.d',      subject: 'tn', day: 'Hétfo',    start: '08:20', end: '09:05' },
+  { teacher: 'FL', room: 'T1',         class: '10.e',     subject:'tn', day: 'Hétfo', start: '09:15', end: '10:00' },
   { teacher: 'FL', room: 'T1',          class: '9.c',       subject: 'tn', day: 'Kedd',     start: '08:20', end: '09:05' },
   { teacher: 'FL', room: 'T1',         class: '10.a',      subject: 'tn', day: 'Kedd',     start: '09:15', end: '10:00' },
   { teacher: 'FL', room: 'T1',         class: '9.b', subject: 'tn', day: 'Szerda',  start: '07:30', end: '08:10' },
@@ -1777,9 +1777,9 @@ export const SCHEDULE_DATA = [
 
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // SZL (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
 
 
   { teacher: 'SZL', room: '110',         class: '12.e',       subject: 'szvv', day: 'Szerda',    start: '07:30', end: '08:10' },
@@ -1789,32 +1789,32 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZL', room: '208',         class: '11.e',      subject: 'szk', day: 'Csütörtök',     start: '08:20', end: '09:05' },
   { teacher: 'SZL', room: '24',         class: '13.e', subject: 'Szolgálati ismeretek', day: 'Csütörtök',  start: '09:15', end: '10:00' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // IT (forrás: edupage)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
 
 
 
-  {teacher: 'IT', room: '104', class: '9.e', subject: 'hi', day: 'Hétfő', start: '12:55', end: '13:35'},
+  {teacher: 'IT', room: '104', class: '9.e', subject: 'hi', day: 'Hétfo', start: '12:55', end: '13:35'},
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // Excel-bol hianyzo bejegyzesek (autom. generalt)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BKA
-  { teacher: 'BKA', room: 'K2', class: '14.f', subject: 'Szát', day: 'Hétfő', start: '10:15', end: '11:00' },
-  { teacher: 'BKA', room: 'K104', class: '14.f', subject: 'Szát', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'BKA', room: 'K2', class: '14.f', subject: 'Szát', day: 'Hétfo', start: '10:15', end: '11:00' },
+  { teacher: 'BKA', room: 'K104', class: '14.f', subject: 'Szát', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'BKA', room: 'K103', class: '14.f', subject: 'Szát', day: 'Szerda', start: '10:15', end: '11:00' },
   { teacher: 'BKA', room: 'K104', class: '13.f', subject: 'ji', day: 'Csütörtök', start: '08:20', end: '09:05' },
   // BO
-  { teacher: 'BO', room: '104', class: '13.e', subject: 'Szvv', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'BO', room: '104', class: '13.e', subject: 'Szvv', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'BO', room: '109', class: '10.e', subject: 'Pséka', day: 'Csütörtök', start: '07:30', end: '08:10' },
   { teacher: 'BO', room: '104', class: '13.e', subject: 'Szvv', day: 'Péntek', start: '07:30', end: '08:10' },
   // BSN
   { teacher: 'BSN', room: 'K106', class: '13.f', subject: 'of', day: 'Szerda', start: '11:10', end: '11:55' },  // BZS
   { teacher: 'BZS', room: '110', class: '12.e', subject: 'Szvv', day: 'Kedd', start: '08:20', end: '09:05' },
   // CSMM
-  { teacher: 'CSMM', room: '20', class: '11.d', subject: 'se', day: 'Hétfő', start: '10:15', end: '11:00' },
+  { teacher: 'CSMM', room: '20', class: '11.d', subject: 'se', day: 'Hétfo', start: '10:15', end: '11:00' },
   { teacher: 'CSMM', room: '20', class: '12.e', subject: 'mt', day: 'Csütörtök', start: '10:15', end: '11:00' },
   // DA
   { teacher: 'DA', room: '105', class: '9.c', subject: 'of', day: 'Szerda', start: '07:30', end: '08:10' },
@@ -1836,9 +1836,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'GR', room: '24', class: '12.b', subject: 'tö.', day: 'Csütörtök', start: '09:15', end: '10:00' },
   { teacher: 'GR', room: '110', class: '12.b', subject: 'of', day: 'Csütörtök', start: '12:05', end: '12:50' },
   // HI
-  { teacher: 'HI', room: '209', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '12:05', end: '12:50' },
-  { teacher: 'HI', room: '14', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '12:05', end: '12:50' },
-  { teacher: 'HI', room: '209', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '12:55', end: '13:35' },
+  { teacher: 'HI', room: '209', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '12:05', end: '12:50' },
+  { teacher: 'HI', room: '14', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '12:05', end: '12:50' },
+  { teacher: 'HI', room: '209', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '12:55', end: '13:35' },
   { teacher: 'HI', room: '210', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '10:15', end: '11:00' },
   // HZN
   { teacher: 'HZN', room: 'K102', class: '14.f', subject: 'Si', day: 'Kedd', start: '07:30', end: '08:10' },
@@ -1853,7 +1853,7 @@ export const SCHEDULE_DATA = [
   { teacher: 'JI', room: '1', class: '11.b', subject: 'Ip-irr2I. cIsoport', day: 'Szerda', start: '12:05', end: '12:50' },
   { teacher: 'JI', room: '210', class: '9.c', subject: 'dk', day: 'Csütörtök', start: '12:55', end: '13:35' },
   // JMK
-  { teacher: 'JMK', room: 'K101', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '10:15', end: '11:00' },
+  { teacher: 'JMK', room: 'K101', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '10:15', end: '11:00' },
   { teacher: 'JMK', room: '303', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '12:55', end: '13:35' },
   { teacher: 'JMK', room: '303', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '13:40', end: '14:20' },
   { teacher: 'JMK', room: '1', class: '9.a', subject: 'IprI', day: 'Csütörtök', start: '12:05', end: '12:50' },
@@ -1862,15 +1862,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Kedd', start: '11:10', end: '11:55' },
   { teacher: 'KTT', room: 'K102', class: 'HT_13.ap', subject: 'sa', day: 'Szerda', start: '11:10', end: '11:55' },
   // KÖS
-  { teacher: 'KÖS', room: '102', class: '11.d', subject: 'szv', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'KÖS', room: '102', class: '11.d', subject: 'szv', day: 'Hétfo', start: '09:15', end: '10:00' },
   // LK
-  { teacher: 'LK', room: '105', class: '9.e', subject: 'ttfi', day: 'Hétfő', start: '11:10', end: '11:55' },
+  { teacher: 'LK', room: '105', class: '9.e', subject: 'ttfi', day: 'Hétfo', start: '11:10', end: '11:55' },
   { teacher: 'LK', room: '101', class: '11.b', subject: 'fi', day: 'Csütörtök', start: '09:15', end: '10:00' },
   // LTK
-  { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Hétfő', start: '08:20', end: '09:05' },
-  { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Hétfő', start: '11:10', end: '11:55' },
-  { teacher: 'LTK', room: 'K104', class: '14.f', subject: 'Szát', day: 'Hétfő', start: '12:55', end: '13:35' },
-  { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Hétfő', start: '13:40', end: '14:20' },
+  { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Hétfo', start: '08:20', end: '09:05' },
+  { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Hétfo', start: '11:10', end: '11:55' },
+  { teacher: 'LTK', room: 'K104', class: '14.f', subject: 'Szát', day: 'Hétfo', start: '12:55', end: '13:35' },
+  { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Hétfo', start: '13:40', end: '14:20' },
   { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Kedd', start: '07:30', end: '08:10' },
   { teacher: 'LTK', room: 'K105', class: '14.f', subject: 'Szát', day: 'Kedd', start: '09:15', end: '10:00' },
   { teacher: 'LTK', room: 'K103', class: '14.f', subject: 'Szát', day: 'Kedd', start: '09:15', end: '10:00' },
@@ -1883,15 +1883,15 @@ export const SCHEDULE_DATA = [
   { teacher: 'LTK', room: 'K101', class: '10.f', subject: 'ag', day: 'Péntek', start: '09:15', end: '10:00' },
   { teacher: 'LTK', room: 'K101', class: '9.b', subject: 'ag', day: 'Péntek', start: '12:05', end: '12:50' },
   // MMR
-  { teacher: 'MMR', room: '105', class: '11.d', subject: 'mt', day: 'Hétfő', start: '11:10', end: '11:55' },
+  { teacher: 'MMR', room: '105', class: '11.d', subject: 'mt', day: 'Hétfo', start: '11:10', end: '11:55' },
   { teacher: 'MMR', room: '21', class: '11.d', subject: 'mt', day: 'Csütörtök', start: '10:15', end: '11:00' },
   { teacher: 'MMR', room: '205', class: '9.c', subject: 'mt', day: 'Péntek', start: '09:15', end: '10:00' },
   { teacher: 'MMR', room: '205', class: '9.c', subject: 'mt', day: 'Péntek', start: '10:15', end: '11:00' },
   // MÉ
-  { teacher: 'MÉ', room: 'K102', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '09:15', end: '10:00' },
-  { teacher: 'MÉ', room: 'K101', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '11:10', end: '11:55' },
+  { teacher: 'MÉ', room: 'K102', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '09:15', end: '10:00' },
+  { teacher: 'MÉ', room: 'K101', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '11:10', end: '11:55' },
   // NA
-  { teacher: 'NA', room: 'T2', class: '11.d', subject: 'tn.', day: 'Hétfő', start: '08:20', end: '09:05' },
+  { teacher: 'NA', room: 'T2', class: '11.d', subject: 'tn.', day: 'Hétfo', start: '08:20', end: '09:05' },
   // PMG
   { teacher: 'PMG', room: '1', class: '11.b', subject: 'a-ir2I. csoport', day: 'Kedd', start: '12:55', end: '13:35' },
   { teacher: 'PMG', room: '14', class: '11.b', subject: 'a-ir2I. csoport', day: 'Szerda', start: '13:40', end: '14:20' },
@@ -1918,11 +1918,11 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZG', room: '203', class: '11.d', subject: 'tö.', day: 'Csütörtök', start: '07:30', end: '08:10' },
   { teacher: 'SZG', room: '20', class: '13.b', subject: 'mi-ni. csoport', day: 'Péntek', start: '12:55', end: '13:35' },
   // SZI
-  { teacher: 'SZI', room: '306', class: '11.d', subject: 'fö', day: 'Hétfő', start: '07:30', end: '08:10' },
-  { teacher: 'SZI', room: '306', class: '9.e', subject: 'ttfö', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'SZI', room: '306', class: '11.d', subject: 'fö', day: 'Hétfo', start: '07:30', end: '08:10' },
+  { teacher: 'SZI', room: '306', class: '9.e', subject: 'ttfö', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'SZI', room: 'K106', class: '13.f', subject: 'b', day: 'Szerda', start: '09:15', end: '10:00' },
   // SZZ
-  { teacher: 'SZZ', room: '310', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '08:20', end: '09:05' },
+  { teacher: 'SZZ', room: '310', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '08:20', end: '09:05' },
   { teacher: 'SZZ', room: '1', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '07:30', end: '08:10' },
   { teacher: 'SZZ', room: '210', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '08:20', end: '09:05' },
   { teacher: 'SZZ', room: '210', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '09:15', end: '10:00' },
@@ -1938,7 +1938,7 @@ export const SCHEDULE_DATA = [
   { teacher: 'TPI', room: '203', class: '9.a', subject: 'ir', day: 'Szerda', start: '08:20', end: '09:05' },
   { teacher: 'TPI', room: '203', class: '11.d', subject: 'ir', day: 'Csütörtök', start: '09:15', end: '10:00' },
   // UME
-  { teacher: 'UME', room: '306', class: '11.d', subject: 'szv', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'UME', room: '306', class: '11.d', subject: 'szv', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'UME', room: '208', class: '11.d', subject: 'pü', day: 'Szerda', start: '09:15', end: '10:00' },
   { teacher: 'UME', room: '24', class: '11.d', subject: 'pü', day: 'Szerda', start: '13:40', end: '14:20' },
   { teacher: 'UME', room: '109', class: '11.d', subject: 'gs', day: 'Szerda', start: '13:40', end: '14:20' },
@@ -1946,8 +1946,8 @@ export const SCHEDULE_DATA = [
   { teacher: 'UT', room: '202', class: '12.b', subject: 'Aig-g. ycsoport', day: 'Kedd', start: '12:55', end: '13:35' },
   { teacher: 'UT', room: '102', class: '12.b', subject: 'sé-gk. csoport', day: 'Szerda', start: '10:15', end: '11:00' },
   // VG
-  { teacher: 'VG', room: '301', class: '9.a', subject: 'ItaI', day: 'Hétfő', start: '09:15', end: '10:00' },
-  { teacher: 'VG', room: '210', class: 'HT_13.ir', subject: 'i', day: 'Hétfő', start: '11:10', end: '11:55' },
+  { teacher: 'VG', room: '301', class: '9.a', subject: 'ItaI', day: 'Hétfo', start: '09:15', end: '10:00' },
+  { teacher: 'VG', room: '210', class: 'HT_13.ir', subject: 'i', day: 'Hétfo', start: '11:10', end: '11:55' },
   { teacher: 'VG', room: '310', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '08:20', end: '09:05' },
   { teacher: 'VG', room: '303', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '12:05', end: '12:50' },
   { teacher: 'VG', room: '310', class: 'HT_13.ir', subject: 'i', day: 'Kedd', start: '13:40', end: '14:20' },
@@ -1963,9 +1963,9 @@ export const SCHEDULE_DATA = [
   // ÉCS
   { teacher: 'ÉCS', room: 'T2', class: '12.b', subject: 'tn.', day: 'Csütörtök', start: '12:55', end: '13:35' },
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // Kézi javítások a PDF alapján (csoport-bontás merge)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // HI
   { teacher: 'HI', room: '210/1', class: '12.a/12.b', subject: 'Wp', day: 'Csütörtök', start: '09:15', end: '10:00' },
   { teacher: 'HI', room: '210/1', class: '12.a/12.b', subject: 'Wp', day: 'Csütörtök', start: '10:15', end: '11:00' },
@@ -1978,9 +1978,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'SZZ', room: '209', class: '12.a/12.b', subject: 'lprl', day: 'Csütörtök', start: '10:15', end: '11:00' },
 
 
-  // ─────────────────────────────────────────────
-  // Excel csoport-bontásból hiányzó órák (PDF-fel ellenőrizve)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
+  // Excel csoport-bontásból hiányzó órák (PDF-fel ellenorizve)
+  // ---------------------------------------------
   // BI
   { teacher: 'BI', room: '25', class: '10.b', subject: 'any', day: 'Szerda', start: '07:30', end: '08:10' },
   { teacher: 'BI', room: '208', class: '10.b', subject: 'any', day: 'Péntek', start: '07:30', end: '08:10' },
@@ -1995,7 +1995,7 @@ export const SCHEDULE_DATA = [
   { teacher: 'BZS', room: '109', class: '13.e', subject: 'szk', day: 'Kedd', start: '07:30', end: '08:10' },
   { teacher: 'BZS', room: '110', class: '10.b', subject: 'Pséka', day: 'Kedd', start: '09:15', end: '10:00' },
   // FEG
-  { teacher: 'FEG', room: '101', class: '13.e', subject: 'Szolgálati ismeretek', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'FEG', room: '101', class: '13.e', subject: 'Szolgálati ismeretek', day: 'Hétfo', start: '09:15', end: '10:00' },
   { teacher: 'FEG', room: 'K1', class: '13.e', subject: 'Szolgálati ismeretek', day: 'Kedd', start: '12:05', end: '12:50' },
   { teacher: 'FEG', room: 'K202', class: '11.e', subject: 'Öv', day: 'Kedd', start: '12:55', end: '13:35' },
   { teacher: 'FEG', room: 'K314', class: '11.e', subject: 'Lö', day: 'Szerda', start: '08:20', end: '09:05' },
@@ -2026,8 +2026,8 @@ export const SCHEDULE_DATA = [
   { teacher: 'KM', room: 'T1', class: '12.e', subject: 'tn.', day: 'Szerda', start: '12:55', end: '13:35' },
   { teacher: 'KM', room: 'T1', class: '13.e', subject: 'E-áf', day: 'Csütörtök', start: '12:55', end: '13:35' },
   // KTT
-  { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Hétfő', start: '07:30', end: '08:10' },
-  { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Hétfő', start: '09:15', end: '10:00' },
+  { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Hétfo', start: '07:30', end: '08:10' },
+  { teacher: 'KTT', room: 'K105', class: '14.f', subject: 'Kgy', day: 'Hétfo', start: '09:15', end: '10:00' },
   // LK
   { teacher: 'LK', room: '105', class: '13.b', subject: 'fi', day: 'Kedd', start: '09:15', end: '10:00' },
   { teacher: 'LK', room: '105', class: '13.b', subject: 'fi', day: 'Kedd', start: '10:15', end: '11:00' },
@@ -2044,7 +2044,7 @@ export const SCHEDULE_DATA = [
   // MMR
   { teacher: 'MMR', room: '106', class: '11.b', subject: 'mt', day: 'Csütörtök', start: '08:20', end: '09:05' },
   // MÉ
-  { teacher: 'MÉ', room: '19', class: '10.c/10.e', subject: 'any', day: 'Hétfő', start: '12:55', end: '13:35' },
+  { teacher: 'MÉ', room: '19', class: '10.c/10.e', subject: 'any', day: 'Hétfo', start: '12:55', end: '13:35' },
   { teacher: 'MÉ', room: 'K1', class: '10.c/10.e', subject: 'any', day: 'Kedd', start: '08:20', end: '09:05' },
   { teacher: 'MÉ', room: 'K102', class: '11.d', subject: 'any', day: 'Kedd', start: '12:55', end: '13:35' },
   { teacher: 'MÉ', room: 'K101', class: '11.b', subject: 'sza', day: 'Szerda', start: '10:15', end: '11:00' },
@@ -2053,8 +2053,8 @@ export const SCHEDULE_DATA = [
   { teacher: 'MÉ', room: 'K3', class: '11.d', subject: 'any', day: 'Csütörtök', start: '12:05', end: '12:50' },
   { teacher: 'MÉ', room: '306', class: '11.f', subject: 'any', day: 'Csütörtök', start: '12:55', end: '13:35' },
   // PE
-  { teacher: 'PE', room: '102', class: '12.d', subject: 'tö.', day: 'Hétfő', start: '08:20', end: '09:05' },
-  { teacher: 'PE', room: '205', class: '10.e', subject: 'tö.', day: 'Hétfő', start: '10:15', end: '11:00' },
+  { teacher: 'PE', room: '102', class: '12.d', subject: 'tö.', day: 'Hétfo', start: '08:20', end: '09:05' },
+  { teacher: 'PE', room: '205', class: '10.e', subject: 'tö.', day: 'Hétfo', start: '10:15', end: '11:00' },
   // PMG
   { teacher: 'PMG', room: '301', class: '11.a', subject: 'aI', day: 'Kedd', start: '09:15', end: '10:00' },
   { teacher: 'PMG', room: '310', class: '11.a', subject: 'aI', day: 'Kedd', start: '12:05', end: '12:50' },
@@ -2097,18 +2097,18 @@ export const SCHEDULE_DATA = [
   { teacher: 'UT', room: '24', class: '12.c', subject: 'Aigy', day: 'Csütörtök', start: '10:15', end: '11:00' },
   { teacher: 'UT', room: 'K3', class: '13.b', subject: 'm', day: 'Péntek', start: '11:10', end: '11:55' },
   // VG
-  { teacher: 'VG', room: '211', class: '10.b', subject: 'dk', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'VG', room: '211', class: '10.b', subject: 'dk', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'VG', room: '301', class: '11.b', subject: 'hl', day: 'Kedd', start: '08:20', end: '09:05' },
   { teacher: 'VG', room: '1', class: '11.a', subject: 'hl', day: 'Szerda', start: '11:10', end: '11:55' },
   { teacher: 'VG', room: '1', class: '11.b', subject: 'hl', day: 'Péntek', start: '11:10', end: '11:55' },
   // VKJ
-  { teacher: 'VKJ', room: '21', class: '12.d/12.f', subject: 'nny', day: 'Hétfő', start: '09:15', end: '10:00' },
-  { teacher: 'VKJ', room: 'K2', class: '13.f', subject: 'nny', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'VKJ', room: '21', class: '12.d/12.f', subject: 'nny', day: 'Hétfo', start: '09:15', end: '10:00' },
+  { teacher: 'VKJ', room: 'K2', class: '13.f', subject: 'nny', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'VKJ', room: 'K2', class: '13.b', subject: 'nny', day: 'Kedd', start: '12:05', end: '12:50' },
   { teacher: 'VKJ', room: '19', class: '13.b', subject: 'nny', day: 'Csütörtök', start: '07:30', end: '08:10' },
   { teacher: 'VKJ', room: '19', class: '13.b', subject: 'nny', day: 'Csütörtök', start: '08:20', end: '09:05' },
   // VZS
-  { teacher: 'VZS', room: '24', class: '12.c', subject: 'a', day: 'Hétfő', start: '12:05', end: '12:50' },
+  { teacher: 'VZS', room: '24', class: '12.c', subject: 'a', day: 'Hétfo', start: '12:05', end: '12:50' },
   { teacher: 'VZS', room: '24', class: '13.c', subject: 'g', day: 'Kedd', start: '12:55', end: '13:35' },
   { teacher: 'VZS', room: '25', class: '13.c', subject: 'a', day: 'Szerda', start: '12:05', end: '12:50' },
   { teacher: 'VZS', room: '25', class: '12.c', subject: 'a', day: 'Csütörtök', start: '10:15', end: '11:00' },
@@ -2125,9 +2125,9 @@ export const SCHEDULE_DATA = [
   { teacher: 'ÁSZJ', room: '204', class: '12.b', subject: 'nny', day: 'Péntek', start: '13:40', end: '14:20' },
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // További hiányzó órák (Excel v3 alapján, csoport továbbvitel)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // BZ
   { teacher: 'BZ', room: '19', class: '13.e', subject: 'min', day: 'Kedd', start: '10:15', end: '11:00' },
   { teacher: 'BZ', room: '25', class: '9.b/9.e', subject: 'any', day: 'Szerda', start: '08:20', end: '09:05' },
@@ -2155,12 +2155,97 @@ export const SCHEDULE_DATA = [
   { teacher: 'ÁSZJ', room: '204', class: '12.e', subject: 'nny', day: 'Csütörtök', start: '12:05', end: '12:50' },
 
 
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   // 11.b Pé P7 + 13.a Pé P4-P5 (Excel sérült cellák értelmezése)
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------
   { teacher: 'PMGY', room: '14', class: '11.b', subject: 'hl', day: 'Péntek', start: '12:55', end: '13:35' },
   { teacher: 'PMG', room: '209', class: '13.a', subject: 'aémafét', day: 'Péntek', start: '10:15', end: '11:00' },
   { teacher: 'PMG', room: '209', class: '13.a', subject: 'aémafét', day: 'Péntek', start: '11:10', end: '11:55' },
   { teacher: 'VG', room: '310', class: '13.a', subject: 'h', day: 'Péntek', start: '10:15', end: '11:00' },
   { teacher: 'VG', room: '310', class: '13.a', subject: 'hl', day: 'Péntek', start: '11:10', end: '11:55' },
+
+  // ---------------------------------------------
+  // AUTO-PATCH: Excel-bol hiányzó 24 bejegyzés.
+  // Forrás: orarend_csoportonkent.xlsx ? tanárok.js összevetés
+  // (subject-normalizációval: tö.?to., trailing dot egységesítve).
+  // ---------------------------------------------
+  // AZ
+  { teacher: 'AZ', room: '24', class: '10.a', subject: 'ItaII', day: 'Szerda', start: '12:05', end: '12:50' },
+  // CSMM
+  { teacher: 'CSMM', room: '20', class: '12.e', subject: 'mt', day: 'Kedd', start: '09:15', end: '10:00' },
+  { teacher: 'CSMM', room: '20', class: '12.e', subject: 'mt', day: 'Szerda', start: '09:15', end: '10:00' },
+  { teacher: 'CSMM', room: '20', class: '12.e', subject: 'mt', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  // FEG
+  { teacher: 'FEG', room: 'K202', class: '9.e', subject: 'stö', day: 'Szerda', start: '11:10', end: '11:55' },
+  // GR
+  { teacher: 'GR', room: '307', class: '9.a', subject: 'ttfö', day: 'Kedd', start: '12:55', end: '13:35' },
+  { teacher: 'GR', room: '207', class: '9.b', subject: 'ttfö', day: 'Csütörtök', start: '12:05', end: '12:50' },
+  // JMK
+  { teacher: 'JMK', room: '209', class: '10.a', subject: 'IprI', day: 'Hétfo', start: '11:10', end: '11:55' },
+  { teacher: 'JMK', room: '24', class: '9.a', subject: 'IprI', day: 'Kedd', start: '10:15', end: '11:00' },
+  { teacher: 'JMK', room: '14', class: '10.a', subject: 'IprI', day: 'Kedd', start: '11:10', end: '11:55' },
+  { teacher: 'JMK', room: '1', class: '9.a', subject: 'IprI', day: 'Péntek', start: '07:30', end: '08:10' },
+  // KTT
+  { teacher: 'KTT', room: 'K105', class: '11.f', subject: 'klgy', day: 'Hétfo', start: '11:10', end: '11:55' },
+  // LKJ
+  { teacher: 'LKJ', room: '1', class: '10.e', subject: 'Ki', day: 'Péntek', start: '12:05', end: '12:50' },
+  // PE
+  { teacher: 'PE', room: '20', class: '12.d', subject: 'of', day: 'Péntek', start: '11:10', end: '11:55' },
+  // PMGY
+  { teacher: 'PMGY', room: '303', class: '10.a', subject: 'ItaII', day: 'Hétfo', start: '10:15', end: '11:00' },
+  { teacher: 'PMGY', room: '306', class: '9.e', subject: 'of', day: 'Szerda', start: '07:30', end: '08:10' },
+  { teacher: 'PMGY', room: '310', class: '10.a', subject: 'ItaII', day: 'Csütörtök', start: '11:10', end: '11:55' },
+  // SZBI
+  { teacher: 'SZBI', room: '101', class: '9.a', subject: 'ttbi', day: 'Szerda', start: '11:10', end: '11:55' },
+  { teacher: 'SZBI', room: '106', class: '9.b', subject: 'ttké', day: 'Péntek', start: '11:10', end: '11:55' },
+  // TPI
+  { teacher: 'TPI', room: '203', class: '11.d', subject: 'mny', day: 'Hétfo', start: '12:55', end: '13:35' },
+  // VG
+  { teacher: 'VG', room: '211', class: '9.a', subject: 'ItaI', day: 'Hétfo', start: '12:55', end: '13:35' },
+  { teacher: 'VG', room: '211', class: '9.a', subject: 'ItaI', day: 'Hétfo', start: '13:40', end: '14:20' },
+  { teacher: 'VG', room: '211', class: '9.a', subject: 'ItaI', day: 'Csütörtök', start: '13:40', end: '14:20' },
+  { teacher: 'VG', room: '14', class: '9.a', subject: 'ItaI', day: 'Péntek', start: '12:55', end: '13:35' },
+
+  // ---------------------------------------------
+  // AUTO-PATCH (2): Excel-ben szétcsúszott (split-cell) 2-órás összevont
+  // blokkok, amik a tanárok.js-bol kimaradtak (pl. 12.c Szerda 12:05 ir).
+  // ---------------------------------------------
+  // BCS
+  { teacher: 'BCS', room: 'm17', class: '13.c_du', subject: 'C-é', day: 'Szerda', start: '10:15', end: '11:55' },
+  { teacher: 'BCS', room: 'm17', class: '13.c_du', subject: 'C-é', day: 'Szerda', start: '12:05', end: '13:35' },
+  // HZN
+  { teacher: 'HZN', room: 'K106', class: '12.f', subject: 'klgy', day: 'Csütörtök', start: '12:55', end: '13:35' },
+  // JMK
+  { teacher: 'JMK', room: '14', class: '10.a', subject: 'IprI', day: 'Hétfo', start: '09:15', end: '10:00' },
+  { teacher: 'JMK', room: '1', class: '10.a', subject: 'IprI', day: 'Kedd', start: '13:40', end: '14:20' },
+  // KTT
+  { teacher: 'KTT', room: 'K105', class: '10.f', subject: 'sag', day: 'Péntek', start: '09:15', end: '10:00' },
+  // LZ
+  { teacher: 'LZ', room: 'm17', class: '13.c_du', subject: 'aC-a', day: 'Szerda', start: '08:20', end: '10:00' },
+  // PMGY
+  { teacher: 'PMGY', room: '210', class: '10.a', subject: 'ItaII', day: 'Hétfo', start: '09:15', end: '10:00' },
+  { teacher: 'PMGY', room: '14', class: '10.a', subject: 'ItaII', day: 'Péntek', start: '10:15', end: '11:00' },
+  // PZ
+  { teacher: 'PZ', room: '303', class: '13.d', subject: 'sk', day: 'Hétfo', start: '08:20', end: '09:05' },
+  { teacher: 'PZ', room: '301', class: '13.d', subject: 'sk', day: 'Hétfo', start: '11:10', end: '11:55' },
+  { teacher: 'PZ', room: '303', class: '13.d', subject: 'sk', day: 'Kedd', start: '12:55', end: '14:20' },
+  { teacher: 'PZ', room: '301', class: '13.d', subject: 'sk', day: 'Csütörtök', start: '13:40', end: '14:20' },
+  // PÁ
+  { teacher: 'PÁ', room: 'K1', class: '12.d', subject: 'ir', day: 'Csütörtök', start: '09:15', end: '10:00' },
+  { teacher: 'PÁ', room: '306', class: '12.b', subject: 'ir', day: 'Csütörtök', start: '10:15', end: '11:00' },
+  { teacher: 'PÁ', room: '207', class: '11.f', subject: 'ir', day: 'Péntek', start: '08:20', end: '09:05' },
+  // SZIN
+  { teacher: 'SZIN', room: '307', class: '11.c', subject: 'ir', day: 'Szerda', start: '09:15', end: '10:00' },
+  // SZKÉ
+  { teacher: 'SZKÉ', room: '105', class: '12.f', subject: 'ir', day: 'Kedd', start: '09:15', end: '10:00' },
+  // TM
+  { teacher: 'TM', room: '111', class: '10.c', subject: 'viai', day: 'Szerda', start: '12:05', end: '13:35' },
+  // TPI
+  { teacher: 'TPI', room: '203', class: '11.d', subject: 'ir', day: 'Hétfo', start: '12:05', end: '12:50' },
+  { teacher: 'TPI', room: '203', class: '12.c', subject: 'ir', day: 'Szerda', start: '12:05', end: '12:50' },
+  // UME
+  { teacher: 'UME', room: '109', class: '12.d', subject: 'szv', day: 'Hétfo', start: '13:40', end: '14:20' },
+  { teacher: 'UME', room: '105', class: '12.d', subject: 'szv', day: 'Kedd', start: '13:40', end: '14:20' },
+  // VZS
+  { teacher: 'VZS', room: 'm22', class: '11.c', subject: 'fm', day: 'Kedd', start: '09:15', end: '10:00' },
 ];
