@@ -81,6 +81,10 @@ $selected_kod = $route_match ? urldecode($route_match['kod']) : null;
   .het-empty{padding:18px 12px;font-size:12px;color:rgba(255,255,255,.3);text-align:center;}
   /* Hiányzó csoport label (a sárga "csak X csoport" mellett) */
   .hianyzo-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.18);color:rgba(255,255,255,.55);}
+  /* Lyukasóra sor (kihagyott óraszám) */
+  .ora-row.lyukas{background:rgba(255,255,255,.015);border:1px dashed rgba(255,255,255,.08);opacity:.85;}
+  .ora-row.lyukas:hover{background:rgba(255,255,255,.03);}
+  .lyukas-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.03em;white-space:nowrap;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.16);color:rgba(255,255,255,.45);}
   /* Floating sidebar */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
   .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
@@ -337,6 +341,50 @@ function sorszamLabel(o, fallback){
   return `${tol}`
 }
 
+// ─── Lyukasóra-jelölés ────────────────────────────────────────────────
+// Ha két egymást követő óra között kimarad egy óraszám (pl. 5. után 7.),
+// a köztes órá(k)ra "lyukasóra" sort szúrunk be.
+const PERIOD_STARTS = ['07:30','08:20','09:15','10:15','11:10','12:05','12:55','13:40']
+const PERIOD_ENDS   = ['08:10','09:05','10:00','11:00','11:55','12:50','13:35','14:20']
+function startPeriod(o){
+  if (o.ora_sorszam) return parseInt(o.ora_sorszam, 10)
+  const i = PERIOD_STARTS.indexOf(String(o.kezdes||'').slice(0,5))
+  return i >= 0 ? i + 1 : null
+}
+function endPeriod(o){
+  if (o.ora_sorszam_ig) return parseInt(o.ora_sorszam_ig, 10)
+  const i = PERIOD_ENDS.indexOf(String(o.vegzes||'').slice(0,5))
+  if (i >= 0) return i + 1
+  const sp = startPeriod(o)
+  return sp !== null ? sp + Math.max(0, oraSzam(o) - 1) : null
+}
+function lyukasRowHtml(p){
+  const k = PERIOD_STARTS[p-1] || '', v = PERIOD_ENDS[p-1] || ''
+  return `
+    <div class="ora-row lyukas flex items-center gap-3 px-2 py-2 -mx-1">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:rgba(255,255,255,.22);min-width:22px;text-align:right;flex-shrink:0;white-space:nowrap;">${p}</span>
+      <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+        <span class="lyukas-badge">☕ lyukasóra</span>
+        <span class="text-xs" style="color:rgba(255,255,255,.25);">${k} – ${v}</span>
+      </div>
+    </div>`
+}
+// Órák HTML-je, közéjük a kihagyott (lyukas) órák beszúrva.
+function withLyukasorak(orak, makeRow){
+  let html = ''
+  let prevEnd = null
+  orak.forEach((o, i) => {
+    const sp = startPeriod(o)
+    if (prevEnd !== null && sp !== null && sp > prevEnd + 1) {
+      for (let p = prevEnd + 1; p < sp; p++) html += lyukasRowHtml(p)
+    }
+    html += makeRow(o, i)
+    const ep = endPeriod(o)
+    prevEnd = (ep !== null ? ep : (sp !== null ? sp : prevEnd))
+  })
+  return html
+}
+
 // ─── Adatok betöltése ─────────────────────────────────────────────────
 async function loadData() {
   if (!curKod) return
@@ -504,7 +552,7 @@ function renderLista(orak) {
     return
   }
 
-  el.innerHTML = `<div class="lista-in">` + orak.map((o, i) => {
+  el.innerHTML = `<div class="lista-in">` + withLyukasorak(orak, (o, i) => {
     const ak = isAktiv(o.kezdes, o.vegzes)
     const mu = isMult(o.vegzes)
     const numColor = mu ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.85)'
@@ -552,7 +600,7 @@ function renderLista(orak) {
         <div class="flex-1 min-w-0">${body}</div>
         ${ak ? `<span class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:#ff6b82;display:inline-block;margin-top:6px;"></span>` : ''}
       </div>`
-  }).join('') + `</div>`
+  }) + `</div>`
 }
 
 function setView(v) {
@@ -614,7 +662,7 @@ function renderHet(het) {
     const isToday = napNum === today
     const orak = nap.orak || []
     const orakHtml = orak.length
-      ? orak.map((o, i) => hetOraRow(o, i, isToday)).join('')
+      ? withLyukasorak(orak, (o, i) => hetOraRow(o, i, isToday))
       : `<div class="het-empty">Nincs óra</div>`
     return `
       <section class="het-nap${isToday ? ' ma' : ''} lista-in">
