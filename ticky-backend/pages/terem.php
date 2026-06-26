@@ -8,155 +8,172 @@
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64">
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family:'DM Sans',sans-serif; color:white; min-height:100vh;
-    background-color:#060f1e; transition:background-image .6s ease;
-    background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(26,74,138,.5) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 45% at 85% 85%, rgba(200,151,42,.15) 0%, transparent 55%);
+  :root{
+    --bg:#050b15;
+    --gold:#c8972a; --gold-l:#f0c76b; --gold-soft:rgba(200,151,42,.14);
+    --green:#34d399; --green-txt:#6ee7b7; --green-soft:rgba(52,211,153,.13);
+    --red:#fb7185; --red-deep:#e8334a; --red-soft:rgba(244,63,94,.13);
+    --line:rgba(96,150,220,.16); --line-strong:rgba(96,150,220,.30);
+    --surface:rgba(255,255,255,.022); --surface-2:rgba(255,255,255,.05);
+    --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.17);
+    --text:rgba(255,255,255,.93); --dim:rgba(255,255,255,.55); --faint:rgba(255,255,255,.34);
   }
-  body.szabad { background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(26,138,74,.38) 0%, transparent 60%), radial-gradient(ellipse 50% 45% at 85% 85%, rgba(26,74,138,.2) 0%, transparent 55%); }
-  body.foglalt { background-image: radial-gradient(ellipse 70% 55% at 15% 10%, rgba(200,16,46,.32) 0%, transparent 60%), radial-gradient(ellipse 50% 45% at 85% 85%, rgba(200,151,42,.12) 0%, transparent 55%); }
-  body::before { content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:40px 40px; }
-  .top-line { position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,151,42,.5),transparent);z-index:200; }
-  a { text-decoration:none; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);min-height:100vh;overflow-x:hidden;}
 
-  /* Status kártya */
-  .glass { background:rgba(255,255,255,.05);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10); }
+  .bp{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .bp::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 55% at 12% -8%,rgba(34,86,156,.45) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 92% 108%,rgba(200,151,42,.10) 0%,transparent 55%);}
+  .bp::after{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px),linear-gradient(var(--line-strong) 1px,transparent 1px),linear-gradient(90deg,var(--line-strong) 1px,transparent 1px);background-size:28px 28px,28px 28px,140px 140px,140px 140px;mask-image:radial-gradient(ellipse 110% 95% at 50% 30%,#000 55%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 110% 95% at 50% 30%,#000 55%,transparent 100%);opacity:.6;}
+  .vig{position:fixed;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 200px 40px rgba(0,0,0,.55);}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .reg{position:fixed;z-index:2;pointer-events:none;width:26px;height:26px;opacity:.5;}
+  .reg::before,.reg::after{content:'';position:absolute;background:var(--gold);}
+  .reg::before{left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);}
+  .reg::after{top:50%;left:0;right:0;height:1px;transform:translateY(-.5px);}
+  .reg.tl{top:74px;left:20px;} .reg.tr{top:74px;right:20px;} .reg.bl{bottom:24px;left:20px;} .reg.br{bottom:24px;right:20px;}
+  .topline{position:fixed;top:0;left:0;right:0;height:2px;z-index:60;background:linear-gradient(90deg,transparent,var(--gold) 28%,var(--gold-l) 50%,var(--gold) 72%,transparent);box-shadow:0 0 18px rgba(200,151,42,.4);}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  @keyframes spin{to{transform:rotate(360deg)}} .spinning{animation:spin .6s linear;}
+  a{text-decoration:none;}
 
-  .pulse { animation:pd 2s infinite; }
-  @keyframes pd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .spinning { animation:spin .6s linear; }
-  .slide-up { animation:su .5s cubic-bezier(.22,1,.36,1) both; }
-  @keyframes su { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+  .nav{position:sticky;top:0;z-index:50;height:62px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,11,21,.74);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;}
+  .brand .bd{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold);animation:pulse 2.4s infinite;}
+  .crumb{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--dim);} .crumb svg{width:15px;height:15px;color:var(--faint);}
+  .sep{color:rgba(255,255,255,.18);}
+  .navbtn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--dim);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 13px;cursor:pointer;transition:all .15s;}
+  .navbtn:hover{color:var(--text);background:var(--surface-2);} .navbtn svg{width:14px;height:14px;}
 
-  .skel { background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:8px; }
-  @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .wrap{position:relative;z-index:10;max-width:1080px;margin:0 auto;padding:28px 24px 84px;}
 
-  .prog-bar { transition:width .6s ease; }
+  .titleblock{position:relative;display:grid;grid-template-columns:1fr auto;gap:20px;border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));margin-bottom:16px;animation:fade .6s ease both;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .tb-left{padding:22px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .tb-tag{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--gold-l);text-transform:uppercase;margin-bottom:10px;}
+  .tb-tag .ln{width:24px;height:1px;background:var(--gold);}
+  .tb-room{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(52px,11vw,100px);line-height:.85;letter-spacing:-3px;color:#fff;}
+  .statuswrap{display:flex;flex-direction:column;gap:10px;}
+  .bigpill{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;letter-spacing:.05em;background:var(--surface);border:1px solid var(--border);color:var(--dim);}
+  .bigpill .pd{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);animation:pulse 2.2s infinite;}
+  .bigpill.busy{color:var(--red);background:var(--red-soft);border-color:rgba(244,63,94,.4);} .bigpill.busy .pd{background:var(--red);}
+  .bigpill.free{color:var(--green-txt);background:var(--green-soft);border-color:rgba(52,211,153,.4);} .bigpill.free .pd{background:var(--green);}
+  .clockcol{padding:20px 24px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:rgba(200,151,42,.05);border-left:1px solid var(--border);}
+  .clk{font-family:'DM Mono',monospace;font-size:30px;letter-spacing:.04em;color:#fff;line-height:1;} .clk .s{color:var(--gold-l);opacity:.7;font-size:20px;}
+  .upd{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--faint);text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+  .upd .rd{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
 
-  /* ── TIMETABLE ── */
-  .tt-wrap { position:relative;z-index:10;max-width:580px;margin:20px auto 0;padding:0 16px;overflow-x:auto; }
+  /* now / next strip */
+  .strip{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:24px;}
+  .panel{border:1px solid var(--border);border-radius:16px;padding:18px 20px;background:var(--surface);position:relative;overflow:hidden;animation:fade .45s ease both;}
+  .panel::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+  .panel.now{background:linear-gradient(160deg,rgba(244,63,94,.08),var(--surface) 60%);border-color:rgba(244,63,94,.22);box-shadow:0 14px 38px -22px rgba(232,51,74,.6);}
+  .panel.free{background:linear-gradient(160deg,rgba(52,211,153,.06),var(--surface) 60%);border-color:rgba(52,211,153,.2);}
+  .p-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;}
+  .p-main{font-family:'Playfair Display',serif;font-weight:800;font-size:26px;line-height:1.05;color:#fff;}
+  .p-meta{font-size:13px;color:var(--dim);margin-top:6px;} .p-meta .mono{font-family:'DM Mono',monospace;}
+  .prog{height:4px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;margin-top:14px;}
+  .prog>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red-deep),var(--red));box-shadow:0 0 10px rgba(232,51,74,.5);}
+  .prog-meta{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--faint);margin-top:7px;} .prog-meta .rem{color:var(--red);font-weight:500;}
 
-  .tt-grid {
-    display:grid;
-    grid-template-columns: 38px repeat(5, minmax(80px, 1fr));
-    min-width:460px;
-  }
+  /* timetable */
+  .tt-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .tt-h-l{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-l);display:flex;align-items:center;gap:8px;} .tt-h-l .ln{width:24px;height:1px;background:var(--gold);}
+  .ttcard{border:1px solid var(--border);border-radius:18px;padding:6px 10px 14px;background:var(--surface);overflow-x:auto;}
+  .tt{display:grid;grid-template-columns:50px repeat(5,minmax(108px,1fr));min-width:660px;}
+  .tt-hdr{padding:12px 6px;text-align:center;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--border);}
+  .tt-hdr.ma{color:var(--gold-l);}
+  .tt-hdr .md{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-left:5px;vertical-align:middle;animation:pulse 2s infinite;}
+  .tt-corner{border-bottom:1px solid var(--border);}
+  .tt-time{position:relative;border-right:1px solid var(--border);}
+  .tt-col{position:relative;border-right:1px solid rgba(255,255,255,.045);overflow:hidden;} .tt-col:last-child{border-right:none;} .tt-col.ma{background:rgba(200,151,42,.03);}
+  .gl{position:absolute;left:0;right:0;height:1px;background:var(--line);pointer-events:none;} .gl.bold{background:var(--line-strong);}
+  .tl{position:absolute;right:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);transform:translateY(-50%);}
+  .blk{position:absolute;left:3px;right:3px;border-radius:9px;padding:6px 8px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(160deg,rgba(34,86,156,.55),rgba(11,38,72,.6));transition:filter .15s,transform .15s;}
+  .blk:hover{filter:brightness(1.25);transform:scale(1.015);z-index:5;}
+  .blk.aktiv{background:linear-gradient(160deg,rgba(200,151,42,.4),rgba(180,110,20,.32));border-color:rgba(200,151,42,.6);box-shadow:0 0 22px -6px rgba(200,151,42,.6);}
+  .blk.mult{opacity:.32;}
+  .ob-tanar{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15;}
+  .blk.aktiv .ob-tanar{color:var(--gold-l);}
+  .ob-meta{font-size:9px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+  .ob-prog{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.1);overflow:hidden;} .ob-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-l));}
+  .now-line{position:absolute;left:0;right:0;height:2px;z-index:8;pointer-events:none;background:linear-gradient(90deg,transparent,var(--red) 18%,var(--red) 82%,transparent);}
+  .now-dot{position:absolute;left:0;top:-4px;width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 9px var(--red);animation:pulse 1.6s infinite;}
 
-  .tt-hdr { padding:7px 4px 9px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.07); }
-  .tt-hdr.ma { color:#f0c76b; }
-  .tt-hdr-empty { border-bottom:1px solid rgba(255,255,255,.07); }
+  .skel{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-  .tt-timecol { position:relative;border-right:1px solid rgba(255,255,255,.07); }
-  .tt-daycol { position:relative;border-right:1px solid rgba(255,255,255,.04);overflow:hidden; }
-  .tt-daycol:last-child { border-right:none; }
-  .tt-daycol.ma { background:rgba(200,151,42,.025); }
-
-  .hline { position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.04);pointer-events:none; }
-  .hline.bold { background:rgba(255,255,255,.08); }
-
-  .tlabel { position:absolute;right:4px;font-size:9px;font-weight:500;color:rgba(255,255,255,.22);transform:translateY(-50%);white-space:nowrap; }
-
-  .ora-blk {
-    position:absolute;left:2px;right:2px;border-radius:7px;padding:4px 6px;overflow:hidden;
-    border:1px solid rgba(255,255,255,.07);transition:filter .15s;cursor:default;
-    background:linear-gradient(160deg,rgba(26,74,138,.8),rgba(11,46,89,.85));
-  }
-  .ora-blk:hover { filter:brightness(1.2);z-index:20; }
-  .ora-blk.aktiv { background:linear-gradient(160deg,rgba(200,151,42,.35),rgba(180,100,20,.3));border-color:rgba(200,151,42,.55); }
-  .ora-blk.mult { opacity:.3; }
-  .ob-tanar { font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2; }
-  .ob-meta { font-size:9px;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px; }
-  .ora-blk.aktiv .ob-tanar { color:#f0c76b; }
-  .ob-prog { position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.06);border-radius:0 0 7px 7px;overflow:hidden; }
-  .ob-prog-fill { height:100%;background:linear-gradient(90deg,#c8972a,#f0c76b); }
-
-  .now-line { position:absolute;left:0;right:0;height:2px;pointer-events:none;z-index:15;background:linear-gradient(90deg,transparent,#ff6b82 20%,#ff6b82 80%,transparent); }
-  .now-dot { position:absolute;left:0;top:-4px;width:8px;height:8px;border-radius:50%;background:#ff6b82;box-shadow:0 0 6px #ff6b82;animation:pd 1.5s infinite; }
-
-  /* Timetable title */
-  .tt-title { position:relative;z-index:10;max-width:580px;margin:28px auto 0;padding:0 16px; }
-
-  /* Footer */
-  .footer { position:relative;z-index:10;max-width:580px;margin:12px auto 40px;padding:0 16px;display:flex;align-items:center;justify-content:space-between; }
+  @media(max-width:760px){.titleblock{grid-template-columns:1fr;}.clockcol{border-left:none;border-top:1px solid var(--border);}.strip{grid-template-columns:1fr;}}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;}}
 </style>
 </head>
 <body>
-<div class="top-line"></div>
+<div class="bp"></div><div class="vig"></div><div class="grain"></div><div class="topline"></div>
+<span class="reg tl"></span><span class="reg tr"></span><span class="reg bl"></span><span class="reg br"></span>
 
-<div class="relative z-10 max-w-sm mx-auto px-4 pt-8 slide-up">
+<nav class="nav">
+  <div style="display:flex;align-items:center;gap:13px;min-width:0;">
+    <a href="/" class="brand"><span class="bd"></span>Ticky</a>
+    <span class="sep">·</span>
+    <span class="crumb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
+      Terem
+    </span>
+  </div>
+  <a class="navbtn" href="/termek">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    Összes terem
+  </a>
+</nav>
 
-  <!-- Státusz kártya -->
-  <div class="glass rounded-2xl overflow-hidden">
+<div class="wrap">
 
-    <!-- Ticky brand – felül -->
-    <div class="px-7 pt-4 pb-0 flex items-center">
-      <a href="/" style="font-family:'Playfair Display',serif;color:rgba(255,255,255,.3);font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px;">
-        <span style="width:5px;height:5px;border-radius:50%;background:#c8972a;display:inline-block;"></span>
-        Ticky
-      </a>
-    </div>
-
-    <!-- Fejléc -->
-    <div class="px-7 pt-6 pb-5 flex items-center justify-between gap-3" style="border-bottom:1px solid rgba(255,255,255,.08);">
+  <!-- Title block: terem + státusz + óra -->
+  <section class="titleblock">
+    <div class="tb-left">
       <div>
-        <p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.3);">Terem</p>
-        <h1 id="terem-szam" style="font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;">–</h1>
+        <div class="tb-tag"><span class="ln"></span>Terem · élő állapot</div>
+        <div class="tb-room" id="terem-szam">–</div>
       </div>
-      <div id="status-pill" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);">
-        <span id="status-dot" class="w-2 h-2 rounded-full pulse flex-shrink-0" style="background:rgba(255,255,255,.3);display:inline-block;"></span>
-        <span id="status-text">Betöltés…</span>
-      </div>
-    </div>
-
-    <!-- Tartalom -->
-    <div class="px-7 py-6" id="content">
-      <div class="flex flex-col gap-3">
-        <div class="skel h-4 w-2/5"></div>
-        <div class="skel h-8 w-3/5"></div>
-        <div class="skel h-4 w-full mt-1"></div>
+      <div class="statuswrap">
+        <span id="status-pill" class="bigpill"><span id="status-dot" class="pd"></span><span id="status-text">Betöltés…</span></span>
       </div>
     </div>
+    <div class="clockcol">
+      <div class="clk"><span id="clk-hm">––:––</span><span class="s">:<span id="clk-ss">00</span></span></div>
+      <div class="upd"><span class="rd"></span>Frissítve <span id="footer-ido">–</span></div>
+    </div>
+  </section>
 
-    <!-- Footer – idő + frissít -->
-    <div class="px-7 py-4 flex items-center justify-between gap-2" style="border-top:1px solid rgba(255,255,255,.08);">
-      <span class="text-xs" style="color:rgba(255,255,255,.28);" id="footer-ido">–</span>
-      <button onclick="refresh()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style="color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.10);background:transparent;width:auto;margin-top:0;font-size:12px;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='transparent'">
-        <svg id="refresh-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+  <!-- Most / Következő -->
+  <div id="content">
+    <div class="strip">
+      <div class="panel"><div class="p-lbl">Most</div><div class="skel" style="height:24px;width:70%;margin-top:6px"></div><div class="skel" style="height:14px;width:50%;margin-top:10px"></div></div>
+      <div class="panel"><div class="p-lbl">Következő óra</div><div class="skel" style="height:18px;width:80%;margin-top:6px"></div></div>
+    </div>
+  </div>
+
+  <!-- Heti órarend -->
+  <div class="tt-head">
+    <div class="tt-h-l"><span class="ln"></span>Heti órarend</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a id="napirend-link" href="#" class="navbtn">Teljes nézet →</a>
+      <button class="navbtn" onclick="refresh()">
+        <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         Frissít
       </button>
     </div>
   </div>
-</div>
-
-<!-- Heti napirend cím -->
-<div class="tt-title">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-    <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);">Heti órarend</p>
-    <a id="napirend-link" href="#" style="font-size:12px;color:#f0c76b;font-weight:500;">Teljes nézet →</a>
+  <div class="ttcard">
+    <div id="tt-skel" style="display:flex;gap:6px;min-width:660px;">
+      <div class="skel" style="width:50px;height:560px;flex-shrink:0;"></div>
+      <div class="skel" style="flex:1;height:560px;"></div><div class="skel" style="flex:1;height:560px;"></div>
+      <div class="skel" style="flex:1;height:560px;"></div><div class="skel" style="flex:1;height:560px;"></div>
+      <div class="skel" style="flex:1;height:560px;"></div>
+    </div>
+    <div id="tt" class="tt" style="display:none;"></div>
   </div>
-  <!-- Skeleton -->
-  <div id="tt-skel" style="display:flex;gap:6px;">
-    <div class="skel" style="width:38px;height:500px;border-radius:8px;flex-shrink:0;"></div>
-    <div class="skel" style="flex:1;height:500px;border-radius:8px;"></div>
-    <div class="skel" style="flex:1;height:500px;border-radius:8px;"></div>
-    <div class="skel" style="flex:1;height:500px;border-radius:8px;"></div>
-    <div class="skel" style="flex:1;height:500px;border-radius:8px;"></div>
-    <div class="skel" style="flex:1;height:500px;border-radius:8px;"></div>
-  </div>
-</div>
-
-<!-- Timetable -->
-<div class="tt-wrap">
-  <div id="tt" class="tt-grid" style="display:none;"></div>
-</div>
-
-<!-- Footer -->
-<div class="footer">
-  
 </div>
 
 <?php render_time_sync_bootstrap(); ?>
@@ -167,7 +184,7 @@ const NAP_T = {1:'Hétfő',2:'Kedd',3:'Szerda',4:'Csütörtök',5:'Péntek'}
 const START = 7*60+30
 const END   = 14*60+30
 const TOTAL = END-START   // 420 perc
-const PPM   = 1.8         // px/perc → ~756px
+const PPM   = 1.8         // px/perc
 const H     = TOTAL*PPM
 
 let teremSzam = null
@@ -193,50 +210,43 @@ function isMult(v) { return nowMin()>toMin(v) }
 function calcPct(k,v) { const c=nowMin(); return Math.min(100,Math.max(0,Math.round(((c-toMin(k))/(toMin(v)-toMin(k)))*100))) }
 function nowM() { return nowMin() }
 
-// ── Státusz kártya ───────────────────────────────────
+// ── Státusz pill ─────────────────────────────────────
 function setAllapot(a) {
   const pill=document.getElementById('status-pill')
-  const dot=document.getElementById('status-dot')
   const txt=document.getElementById('status-text')
   if(a==='foglalt'){
-    document.body.className='foglalt'
-    pill.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;font-size:14px;font-weight:600;background:rgba(200,16,46,.25);color:#ff6b82;border:1px solid rgba(200,16,46,.4);flex-shrink:0;'
-    dot.style.background='#ff6b82'; txt.textContent='FOGLALT'
+    pill.className='bigpill busy'; txt.textContent='FOGLALT'
   } else {
-    document.body.className='szabad'
-    pill.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;font-size:14px;font-weight:600;background:rgba(26,138,74,.25);color:#4ade80;border:1px solid rgba(26,138,74,.4);flex-shrink:0;'
-    dot.style.background='#4ade80'; txt.textContent='SZABAD'
+    pill.className='bigpill free'; txt.textContent='SZABAD'
   }
 }
 
 function kovHtml(k) {
-  if(!k) return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1" style="color:rgba(255,255,255,.25);">Következő óra</p><p class="text-sm" style="color:rgba(255,255,255,.35);">Ma már nincs több óra</p></div>`
-  return `<div class="mt-4 rounded-xl px-4 py-3" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);"><p class="text-xs font-semibold tracking-widest uppercase mb-1.5" style="color:rgba(255,255,255,.25);">Következő óra</p><div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-sm font-medium" style="color:rgba(255,255,255,.7);">${k.tanar} · ${k.osztaly} · ${k.tantargy}</span><span class="text-xs" style="color:rgba(255,255,255,.35);">${k.kezdes}–${k.vegzes}</span></div></div>`
+  if(!k) return `<div class="panel next"><div class="p-lbl">Következő óra</div><div class="p-main" style="font-size:18px;color:rgba(255,255,255,.7);">Ma már nincs több óra</div></div>`
+  return `<div class="panel next"><div class="p-lbl">Következő óra</div><div class="p-main" style="font-size:18px;">${k.tanar} · ${k.osztaly}</div><div class="p-meta">${k.tantargy} · <span class="mono">${k.kezdes}–${k.vegzes}</span></div></div>`
 }
 
 function renderStatus(data) {
   setAllapot(data.allapot)
   const el=document.getElementById('content')
   if(data.allapot==='szabad'){
-    el.innerHTML=`<div class="text-center py-3"><span class="text-5xl block mb-3">✅</span><p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#4ade80;" class="mb-1">Szabad terem</p><p class="text-sm" style="color:rgba(255,255,255,.4);">Nincs aktív foglalás</p></div>${kovHtml(data.kovetkezo)}`
+    el.innerHTML=`<div class="strip">
+      <div class="panel free"><div class="p-lbl">Most</div><div class="p-main" style="color:var(--green-txt);">Szabad terem</div><div class="p-meta">Nincs aktív foglalás</div></div>
+      ${kovHtml(data.kovetkezo)}
+    </div>`
   } else {
     const a=data.aktualis
     const pct=calcPct(a.kezdes,a.vegzes)
-    el.innerHTML=`<div class="flex flex-col gap-4">
-      <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tanár</p><p style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1.2;">${a.tanar_nev||a.tanar}</p></div>
-      <div class="grid grid-cols-2 gap-3">
-        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Osztály</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.osztaly}</p></div>
-        <div><p class="text-xs font-semibold tracking-widest uppercase mb-0.5" style="color:rgba(255,255,255,.3);">Tantárgy</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;">${a.tantargy}</p></div>
+    el.innerHTML=`<div class="strip">
+      <div class="panel now">
+        <div class="p-lbl">Most itt zajlik</div>
+        <div class="p-main">${a.tanar_nev||a.tanar}</div>
+        <div class="p-meta">${a.osztaly} · ${a.tantargy} · <span class="mono">${a.kezdes}–${a.vegzes}</span></div>
+        <div class="prog" style="height:5px;"><span style="width:${pct}%;"></span></div>
+        <div class="prog-meta"><span>${a.kezdes}</span><span class="rem">még ${a.perc_maradt} perc</span><span>${a.vegzes}</span></div>
       </div>
-      <div>
-        <div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,.08);">
-          <div class="h-full rounded-full prog-bar" style="width:${pct}%;background:linear-gradient(90deg,#e8334a,#ff6b82);"></div>
-        </div>
-        <div class="flex justify-between mt-1.5 text-xs" style="color:rgba(255,255,255,.35);">
-          <span>${a.kezdes}</span><span style="color:#ff6b82;font-weight:600;">még ${a.perc_maradt} perc</span><span>${a.vegzes}</span>
-        </div>
-      </div>
-    </div>${kovHtml(data.kovetkezo)}`
+      ${kovHtml(data.kovetkezo)}
+    </div>`
   }
 }
 
@@ -249,18 +259,18 @@ function buildTT() {
   let html=''
 
   // Fejléc
-  html+=`<div class="tt-hdr-empty"></div>`
+  html+=`<div class="tt-corner"></div>`
   for(let n=1;n<=5;n++){
-    html+=`<div class="tt-hdr${n===mai?' ma':''}">${NAP[n]}${n===mai?'<span style="display:inline-block;width:4px;height:4px;border-radius:50%;background:#c8972a;margin-left:3px;vertical-align:middle;animation:pd 2s infinite;"></span>':''}</div>`
+    html+=`<div class="tt-hdr${n===mai?' ma':''}">${NAP[n]}${n===mai?'<span class="md"></span>':''}</div>`
   }
 
   // Idő oszlop
-  let tc=`<div class="tt-timecol" style="height:${H}px;position:relative;">`
+  let tc=`<div class="tt-time" style="height:${H}px;position:relative;">`
   ticks.forEach(m=>{
     const top=topPx(m)
     const hh=Math.floor(m/60).toString().padStart(2,'0')
     const mm=(m%60).toString().padStart(2,'0')
-    tc+=`<span class="tlabel" style="top:${top}px;">${hh}:${mm}</span>`
+    tc+=`<span class="tl" style="top:${top}px;">${hh}:${mm}</span>`
   })
   tc+=`</div>`
   html+=tc
@@ -269,10 +279,10 @@ function buildTT() {
   for(let n=1;n<=5;n++){
     const isMa=n===mai
     const orak=hetData[n]||[]
-    let col=`<div class="tt-daycol${isMa?' ma':''}" style="height:${H}px;">`
+    let col=`<div class="tt-col${isMa?' ma':''}" style="height:${H}px;">`
 
     ticks.forEach(m=>{
-      col+=`<div class="hline${m%60===0?' bold':''}" style="top:${topPx(m)}px;"></div>`
+      col+=`<div class="gl${m%60===0?' bold':''}" style="top:${topPx(m)}px;"></div>`
     })
 
     if(isMa){
@@ -290,7 +300,7 @@ function buildTT() {
       const p=ak?calcPct(o.kezdes,o.vegzes):0
       const osztKod=(o.osztaly||'').split('/')[0].trim()
       const href=osztKod?'/osztaly/'+encodeURIComponent(osztKod):'#'
-      col+=`<a href="${href}" class="ora-blk${ak?' aktiv':mu?' mult':''}" style="top:${top}px;height:${h}px;text-decoration:none;"
+      col+=`<a href="${href}" class="blk${ak?' aktiv':mu?' mult':''}" style="top:${top}px;height:${h}px;text-decoration:none;"
         title="${o.tanar_nev||o.tanar} · ${o.osztaly} · ${o.tantargy} · ${o.kezdes}–${o.vegzes} – Klikk: osztály nézet">
         <div class="ob-tanar">${o.tanar_nev||o.tanar}</div>
         ${h>32?`<div class="ob-meta">${o.osztaly} · ${o.tantargy}</div>`:''}
@@ -320,7 +330,7 @@ async function fetchStatus() {
       document.getElementById('terem-szam').textContent=d.terem||teremSzam
       if(d.szunet){
         setAllapot('szabad')
-        document.getElementById('content').innerHTML=`<div style="text-align:center;padding:24px 0;"><div style="font-size:40px;margin-bottom:10px;">🌙</div><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#f0c76b;margin-bottom:4px;">${d.szunet}</p><p style="font-size:13px;color:rgba(255,255,255,.4);">Szünet idején nincs tanítás</p></div>`
+        document.getElementById('content').innerHTML=`<div class="strip"><div class="panel" style="grid-column:1/-1;text-align:center;padding:28px 0;"><div style="font-size:40px;margin-bottom:10px;">🌙</div><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold-l);margin-bottom:4px;">${d.szunet}</p><p style="font-size:13px;color:var(--faint);">Szünet idején nincs tanítás</p></div></div>`
       } else {
         renderStatus(d)
       }
@@ -328,7 +338,6 @@ async function fetchStatus() {
   } catch(e){}
   const t=window.TickyTime ? window.TickyTime.formatHM() : new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
   document.getElementById('footer-ido').textContent=t
-  // footer-ido2 removed
 }
 
 async function fetchTimetable() {
@@ -349,19 +358,30 @@ function refresh() {
     .finally(()=>setTimeout(()=>ic.classList.remove('spinning'),600))
 }
 
+// ── Élő óra (csak megjelenítés) ──────────────────────
+function updateClock(){
+  const hm=document.getElementById('clk-hm'); if(!hm) return
+  let s
+  if(window.TickyTime){ s=window.TickyTime.formatHMS() }
+  else { const n=new Date(); const p=x=>String(x).padStart(2,'0'); s=p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds()) }
+  const parts=String(s).split(':')
+  hm.textContent=(parts[0]||'--')+':'+(parts[1]||'--')
+  const ss=document.getElementById('clk-ss'); if(ss) ss.textContent=parts[2]||'00'
+}
+
 // ── Init ─────────────────────────────────────────────
 teremSzam=getTerem()
 if(!teremSzam){
   document.getElementById('terem-szam').textContent='?'
-  document.getElementById('content').innerHTML=`<div class="text-center py-6"><span class="text-4xl block mb-3">🔍</span><p style="color:rgba(255,255,255,.6);">Nincs terem megadva</p><p class="text-sm mt-1" style="color:rgba(255,255,255,.35);">URL: /terem/204</p></div>`
+  document.getElementById('content').innerHTML=`<div class="strip"><div class="panel" style="grid-column:1/-1;text-align:center;padding:24px 0;"><span style="font-size:36px;display:block;margin-bottom:10px;">🔍</span><p style="color:var(--dim);">Nincs terem megadva</p><p style="font-size:13px;margin-top:4px;color:var(--faint);">URL: /terem/204</p></div></div>`
 } else {
   document.getElementById('terem-szam').textContent=teremSzam
   document.getElementById('napirend-link').href='/terem/'+teremSzam+'/nap'
   document.title='Ticky – '+teremSzam
   fetchStatus()
   fetchTimetable()
-  // Live clock
-  setInterval(()=>{const t=window.TickyTime ? window.TickyTime.formatHMS() : new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const el=document.getElementById('footer-ido');if(el)el.textContent=t;},1000)
+  updateClock()
+  setInterval(updateClock,1000)
   setInterval(fetchStatus, REFRESH_MS)
   setInterval(fetchTimetable, 5*60_000)
 }
