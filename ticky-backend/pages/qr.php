@@ -8,7 +8,7 @@
 <link rel="shortcut icon" href="/favicon.ico?v=<?= filemtime('favicon.ico') ?>">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* ── Screen stílus ── */
   body {
@@ -25,12 +25,17 @@
     background-size:40px 40px;
   }
   .top-line { position:fixed; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(200,151,42,.5),transparent); z-index:200; }
+  svg{display:block;}
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline:2px solid rgba(200,151,42,.6); outline-offset:2px; border-radius:8px; }
+  @media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important;} }
   .glass { background:rgba(255,255,255,.05); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,.10); }
-  .gold-btn { background:linear-gradient(135deg,#c8972a,#a07020); color:white; border:none; border-radius:10px; padding:11px 24px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; width:auto; margin-top:0; }
+  .gold-btn { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#c8972a,#a07020); color:white; border:none; border-radius:10px; padding:11px 24px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; width:auto; margin-top:0; }
   .gold-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(200,151,42,.35); }
-  .nav-btn { background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12); color:rgba(255,255,255,.6); border-radius:10px; padding:9px 18px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; width:auto; margin-top:0; }
+  .gold-btn svg { width:15px; height:15px; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12); color:rgba(255,255,255,.6); border-radius:10px; padding:9px 18px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; width:auto; margin-top:0; }
   .nav-btn:hover { background:rgba(255,255,255,.10); color:white; }
   .nav-btn.active { background:rgba(200,151,42,.15); border-color:rgba(200,151,42,.4); color:#f0c76b; }
+  .nav-btn svg { width:14px; height:14px; }
   .skeleton { background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:10px; }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
   .fade-in { animation:fadeIn .4s cubic-bezier(.22,1,.36,1) both; }
@@ -55,8 +60,9 @@
   a { text-decoration:none; }
   /* sidebar */
   .ticky-sidebar{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:rgba(6,15,30,.78);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-left:none;border-radius:0 12px 12px 0;}
-  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
+  .tsb-item{position:relative;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:rgba(255,255,255,.6);transition:all .18s;}
   .tsb-item:hover{background:rgba(255,255,255,.10);color:white;}
+  .tsb-item svg{width:18px;height:18px;}
   .tsb-item::after{content:attr(data-label);position:absolute;left:46px;top:50%;transform:translateY(-50%);background:rgba(6,15,30,.96);color:rgba(255,255,255,.88);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;padding:5px 11px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid rgba(255,255,255,.10);}
   .tsb-item:hover::after{opacity:1;}
   .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
@@ -101,10 +107,16 @@
 
 <!-- Bal oldali sidebar -->
 <div class="ticky-sidebar">
-  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">📅</a>
+  <a href="https://esemenynaptar.onrender.com/" target="_blank" rel="noopener" class="tsb-item" data-label="Eseménynaptár">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  </a>
   <div class="tsb-divider"></div>
-  <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="tsb-item" data-label="Support">✉️</a>
-  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">🐛</a>
+  <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="tsb-item" data-label="Support">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+  </a>
+  <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="tsb-item" data-label="Bug report">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6Z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>
+  </a>
 </div>
 
 <!-- Navbar -->
@@ -118,7 +130,10 @@
     <span class="text-sm" style="color:rgba(255,255,255,.45);">QR Generátor</span>
   </div>
   <div class="flex items-center gap-2">
-    <a href="/termek" class="nav-btn">← Termek</a>
+    <a href="/termek" class="nav-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Termek
+    </a>
   </div>
 </nav>
 
@@ -133,7 +148,8 @@
       <button class="nav-btn" id="btn-select-all" onclick="selectAll()">Összes kijelölése</button>
       <button class="nav-btn" id="btn-clear" onclick="clearSelection()" style="display:none;">Kijelölés törlése</button>
       <button class="gold-btn" onclick="printSelected()" id="btn-print">
-        <span id="print-label">🖨️ Összes nyomtatása</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+        <span id="print-label">Összes nyomtatása</span>
       </button>
     </div>
   </div>
@@ -169,7 +185,7 @@ async function loadRooms() {
     allRooms = (data.termek || []).map(t => t.terem_szam)
     renderCards()
   } catch(e) {
-    document.getElementById('qr-grid').innerHTML = `<div class="col-span-full text-center py-16 screen-only"><span class="text-4xl block mb-3">⚠️</span><p style="color:rgba(255,255,255,.5);">Nem sikerült betölteni a termeket</p></div>`
+    document.getElementById('qr-grid').innerHTML = `<div class="col-span-full text-center py-16 screen-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;margin:0 auto 14px;color:rgba(255,255,255,.45);"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg><p style="color:rgba(255,255,255,.5);">Nem sikerült betölteni a termeket</p></div>`
   }
 }
 
@@ -192,7 +208,7 @@ function renderCards() {
         <p class="print-room-num" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:white;line-height:1;text-align:center;">${esc(szam)}</p>
       </div>
       <div class="qr-wrap" id="${qrId}"></div>
-      <p class="print-url text-xs text-center" style="color:rgba(255,255,255,.3);word-break:break-all;max-width:140px;">${esc(url)}</p>
+      <p class="print-url text-xs text-center" style="font-family:'DM Mono',monospace;color:rgba(255,255,255,.3);word-break:break-all;max-width:140px;">${esc(url)}</p>
       <p class="print-ticky" style="font-family:'Playfair Display',serif;font-size:11px;color:rgba(255,255,255,.2);font-weight:600;">Ticky</p>`
     grid.appendChild(card)
     new QRCode(document.getElementById(qrId), {text:url,width:128,height:128,colorDark:'#060f1e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})
@@ -212,8 +228,8 @@ function updateUI() {
   const n=selectedRooms.size, total=allRooms.length
   const info=document.getElementById('selection-info'), cnt=document.getElementById('selected-count')
   const label=document.getElementById('print-label'), btnClear=document.getElementById('btn-clear'), btnSelectAll=document.getElementById('btn-select-all')
-  if(n>0){info.style.display='block';cnt.textContent=n;label.textContent=`🖨️ ${n} terem nyomtatása`;btnClear.style.display='inline-flex';btnSelectAll.textContent=n===total?'Összes kijelölve ✓':'Összes kijelölése'}
-  else{info.style.display='none';label.textContent='🖨️ Összes nyomtatása';btnClear.style.display='none';btnSelectAll.textContent='Összes kijelölése'}
+  if(n>0){info.style.display='block';cnt.textContent=n;label.textContent=`${n} terem nyomtatása`;btnClear.style.display='inline-flex';btnSelectAll.textContent=n===total?'Összes kijelölve ✓':'Összes kijelölése'}
+  else{info.style.display='none';label.textContent='Összes nyomtatása';btnClear.style.display='none';btnSelectAll.textContent='Összes kijelölése'}
 }
 
 function printSelected() {
