@@ -122,88 +122,110 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64">
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#050b15;
-    --gold:#c8972a; --gold-l:#f0c76b;
-    --red:#fb7185; --red-soft:rgba(244,63,94,.1);
-    --line:rgba(96,150,220,.16); --line-strong:rgba(96,150,220,.30);
-    --surface:rgba(255,255,255,.025); --surface-2:rgba(255,255,255,.05);
-    --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.17);
-    --text:rgba(255,255,255,.93); --dim:rgba(255,255,255,.55); --faint:rgba(255,255,255,.34);
+  :root{ --gold:#c8972a; --gold-l:#f0c76b; }
+  *{box-sizing:border-box;}
+  body {
+    font-family:'DM Sans',sans-serif;
+    background:#04090f; color:white; min-height:100vh; margin:0;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 10% 0%, rgba(26,74,138,.4) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 90% 100%, rgba(200,151,42,.10) 0%, transparent 50%);
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);min-height:100vh;overflow-x:hidden;}
-  .bp{position:fixed;inset:0;z-index:0;pointer-events:none;}
-  .bp::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 12% -8%,rgba(34,86,156,.42) 0%,transparent 58%),radial-gradient(ellipse 50% 45% at 90% 108%,rgba(200,151,42,.1) 0%,transparent 55%);}
-  .bp::after{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px),linear-gradient(var(--line-strong) 1px,transparent 1px),linear-gradient(90deg,var(--line-strong) 1px,transparent 1px);background-size:28px 28px,28px 28px,140px 140px,140px 140px;mask-image:radial-gradient(ellipse 90% 80% at 50% 40%,#000 50%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 90% 80% at 50% 40%,#000 50%,transparent 100%);opacity:.55;}
-  .vig{position:fixed;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 220px 50px rgba(0,0,0,.6);}
-  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
-  .reg{position:fixed;z-index:2;pointer-events:none;width:26px;height:26px;opacity:.5;}
-  .reg::before,.reg::after{content:'';position:absolute;background:var(--gold);}
-  .reg::before{left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);}
-  .reg::after{top:50%;left:0;right:0;height:1px;transform:translateY(-.5px);}
-  .reg.tl{top:22px;left:22px;} .reg.tr{top:22px;right:22px;} .reg.bl{bottom:22px;left:22px;} .reg.br{bottom:22px;right:22px;}
-  .topline{position:fixed;top:0;left:0;right:0;height:2px;z-index:60;background:linear-gradient(90deg,transparent,var(--gold) 28%,var(--gold-l) 50%,var(--gold) 72%,transparent);box-shadow:0 0 18px rgba(200,151,42,.4);}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+    background-size:44px 44px;
+  }
+  .top-line { position:fixed; top:0; left:0; right:0; height:2px; z-index:50;
+    background:linear-gradient(90deg, transparent, #c8972a 30%, #f0c76b 50%, #c8972a 70%, transparent);
+    box-shadow:0 0 16px rgba(200,151,42,.3);
+  }
+  svg{display:block;}
+  a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid rgba(200,151,42,.6); outline-offset:2px; border-radius:10px; }
+  @media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important;} }
 
-  .shell{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-  .auth{width:100%;max-width:380px;animation:rise .55s cubic-bezier(.22,1,.36,1) both;}
-  .brand{display:flex;align-items:center;justify-content:center;gap:11px;font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:#fff;letter-spacing:-.5px;}
-  .brand .bd{width:11px;height:11px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold);animation:pulse 2.4s infinite;}
-  .tag{text-align:center;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-top:12px;}
-
-  .card{position:relative;margin-top:26px;border:1px solid var(--border-strong);border-radius:20px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012));padding:28px 26px;}
-  .card::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);}
-  .lbl{display:block;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
-  .inp{width:100%;border-radius:11px;border:1px solid var(--border);background:var(--surface);padding:12px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .18s,box-shadow .18s;}
-  .inp::placeholder{color:var(--faint);}
-  .inp:focus{border-color:rgba(200,151,42,.55);box-shadow:0 0 0 3px rgba(200,151,42,.09);}
-  .err{color:var(--red);background:var(--red-soft);border:1px solid rgba(244,63,94,.3);padding:11px 14px;border-radius:11px;font-size:13px;}
-  .btn-gold{width:100%;border:none;cursor:pointer;border-radius:11px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:.02em;color:#1a1206;background:linear-gradient(135deg,var(--gold-l),var(--gold));transition:transform .15s,box-shadow .18s;}
-  .btn-gold:hover{transform:translateY(-1px);box-shadow:0 10px 26px -10px rgba(200,151,42,.7);}
-  .hint{text-align:center;font-size:11.5px;color:var(--faint);margin-top:18px;}
-  .back{display:block;text-align:center;font-size:12px;color:var(--gold-l);margin-top:20px;text-decoration:none;}
-  .back:hover{color:#fff;}
-  @media (prefers-reduced-motion: reduce){*{animation:none!important;}}
+  .glass { background:rgba(255,255,255,.04); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.08); position:relative; }
+  .glass::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);pointer-events:none;border-radius:inherit;}
+  .field{position:relative;}
+  .field .ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.32);width:16px;height:16px;pointer-events:none;}
+  .inp { width:100%; border-radius:10px; border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.05); padding:12px 14px 12px 40px; color:white; font-size:14px; font-family:'DM Sans',sans-serif; transition:border-color .18s, box-shadow .18s; }
+  .inp:focus { outline:none; border-color:rgba(200,151,42,.45); box-shadow:0 0 0 3px rgba(200,151,42,.08); }
+  .inp::placeholder{color:rgba(255,255,255,.3);}
+  .btn-gold { background:linear-gradient(135deg,#c8972a,#9e6d1e); color:white;
+    border-radius:10px; padding:12px; font-weight:600; font-size:14px; width:100%;
+    border:none; cursor:pointer; transition:transform .15s, box-shadow .18s; display:flex;align-items:center;justify-content:center;gap:8px; }
+  .btn-gold:hover { transform:translateY(-1px); box-shadow:0 10px 26px -10px rgba(200,151,42,.6); }
+  .btn-gold svg{width:15px;height:15px;}
+  .pulse { animation:pd 2s infinite; }
+  @keyframes pd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .err { color:#fda4af; background:rgba(244,63,94,.10); border:1px solid rgba(244,63,94,.24);
+    padding:11px 14px; border-radius:10px; font-size:13px; display:flex;align-items:flex-start;gap:8px; }
+  .err svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+  .lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.4);margin-bottom:8px;}
 </style>
 </head>
 <body>
-<div class="bp"></div><div class="vig"></div><div class="grain"></div><div class="topline"></div>
-<span class="reg tl"></span><span class="reg tr"></span><span class="reg bl"></span><span class="reg br"></span>
+<div class="top-line"></div>
 
-<main class="shell">
-  <div class="auth">
-    <a href="/" class="brand"><span class="bd"></span>Ticky</a>
-    <p class="tag">Belépés · admin / tester</p>
+<main class="min-h-screen flex items-center justify-center p-4 relative z-10">
+  <div class="w-full max-w-sm">
 
-    <div class="card">
-      <form method="POST" action="/login<?= $safe_from !== '' ? ('?from=' . htmlspecialchars($safe_from, ENT_QUOTES, 'UTF-8')) : '' ?>" style="display:flex;flex-direction:column;gap:16px;">
+    <!-- Brand -->
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex items-center gap-3 text-white text-3xl font-bold" style="font-family:'Playfair Display',serif;">
+        <span class="pulse inline-block w-3 h-3 rounded-full" style="background:#c8972a;box-shadow:0 0 12px #c8972a;"></span>
+        Ticky
+      </a>
+      <p class="mt-3 text-sm" style="color:rgba(255,255,255,.45);">Belépés</p>
+    </div>
+
+    <!-- Form -->
+    <div class="glass p-7 rounded-2xl">
+      <form method="POST" action="/login<?= $safe_from !== '' ? ('?from=' . htmlspecialchars($safe_from, ENT_QUOTES, 'UTF-8')) : '' ?>" class="space-y-4">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
 
         <div>
           <label class="lbl">Felhasználónév</label>
-          <input type="text" name="felhasznalonev" class="inp" autocomplete="username" autofocus required>
+          <div class="field">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" name="felhasznalonev" class="inp" autocomplete="username" autofocus required>
+          </div>
         </div>
 
         <div>
           <label class="lbl">Jelszó</label>
-          <input type="password" name="jelszo" class="inp" autocomplete="current-password" required>
+          <div class="field">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" name="jelszo" class="inp" autocomplete="current-password" required>
+          </div>
         </div>
 
         <?php if ($error !== ''): ?>
-          <p class="err"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
+          <p class="err">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
+          </p>
         <?php endif; ?>
 
-        <button type="submit" class="btn-gold">Belépés →</button>
+        <button type="submit" class="btn-gold">
+          Belépés
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </form>
 
-      <p class="hint">Admin vagy tester fiókkal tudsz belépni.</p>
+      <p class="text-center text-xs mt-5" style="color:rgba(255,255,255,.3);">
+        Admin vagy tester fiókkal tudsz belépni.
+      </p>
     </div>
 
-    <a href="/" class="back">← Vissza a főoldalra</a>
+    <p class="text-center text-xs mt-5" style="color:rgba(255,255,255,.18);">
+      <a href="/" style="color:#f0c76b;">← Vissza a főoldalra</a>
+    </p>
   </div>
 </main>
 
