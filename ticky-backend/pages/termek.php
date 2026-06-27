@@ -73,11 +73,11 @@
   </button>
 </nav>
 
-<!-- Hétvége banner -->
-<div id="weekend-info" class="hidden relative z-10 max-w-5xl mx-auto px-4 pt-4">
-  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm" style="background:rgba(200,151,42,.10);border:1px solid rgba(200,151,42,.25);color:#f0c76b;">
+<!-- Szünet banner (a szerver d.szunet mezője alapján; hétvége helyett ezt mutatjuk) -->
+<div id="szunet-banner" class="hidden relative z-10 max-w-5xl mx-auto px-4 pt-4">
+  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm" style="background:rgba(200,151,42,.12);border:1px solid rgba(200,151,42,.3);color:#f0c76b;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-    <span>Hétvége – az órarendek hétfőn frissülnek. A termek listája elérhető, de foglaltság nem jelenik meg.</span>
+    <span>Szünet – jelenleg nincs tanítás.</span>
   </div>
 </div>
 
@@ -138,18 +138,14 @@ async function fetchRooms() {
     if(d.error){showError(d.error);return}
     const szunetBanner=document.getElementById('szunet-banner')
     if(d.szunet&&szunetBanner){
-      szunetBanner.style.display='flex'
-      szunetBanner.querySelector('span').textContent=d.szunet+' – jelenleg szünet van, nincs foglalt terem'
-    } else if(szunetBanner){ szunetBanner.style.display='none' }
+      szunetBanner.classList.remove('hidden')
+      szunetBanner.querySelector('span').textContent=d.szunet+' – jelenleg szünet van, nincs tanítás.'
+    } else if(szunetBanner){ szunetBanner.classList.add('hidden') }
     allRooms=(d.termek||[]).map(r=>({
       ...r,
       allapot: r.allapot ?? 'szabad',
       aktualis: r.aktualis ?? null,
     }))
-    if(d.nap===0){
-      const wi=document.getElementById('weekend-info')
-      if(wi) wi.style.display='flex'
-    }
     updateCounts(); renderGrid()
     document.getElementById('footer-ido').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})
   } catch(e){showError('Nem sikerült csatlakozni')}
