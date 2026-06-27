@@ -54,6 +54,21 @@ $admin_path = '/admin';
 <style>
 body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:100vh;background-image:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(26,74,138,.4) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(200,151,42,.10) 0%,transparent 50%)}body:before{content:'';position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:44px 44px}.top{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8972a 30%,#f0c76b 50%,#c8972a 70%,transparent);box-shadow:0 0 16px rgba(200,151,42,.3);z-index:50}.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08)}.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600}.btn-gold{background:linear-gradient(135deg,#c8972a,#9e6d1e);color:#fff}.btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.78)}.inp{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);padding:10px 12px;color:#fff}.inp:focus{outline:none;border-color:rgba(200,151,42,.45)}.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.12)}.chip.gold{color:#f0c76b;background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.24)}.chip.green{color:#86efac;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.24)}.chip.red{color:#fda4af;background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.24)}.chip.blue{color:#93c5fd;background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.24)}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}.table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35)}.navbtn{width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.65);border:1px solid transparent}.navbtn.active{background:rgba(200,151,42,.12);border-color:rgba(200,151,42,.24);color:#f0c76b}.toast{position:fixed;right:20px;bottom:20px;padding:12px 16px;border-radius:12px;z-index:200;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px)}.toast.ok{background:rgba(34,197,94,.18);color:#86efac}.toast.err{background:rgba(244,63,94,.18);color:#fda4af}.toast.info{background:rgba(200,151,42,.18);color:#f0c76b}.section{display:none}.section.active{display:block}.mono{font-family:'DM Mono',monospace}.stat{padding:18px;border-radius:14px}.small{font-size:12px;color:rgba(255,255,255,.5)}@media(max-width:900px){.layout{display:block}.sidebar{width:auto;margin-bottom:16px}.content{padding:16px}}@media(min-width:901px){.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px}.content{padding:24px 24px 40px 0}.sidebar{padding:24px 0 24px 24px}}
 </style>
+<style>
+/* ── a11y + szünet/feature kiegészítések ── */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid rgba(200,151,42,.6);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.break-banner{display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:14px;font-size:13px;font-weight:500}
+.break-banner.aktiv{background:rgba(200,151,42,.14);border:1px solid rgba(200,151,42,.35);color:#f0c76b}
+.break-banner.jovo{background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25);color:#93c5fd}
+.break-banner .bb-ico{font-size:18px;line-height:1;flex-shrink:0}
+.break-banner .bb-strong{font-family:'Playfair Display',serif;font-weight:700}
+.table tr.row-aktiv td{background:rgba(200,151,42,.07)}
+.mini-input{width:100%;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);padding:7px 9px;color:#fff;font-size:13px}
+.mini-input:focus{outline:none;border-color:rgba(200,151,42,.45)}
+.days-pill{font-size:10px;color:rgba(255,255,255,.42);font-family:'DM Mono',monospace}
+.tool-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+</style>
 </head>
 <body>
 <div class="top"></div>
@@ -117,6 +132,11 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
     </div>
   </header>
 
+  <!-- Aktív / közelgő szünet sáv (globális) -->
+  <div style="padding:14px 20px 0;">
+    <div id="break-banner" class="break-banner" style="display:none;"></div>
+  </div>
+
   <div class="layout">
     <aside class="sidebar">
       <div class="glass rounded-2xl p-3">
@@ -155,7 +175,10 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
             <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Felhasznalok</h1>
             <p class="small mt-2">Admin vagy tester account letrehozasa, szerepkor es aktiv allapot kezelese.</p>
           </div>
-          <button class="btn btn-ghost" id="reload-users">Frissites</button>
+          <div class="tool-row">
+            <button class="btn btn-ghost" id="export-users">CSV export</button>
+            <button class="btn btn-ghost" id="reload-users">Frissites</button>
+          </div>
         </div>
         <div class="glass rounded-2xl p-5 mb-5 grid md:grid-cols-4 gap-3">
           <input id="new-username" class="inp" placeholder="Felhasznalonev">
@@ -166,6 +189,9 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
             <button class="btn btn-gold" id="create-user">Felhasznalo letrehozasa</button>
           </div>
         </div>
+        <div class="glass rounded-2xl p-4 mb-5">
+          <input id="user-search" class="inp" placeholder="Kereses: felhasznalonev vagy nev">
+        </div>
         <div class="glass rounded-2xl p-3 overflow-auto">
           <table class="table" id="users-table"></table>
         </div>
@@ -175,7 +201,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
         <div class="flex items-center justify-between gap-4 mb-5">
           <div>
             <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Szunetek</h1>
-            <p class="small mt-2">Uj idoszakok letrehozasa, szerkesztese es torlese.</p>
+            <p class="small mt-2">Uj idoszakok letrehozasa, szerkesztese es torlese. Az aktiv szunet kiemelve.</p>
           </div>
           <button class="btn btn-ghost" id="reload-breaks">Frissites</button>
         </div>
@@ -198,7 +224,10 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
             <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Tanarok</h1>
             <p class="small mt-2">A secret pathon vagy admin felhasznaloval belepve ugyanaz a tanar-modositas jogosultsag ervenyes.</p>
           </div>
-          <button class="btn btn-ghost" id="reload-teachers">Frissites</button>
+          <div class="tool-row">
+            <button class="btn btn-ghost" id="export-teachers">CSV export</button>
+            <button class="btn btn-ghost" id="reload-teachers">Frissites</button>
+          </div>
         </div>
         <div class="glass rounded-2xl p-5 mb-5 grid md:grid-cols-[160px_1fr_auto] gap-3 items-center">
           <input id="teacher-code" class="inp mono" placeholder="Kod">
@@ -220,6 +249,7 @@ body{font-family:'DM Sans',sans-serif;background:#04090f;color:#fff;min-height:1
             <p class="small mt-2">Emelet modositasa mar megy mindket admin auth moddal.</p>
           </div>
           <div class="flex gap-2">
+            <button class="btn btn-ghost" id="export-rooms">CSV export</button>
             <button class="btn btn-ghost" id="autofill-rooms">Auto emelet</button>
             <button class="btn btn-ghost" id="reload-rooms">Frissites</button>
           </div>
@@ -297,6 +327,58 @@ function attrLiteral(v){return esc(JSON.stringify(v??''))}
 function nowTick(){q('nav-time').textContent=new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 nowTick();setInterval(nowTick,1000)
 
+// ── Szünet segédfüggvények (kliensoldali állapot) ──────────────
+function admToday(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')}
+function admDayDiff(a,b){return Math.round((Date.parse(a+'T00:00:00')-Date.parse(b+'T00:00:00'))/86400000)}
+function breakStatus(b){
+  const t=admToday(),k=String(b.kezdet||''),v=String(b.vege||'');
+  if(k&&v&&k<=t&&t<=v) return {key:'aktiv',label:'Aktiv',chip:'gold',rem:admDayDiff(v,t)+1};
+  if(k&&t<k)           return {key:'jovo', label:'Kozelgo',chip:'blue',rem:admDayDiff(k,t)};
+  return {key:'mult',label:'Lejart',chip:'gray',rem:admDayDiff(t,v)};
+}
+function sortBreaks(list){
+  const order={aktiv:0,jovo:1,mult:2};
+  return [...list].sort((a,b)=>{
+    const sa=breakStatus(a),sb=breakStatus(b);
+    if(order[sa.key]!==order[sb.key]) return order[sa.key]-order[sb.key];
+    if(sa.key==='mult') return String(b.vege||'').localeCompare(String(a.vege||''));
+    return String(a.kezdet||'').localeCompare(String(b.kezdet||''));
+  });
+}
+function renderBreakBanner(list){
+  const el=q('break-banner'); if(!el) return;
+  const active=list.find(b=>breakStatus(b).key==='aktiv');
+  if(active){
+    const s=breakStatus(active);
+    el.className='break-banner aktiv';
+    el.innerHTML=`<span class="bb-ico">🌙</span><div><span class="bb-strong">${esc(active.nev)}</span> – jelenleg szunet van · meg <strong>${s.rem}</strong> nap (${esc(active.vege)}-ig)</div>`;
+    el.style.display='flex'; return;
+  }
+  const up=sortBreaks(list.filter(b=>breakStatus(b).key==='jovo'))[0];
+  if(up){
+    const s=breakStatus(up);
+    el.className='break-banner jovo';
+    el.innerHTML=`<span class="bb-ico">📅</span><div>Kovetkezo szunet: <span class="bb-strong">${esc(up.nev)}</span> · ${s.rem} nap mulva (${esc(up.kezdet)})</div>`;
+    el.style.display='flex'; return;
+  }
+  el.style.display='none';
+}
+async function refreshBreakBanner(){
+  try{const d=await adminFetch('/api/admin/szunetek');state.breaks=d.szunetek||[];renderBreakBanner(state.breaks)}catch(e){}
+}
+
+// ── CSV export (kliensoldali, nincs backend hívás) ─────────────
+function downloadCsv(name,header,rows){
+  const all=[header,...rows];
+  const csv=all.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportUsers(){downloadCsv('felhasznalok.csv',['Felhasznalonev','Nev','Szerep','Aktiv','Letrehozva'],state.users.map(u=>[u.felhasznalonev,u.nev||'',u.szerep||'',(u.aktiv??true)?'aktiv':'tiltott',(u.letrehozva||'').replace('T',' ').slice(0,16)]))}
+function exportTeachers(){downloadCsv('tanarok.csv',['Kod','Nev'],state.teachers.map(t=>[t.rovid_nev,t.nev||'']))}
+function exportRooms(){downloadCsv('termek.csv',['Terem','Emelet'],state.rooms.map(t=>[t.terem_szam,t.emelet??'']))}
+
 async function readJson(res){try{return await res.json()}catch{return {}}}
 async function adminFetch(url,options={}){
   const init={credentials:'same-origin',...options};
@@ -358,6 +440,12 @@ async function loadDashboard(){
     ]);
     const occupied=(live.termek||[]).filter(x=>x.allapot==='foglalt').length;
     const free=(live.termek||[]).filter(x=>x.allapot==='szabad').length;
+    const blist=breaks.szunetek||[]; state.breaks=blist; renderBreakBanner(blist);
+    const act=blist.find(b=>breakStatus(b).key==='aktiv');
+    const up=sortBreaks(blist.filter(b=>breakStatus(b).key==='jovo'))[0];
+    const breakChip=act
+      ? `${statusChip('Szunet aktiv','gold')} <span class="small ml-2">${esc(act.nev)} · meg ${breakStatus(act).rem} nap (${esc(act.vege)}-ig)</span>`
+      : `${statusChip('Nincs aktiv szunet','green')} <span class="small ml-2">${up?('Kovetkezo: '+esc(up.nev)+' · '+breakStatus(up).rem+' nap mulva'):'nincs kozelgo szunet'}</span>`;
     q('dashboard-cards').innerHTML=`
       <div class="glass stat"><div class="small">Termek</div><div class="text-3xl mt-2" style="font-family:'Playfair Display',serif;">${rooms.count||0}</div></div>
       <div class="glass stat"><div class="small">Tanarok</div><div class="text-3xl mt-2" style="font-family:'Playfair Display',serif;">${teachers.count||0}</div></div>
@@ -366,17 +454,19 @@ async function loadDashboard(){
     `;
     q('dashboard-status').innerHTML=`
       <div class="grid md:grid-cols-2 gap-3">
+        <div>${breakChip}</div>
         <div>${statusChip('Admin auth rendben','green')} <span class="small ml-2"><?= $auth_mode === 'felhasznalo' ? 'Belepve admin accounttal.' : 'Belepve secret pathon.' ?></span></div>
         <div>${statusChip('Supabase API elerheto','green')} <span class="small ml-2">Valaszok sikeresek.</span></div>
         <div>${statusChip('Foglalt most: '+occupied,'gold')} <span class="small ml-2">Szabad: ${free}</span></div>
-        <div>${statusChip('Admin path aktiv','gold')} <span class="small ml-2 mono">/admin</span></div>
       </div>
     `;
   }catch(error){q('dashboard-status').textContent=error.message;toast(error.message,'err')}
 }
 
 function renderUsers(){
-  const rows=state.users.map(user=>`
+  const f=(q('user-search')?.value||'').trim().toLowerCase();
+  const list=state.users.filter(u=>((u.felhasznalonev||'')+' '+(u.nev||'')).toLowerCase().includes(f));
+  const rows=list.map(user=>`
     <tr>
       <td class="mono">${esc(user.felhasznalonev)}</td>
       <td>${esc(user.nev||'-')}</td>
@@ -393,7 +483,7 @@ function renderUsers(){
         </div>
       </td>
     </tr>`).join('');
-  q('users-table').innerHTML=`<thead><tr><th>Felhasznalonev</th><th>Nev</th><th>Szerep</th><th>Allapot</th><th>Letrehozva</th><th>Muveletek</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Nincs adat.</td></tr>'}</tbody>`;
+  q('users-table').innerHTML=`<thead><tr><th>Felhasznalonev</th><th>Nev</th><th>Szerep</th><th>Allapot</th><th>Letrehozva</th><th>Muveletek</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Nincs talalat.</td></tr>'}</tbody>`;
 }
 async function loadUsers(){try{const data=await adminFetch('/api/admin/felhasznalok');state.users=data.felhasznalok||[];renderUsers()}catch(error){toast(error.message,'err')}}
 async function createUser(){
@@ -414,35 +504,71 @@ async function renameUser(id,currentName){const nev=prompt('Uj nev:',currentName
 async function resetUserPassword(id){const jelszo=prompt('Uj jelszo (min. 10 karakter):');if(jelszo===null||jelszo==='')return;try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'PATCH',body:{jelszo}});toast('Jelszo frissitve')}catch(error){toast(error.message,'err')}}
 async function deleteUser(id){if(!confirm('Biztosan torlod ezt a felhasznalot?'))return;try{await adminFetch('/api/admin/felhasznalo/'+encodeURIComponent(id),{method:'DELETE'});toast('Felhasznalo torolve');loadUsers()}catch(error){toast(error.message,'err')}}
 
+// ── Szünetek: állapot-badge, kiemelés, rendezés, inline szerk., lejárt-elrejtés ──
+let editingBreak=null;
+let hidePastBreaks=true;
 function renderBreaks(){
-  const rows=state.breaks.map(item=>`
-    <tr>
-      <td>${esc(item.nev)}</td>
-      <td class="mono">${esc(item.kezdet)}</td>
-      <td class="mono">${esc(item.vege)}</td>
+  const tbl=q('breaks-table');
+  let list=sortBreaks(state.breaks);
+  const pastCount=list.filter(b=>breakStatus(b).key==='mult').length;
+  if(hidePastBreaks) list=list.filter(b=>breakStatus(b).key!=='mult');
+  const rows=list.map(item=>{
+    const s=breakStatus(item);
+    const rowCls=s.key==='aktiv'?' class="row-aktiv"':'';
+    if(editingBreak===item.id){
+      return `<tr${rowCls}>
+        <td><input class="mini-input" id="edit-nev-${esc(item.id)}" value="${esc(item.nev)}"></td>
+        <td><input class="mini-input" id="edit-kezdet-${esc(item.id)}" type="date" value="${esc(item.kezdet)}"></td>
+        <td><input class="mini-input" id="edit-vege-${esc(item.id)}" type="date" value="${esc(item.vege)}"></td>
+        <td><div class="flex flex-wrap gap-2">
+          <button class="btn btn-gold" onclick="saveEditBreak('${esc(item.id)}')">Mentes</button>
+          <button class="btn btn-ghost" onclick="cancelEditBreak()">Megse</button>
+        </div></td></tr>`;
+    }
+    const startNote=s.key==='jovo'?`<span class="days-pill">· ${s.rem} nap mulva</span>`:'';
+    const endNote=s.key==='aktiv'?`<span class="days-pill">· meg ${s.rem} nap</span>`:'';
+    return `<tr${rowCls}>
+      <td>${statusChip(s.label,s.chip)} <span style="margin-left:6px">${esc(item.nev)}</span></td>
+      <td class="mono">${esc(item.kezdet)} ${startNote}</td>
+      <td class="mono">${esc(item.vege)} ${endNote}</td>
       <td>
         <div class="flex flex-wrap gap-2">
-          <button class="btn btn-ghost" onclick="editBreak('${esc(item.id)}',${attrLiteral(item.nev)},${attrLiteral(item.kezdet)},${attrLiteral(item.vege)})">Szerkesztes</button>
+          <button class="btn btn-ghost" onclick="startEditBreak('${esc(item.id)}')">Szerkesztes</button>
           <button class="btn btn-ghost" onclick="deleteBreak('${esc(item.id)}')">Torles</button>
         </div>
       </td>
-    </tr>`).join('');
-  q('breaks-table').innerHTML=`<thead><tr><th>Nev</th><th>Kezdet</th><th>Vege</th><th>Muveletek</th></tr></thead><tbody>${rows||'<tr><td colspan="4">Nincs adat.</td></tr>'}</tbody>`;
+    </tr>`;
+  }).join('');
+  const toggle=pastCount>0
+    ? `<tr><td colspan="4" style="text-align:center;padding-top:14px"><button class="btn btn-ghost" onclick="togglePastBreaks()" style="font-size:12px">${hidePastBreaks?('Lejart szunetek mutatasa ('+pastCount+')'):'Lejart szunetek elrejtese'}</button></td></tr>`
+    : '';
+  tbl.innerHTML=`<thead><tr><th>Nev / allapot</th><th>Kezdet</th><th>Vege</th><th>Muveletek</th></tr></thead><tbody>${rows||'<tr><td colspan="4">Nincs megjelenitheto szunet.</td></tr>'}${toggle}</tbody>`;
 }
-async function loadBreaks(){try{const data=await adminFetch('/api/admin/szunetek');state.breaks=data.szunetek||[];renderBreaks()}catch(error){toast(error.message,'err')}}
+function togglePastBreaks(){hidePastBreaks=!hidePastBreaks;renderBreaks()}
+function startEditBreak(id){editingBreak=id;renderBreaks()}
+function cancelEditBreak(){editingBreak=null;renderBreaks()}
+async function saveEditBreak(id){
+  const nev=q('edit-nev-'+id).value.trim();
+  const kezdet=q('edit-kezdet-'+id).value;
+  const vege=q('edit-vege-'+id).value;
+  if(!nev){toast('A nev nem lehet ures','err');return}
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(kezdet)||!/^\d{4}-\d{2}-\d{2}$/.test(vege)){toast('Ervenytelen datum','err');return}
+  if(kezdet>vege){toast('A kezdo datum nem lehet kesobb a zaronal','err');return}
+  try{await adminFetch('/api/admin/szunet/'+encodeURIComponent(id),{method:'PATCH',body:{nev,kezdet,vege}});toast('Szunet frissitve');editingBreak=null;loadBreaks()}catch(error){toast(error.message,'err')}
+}
+async function loadBreaks(){try{const data=await adminFetch('/api/admin/szunetek');state.breaks=data.szunetek||[];renderBreaks();renderBreakBanner(state.breaks)}catch(error){toast(error.message,'err')}}
 async function createBreak(){
+  const nev=q('break-name').value.trim(), kezdet=q('break-start').value, vege=q('break-end').value;
+  if(!nev||!kezdet||!vege){toast('Minden mezo kotelezo','err');return}
+  if(kezdet>vege){toast('A kezdo datum nem lehet kesobb a zaronal','err');return}
+  const overlap=(state.breaks||[]).find(b=>!(vege<String(b.kezdet||'')||kezdet>String(b.vege||'')));
+  if(overlap&&!confirm(`Atfedes a(z) "${overlap.nev}" szunettel (${overlap.kezdet} – ${overlap.vege}). Megis letrehozod?`)) return;
   try{
-    await adminFetch('/api/admin/szunetek',{method:'POST',body:{nev:q('break-name').value.trim(),kezdet:q('break-start').value,vege:q('break-end').value}});
+    await adminFetch('/api/admin/szunetek',{method:'POST',body:{nev,kezdet,vege}});
     q('break-name').value='';q('break-start').value='';q('break-end').value='';
     toast('Szunet letrehozva');
     loadBreaks();
   }catch(error){toast(error.message,'err')}
-}
-async function editBreak(id,name,start,end){
-  const nev=prompt('Nev:',name); if(nev===null) return;
-  const kezdet=prompt('Kezdet (YYYY-MM-DD):',start); if(kezdet===null) return;
-  const vege=prompt('Vege (YYYY-MM-DD):',end); if(vege===null) return;
-  try{await adminFetch('/api/admin/szunet/'+encodeURIComponent(id),{method:'PATCH',body:{nev,kezdet,vege}});toast('Szunet frissitve');loadBreaks()}catch(error){toast(error.message,'err')}
 }
 async function deleteBreak(id){if(!confirm('Biztosan torlod ezt a szunetet?'))return;try{await adminFetch('/api/admin/szunet/'+encodeURIComponent(id),{method:'DELETE'});toast('Szunet torolve');loadBreaks()}catch(error){toast(error.message,'err')}}
 
@@ -606,17 +732,22 @@ q('run-github-sync').addEventListener('click',runGithubSync);
 q('reload-dashboard').addEventListener('click',loadDashboard);
 q('create-user').addEventListener('click',createUser);
 q('reload-users').addEventListener('click',loadUsers);
+q('user-search').addEventListener('input',renderUsers);
+q('export-users').addEventListener('click',exportUsers);
 q('create-break').addEventListener('click',createBreak);
 q('reload-breaks').addEventListener('click',loadBreaks);
 q('teacher-search').addEventListener('input',renderTeachers);
 q('save-teacher').addEventListener('click',saveTeacher);
 q('reload-teachers').addEventListener('click',loadTeachers);
+q('export-teachers').addEventListener('click',exportTeachers);
 q('room-search').addEventListener('input',renderRooms);
 q('reload-rooms').addEventListener('click',loadRooms);
 q('autofill-rooms').addEventListener('click',autofillRooms);
+q('export-rooms').addEventListener('click',exportRooms);
 q('logout-btn').addEventListener('click',logout);
 
 loadDashboard();
+refreshBreakBanner();
 </script>
 <?php endif; ?>
 </body>
