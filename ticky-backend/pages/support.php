@@ -15,6 +15,9 @@ body{font-family:'DM Sans',sans-serif;background-color:#060f1e;min-height:100vh;
   background-image:radial-gradient(ellipse 70% 55% at 15% 10%,rgba(26,74,138,.55) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 85%,rgba(200,151,42,.18) 0%,transparent 55%);}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:40px 40px;}
 a{text-decoration:none;color:inherit;}
+svg{display:block;}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(200,151,42,.6);outline-offset:2px;border-radius:8px;}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}}
 .glass{background:rgba(255,255,255,.05);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10);}
 .gold-line{height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#1a4a8a,#c8972a,#1a4a8a);}
 .pulse{animation:pd 2s infinite;}
@@ -26,6 +29,8 @@ a{text-decoration:none;color:inherit;}
 @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .card-hover{transition:transform .2s,border-color .2s,background .2s;}
 .card-hover:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.2)!important;background:rgba(255,255,255,.07)!important;}
+/* select nyíl (idézőjel-biztos, CSS-ben) */
+.sel-arrow{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;cursor:pointer;}
 /* FAQ */
 .faq-item{border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);overflow:hidden;transition:border-color .2s;margin-bottom:7px;}
 .faq-item:hover{border-color:rgba(255,255,255,.14);}
@@ -74,7 +79,9 @@ textarea.inp{resize:vertical;min-height:90px;}
       <div>
         <div class="gold-line" style="border-radius:8px 8px 0 0;"></div>
         <a href="mailto:tickysupport@gmail.com?subject=Ticky%20support" class="glass card-hover" style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:0 0 14px 14px;border-top:none;">
-          <div style="width:42px;height:42px;border-radius:10px;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.25);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">✉️</div>
+          <div style="width:42px;height:42px;border-radius:10px;background:rgba(200,151,42,.15);border:1px solid rgba(200,151,42,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#f0c76b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          </div>
           <div style="flex:1;min-width:0;">
             <p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Email support</p>
             <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">tickysupport@gmail.com · ~24h válasz</p>
@@ -86,7 +93,9 @@ textarea.inp{resize:vertical;min-height:90px;}
       <div>
         <div style="height:2px;border-radius:2px 2px 0 0;background:linear-gradient(90deg,#5a1a1a,#ff5050,#5a1a1a);"></div>
         <a href="https://github.com/Davedka/Ticky/issues/new" target="_blank" rel="noopener" class="glass card-hover" style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:0 0 14px 14px;border-top:none;">
-          <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,80,80,.10);border:1px solid rgba(255,80,80,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🐛</div>
+          <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,80,80,.10);border:1px solid rgba(255,80,80,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ff7a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6Z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>
+          </div>
           <div style="flex:1;min-width:0;">
             <p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Bug report</p>
             <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;">GitHub Issues · Hibák jelzése</p>
@@ -115,7 +124,7 @@ textarea.inp{resize:vertical;min-height:90px;}
         </div>
         <div>
           <label style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;">Tárgy</label>
-          <select id="f-targy" class="inp" style="appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 13px center;cursor:pointer;">
+          <select id="f-targy" class="inp sel-arrow">
             <option value="" style="background:#0b2e59;">— Válassz kategóriát —</option>
             <option value="hiba" style="background:#0b2e59;">🐛 Hibajelentés</option>
             <option value="kerdes" style="background:#0b2e59;">❓ Általános kérdés</option>
@@ -135,7 +144,7 @@ textarea.inp{resize:vertical;min-height:90px;}
       </div>
       <!-- Siker -->
       <div id="form-success" style="display:none;text-align:center;padding:24px 0;">
-        <div style="font-size:44px;margin-bottom:10px;">✅</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px;margin:0 auto 10px;display:block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
         <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#4ade80;margin-bottom:6px;">Elküldve!</p>
         <p style="font-size:13px;color:rgba(255,255,255,.45);">Hamarosan válaszolunk a megadott email címre.</p>
         <button onclick="resetForm()" style="margin-top:16px;font-size:13px;padding:8px 16px;border-radius:8px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);background:transparent;cursor:pointer;">Új üzenet</button>
@@ -203,7 +212,9 @@ function resetForm(){
   document.getElementById('form-success').style.display='none'
 }
 function showToast(msg){
-  const t=document.createElement('div');t.className='toast';t.innerHTML='⚠️ '+msg
+  const t=document.createElement('div');t.className='toast'
+  t.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg><span></span>'
+  t.querySelector('span').textContent=msg
   document.body.appendChild(t);setTimeout(()=>t.remove(),3500)
 }
 </script>
