@@ -80,6 +80,15 @@ function ticky_group_merge_signature(array $groups): string {
     return (string) json_encode($normalized, JSON_UNESCAPED_UNICODE);
 }
 
+function ticky_set_cached_session(?array $session): void {
+    $GLOBALS['__ticky_session_loaded'] = true;
+    $GLOBALS['__ticky_session_cache'] = $session;
+}
+
+function ticky_cached_session_loaded(): bool {
+    return !empty($GLOBALS['__ticky_session_loaded']);
+}
+
 function _period_index_by_start(): array {
     return ['07:30'=>1,'08:20'=>2,'09:15'=>3,'10:15'=>4,'11:10'=>5,'12:05'=>6,'12:55'=>7,'13:40'=>8];
 }
