@@ -44,6 +44,7 @@ if (empty($termek_raw)) {
                         'count'  => count($fallback),
                         'nap'    => $nap,
                         'ido'    => $ido,
+                        'szunet' => $aktiv_szunet,
                         'source' => 'fallback',
                     ]);
                 }
@@ -51,13 +52,15 @@ if (empty($termek_raw)) {
         } catch (\Throwable $e) {
         }
     }
-    json_response(['termek' => [], 'count' => 0, 'nap' => $nap, 'ido' => $ido]);
+    json_response(['termek' => [], 'count' => 0, 'nap' => $nap, 'ido' => $ido, 'szunet' => $aktiv_szunet]);
 }
 
 $termek = $termek_raw;
 
+// Szünet alatt (akár hétköznap) nincs tanítás → ne számoljunk foglaltságot,
+// minden terem szabad. A hétvégét a $nap > 0 már kezeli.
 $allapot_kell = isset($_GET['allapot']) && $_GET['allapot'] === '1';
-if ($allapot_kell && $nap > 0) {
+if ($allapot_kell && $nap > 0 && $aktiv_szunet === null) {
     $terem_ids = array_column($termek, 'id');
     $foglalt_map = [];
 
@@ -127,4 +130,5 @@ json_response([
     'count'  => count($termek),
     'nap'    => $nap,
     'ido'    => $ido,
+    'szunet' => $aktiv_szunet,
 ]);
