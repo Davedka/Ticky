@@ -1,13 +1,12 @@
 <?php
 // api/tanar_orarend.php
-// GET /api/tanar/{kod}/orarend
-//
-// ÚJ FLOW: source helper (tanárok.js) ELSŐDLEGES, DB csak fallback.
+
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+$aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
 
