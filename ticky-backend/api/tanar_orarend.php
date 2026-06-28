@@ -24,12 +24,7 @@ if (!preg_match('/^[\p{L}\p{N}._-]{1,32}$/u', $kod)) {
 
 $nap = mai_nap();
 
-// Hétvége
-if ($nap === 0) {
-    json_response(['tanar_nev' => null, 'orak' => [], 'uzenet' => 'Hétvége – nincs tanítás']);
-}
-
-// Szünet
+// Szünet elsőbbség (hétvégén is): ha aktív szünet van, azt mutatjuk a hétvége helyett
 $sz = aktiv_szunet();
 if ($sz !== null) {
     json_response([
@@ -38,6 +33,11 @@ if ($sz !== null) {
         'szunet'    => true,
         'uzenet'    => $sz['nev'] . ' – nincs tanítás (' . $sz['kezdet'] . ' – ' . $sz['vege'] . ')',
     ]);
+}
+
+// Hétvége
+if ($nap === 0) {
+    json_response(['tanar_nev' => null, 'orak' => [], 'szunet' => null, 'uzenet' => 'Hétvége – nincs tanítás']);
 }
 
 $source_teacher_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
