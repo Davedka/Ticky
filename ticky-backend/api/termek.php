@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/room_sort.php';
+$aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
 
