@@ -39,11 +39,24 @@ $terem = $termek[0] ?? null;
 $terem_id = $terem['id'] ?? null;
 $emelet = $terem['emelet'] ?? null;
 
+// Szünet elsőbbség (hétvégén is): ha aktív szünet van, azt mutatjuk a hétvége helyett
+if (!$het_egeszben && $sz !== null) {
+    json_response([
+        'terem'  => $szam,
+        'emelet' => $emelet,
+        'nap'    => $nap,
+        'szunet' => $sz['nev'],
+        'uzenet' => $sz['nev'] . ' – nincs tanítás',
+        'orak'   => [],
+    ]);
+}
+
 if (!$het_egeszben && ($nap === null || $nap < 1 || $nap > 5)) {
     json_response([
         'terem' => $szam,
         'emelet' => $emelet,
         'nap' => $nap,
+        'szunet' => null,
         'uzenet' => 'Nincs tanítás (hétvége)',
         'orak' => [],
     ]);
