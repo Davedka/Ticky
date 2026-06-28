@@ -21,6 +21,10 @@ function aktualis_ido(): string {
     return date('H:i');
 }
 
+/**
+ * A mai napra eső szünetet adja vissza a szunetek táblából (vagy null).
+ * Dátum-alapú: hétvégén is működik. Statikusan cache-el.
+ */
 function ticky_aktiv_szunet(): ?array {
     static $loaded = false;
     static $szunet = null;
@@ -30,18 +34,23 @@ function ticky_aktiv_szunet(): ?array {
     $loaded = true;
 
     $ma = date('Y-m-d');
-    $rows = sb_get('szunetek', [
-        'kezdet' => 'lte.' . $ma,
-        'vege'   => 'gte.' . $ma,
-        'select' => 'id,nev,kezdet,vege',
-        'order'  => 'kezdet.asc',
-        'limit'  => '1',
-    ], 'service');
+    try {
+        $rows = sb_get('szunetek', [
+            'kezdet' => 'lte.' . $ma,
+            'vege'   => 'gte.' . $ma,
+            'select' => 'id,nev,kezdet,vege',
+            'order'  => 'kezdet.asc',
+            'limit'  => '1',
+        ], 'service');
+    } catch (\Throwable $e) {
+        $rows = [];
+    }
 
     $szunet = (is_array($rows) && !empty($rows)) ? $rows[0] : null;
     return $szunet;
 }
 
+/** Csak a szünet nevét adja vissza (vagy null). */
 function ticky_aktiv_szunet_nev(): ?string {
     $szunet = ticky_aktiv_szunet();
     if (!is_array($szunet)) {
@@ -80,25 +89,16 @@ function ticky_group_merge_signature(array $groups): string {
     return (string) json_encode($normalized, JSON_UNESCAPED_UNICODE);
 }
 
-function ticky_set_cached_session(?array $session): void {
-    $GLOBALS['__ticky_session_loaded'] = true;
-    $GLOBALS['__ticky_session_cache'] = $session;
-}
-
-function ticky_cached_session_loaded(): bool {
-    return !empty($GLOBALS['__ticky_session_loaded']);
-}
-
-function _period_index_by_start(): array {
+function ticky_period_index_by_start(): array {
     return ['07:30'=>1,'08:20'=>2,'09:15'=>3,'10:15'=>4,'11:10'=>5,'12:05'=>6,'12:55'=>7,'13:40'=>8];
 }
 
-function _period_index_by_end(): array {
+function ticky_period_index_by_end(): array {
     return ['08:10'=>1,'09:05'=>2,'10:00'=>3,'11:00'=>4,'11:55'=>5,'12:50'=>6,'13:35'=>7,'14:20'=>8];
 }
 
-function _lesson_merge_signature(array $lesson): string {
-    $groups = _group_merge_signature($lesson['csoportok'] ?? []);
+function ticky_lesson_merge_signature(array $lesson): string {
+    $groups = ticky_group_merge_signature($lesson['csoportok'] ?? []);
  
      $top = [
         'tantargy'            => (string) ($lesson['tantargy'] ?? ''),
@@ -124,8 +124,8 @@ function merge_consecutive_orak(array $orak): array {
  
     usort($orak, static fn($a, $b) => strcmp((string) ($a['kezdes'] ?? ''), (string) ($b['kezdes'] ?? '')));
  
-    $start_idx = _period_index_by_start();
-    $end_idx   = _period_index_by_end();
+    $start_idx = ticky_period_index_by_start();
+    $end_idx   = ticky_period_index_by_end();
  
     $result = [];
     foreach ($orak as $ora) {
@@ -143,7 +143,7 @@ function merge_consecutive_orak(array $orak): array {
         $has_content  = ($last['csoportok'] ?? []) !== [] && ($ora['csoportok'] ?? []) !== [];
  
         $same_content = $has_content
-                      && _lesson_merge_signature($last) === _lesson_merge_signature($ora);
+                      && ticky_lesson_merge_signature($last) === ticky_lesson_merge_signature($ora);
 
         $last_end    = $end_idx[substr((string) ($last['vegzes'] ?? ''), 0, 5)] ?? null;
         $this_start  = $start_idx[substr((string) ($ora['kezdes'] ?? ''), 0, 5)] ?? null;
@@ -162,7 +162,7 @@ function merge_consecutive_orak(array $orak): array {
 }
 
 
-function _is_https(): bool {
+function ticky_is_https(): bool {
     if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
         return true;
     }
@@ -180,10 +180,10 @@ function _is_https(): bool {
     return false;
 }
 
-function _current_origin_parts(): array {
+function ticky_current_origin_parts(): array {
     $forwarded_host = trim((string) ($_SERVER['HTTP_X_FORWARDED_HOST'] ?? ''));
     $host = $forwarded_host !== '' ? $forwarded_host : trim((string) ($_SERVER['HTTP_HOST'] ?? ''));
-    $scheme = _is_https() ? 'https' : 'http';
+    $scheme = ticky_is_https() ? 'https' : 'http';
 
     if ($host === '') {
         return ['scheme' => $scheme, 'host' => '', 'port' => null, 'origin' => null];
@@ -198,8 +198,8 @@ function _current_origin_parts(): array {
     ];
 }
 
-function _request_origin_is_same_host(): bool {
-    $current = _current_origin_parts();
+function ticky_request_origin_is_same_host(): bool {
+    $current = ticky_current_origin_parts();
     if (($current['host'] ?? '') === '') {
         return true;
     }
@@ -317,17 +317,17 @@ function admin_is_configured(): bool {
     return admin_password() !== '';
 }
 
-function _auth_cookie_options(int $expires): array {
+function ticky_auth_cookie_options(int $expires): array {
     return [
         'expires' => $expires,
         'path' => '/',
-        'secure' => _is_https(),
+        'secure' => ticky_is_https(),
         'httponly' => true,
         'samesite' => 'Strict',
     ];
 }
 
-function _client_ip(): string {
+function ticky_client_ip(): string {
     $ip = trim((string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     $forwarded = trim((string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
     if ($forwarded !== '') {
@@ -341,11 +341,11 @@ function _client_ip(): string {
     return preg_replace('/[^a-f0-9:.]/i', '_', $ip) ?? 'unknown';
 }
 
-function _user_agent_hash(): string {
+function ticky_user_agent_hash(): string {
     return substr(hash('sha256', (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')), 0, 32);
 }
 
-function _random_token(int $bytes = 32): string {
+function ticky_random_token(int $bytes = 32): string {
     try {
         return bin2hex(random_bytes($bytes));
     } catch (Throwable $error) {
@@ -353,18 +353,18 @@ function _random_token(int $bytes = 32): string {
     }
 }
 
-function _session_cookie_name(): string {
-    return '_session';
+function ticky_session_cookie_name(): string {
+    return 'ticky_session';
 }
 
-function _session_store_dir(): string {
+function ticky_session_store_dir(): string {
     static $dir = null;
 
     if ($dir !== null) {
         return $dir;
     }
 
-    $dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '_sessions';
+    $dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ticky_sessions';
     if (!is_dir($dir)) {
         @mkdir($dir, 0700, true);
     }
@@ -372,30 +372,30 @@ function _session_store_dir(): string {
     return $dir;
 }
 
-function _session_file_path(string $session_id): string {
-    return _session_store_dir() . DIRECTORY_SEPARATOR . 'sess_' . $session_id . '.json';
+function ticky_session_file_path(string $session_id): string {
+    return ticky_session_store_dir() . DIRECTORY_SEPARATOR . 'sess_' . $session_id . '.json';
 }
 
-function _session_hash(string $token): string {
-    return hash_hmac('sha256', $token, _session_signing_key());
+function ticky_session_hash(string $token): string {
+    return hash_hmac('sha256', $token, ticky_session_signing_key());
 }
 
-function _set_cached_session(?array $session): void {
-    $GLOBALS['___session_loaded'] = true;
-    $GLOBALS['___session_cache'] = $session;
+function ticky_set_cached_session(?array $session): void {
+    $GLOBALS['__ticky_session_loaded'] = true;
+    $GLOBALS['__ticky_session_cache'] = $session;
 }
 
-function _cached_session_loaded(): bool {
-    return !empty($GLOBALS['___session_loaded']);
+function ticky_cached_session_loaded(): bool {
+    return !empty($GLOBALS['__ticky_session_loaded']);
 }
 
-function _rate_limit_file(string $scope): string {
-    $key = $scope . '|' . _client_ip();
-    return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '_rl_' . hash('sha256', $key) . '.json';
+function ticky_rate_limit_file(string $scope): string {
+    $key = $scope . '|' . ticky_client_ip();
+    return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ticky_rl_' . hash('sha256', $key) . '.json';
 }
 
-function _rate_limit_state(string $scope): array {
-    $file = _rate_limit_file($scope);
+function ticky_rate_limit_state(string $scope): array {
+    $file = ticky_rate_limit_file($scope);
     if (!is_file($file)) {
         return ['attempts' => [], 'blocked_until' => 0];
     }
@@ -412,12 +412,12 @@ function _rate_limit_state(string $scope): array {
     ];
 }
 
-function _write_rate_limit_state(string $scope, array $state): void {
-    @file_put_contents(_rate_limit_file($scope), json_encode($state), LOCK_EX);
+function ticky_write_rate_limit_state(string $scope, array $state): void {
+    @file_put_contents(ticky_rate_limit_file($scope), json_encode($state), LOCK_EX);
 }
 
-function _rate_limit_wait_seconds(string $scope, int $window, int $max_attempts, int $block_seconds): int {
-    $state = _rate_limit_state($scope);
+function ticky_rate_limit_wait_seconds(string $scope, int $window, int $max_attempts, int $block_seconds): int {
+    $state = ticky_rate_limit_state($scope);
     $now = time();
 
     if (($state['blocked_until'] ?? 0) > $now) {
