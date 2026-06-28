@@ -1,17 +1,12 @@
 <?php
 // api/osztaly_orarend.php
-// GET /api/osztaly/{kod}/orarend
-//
-// ÚJ FLOW: a source helper (tanarok.js alapú) ELSŐDLEGES.
-// A DB-t csak akkor használjuk, ha a source nem talál egyezést.
-// Ez megoldja a csoportbontas-display bugot, mert a DB-ben (importer hibája
-// miatt) cross-product van ZIP helyett, és emiatt rossz osztály->terem
-// hozzárendelések vannak benne.
+
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+$aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
 
