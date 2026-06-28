@@ -1,7 +1,5 @@
 <?php
 // api/osztaly_het.php
-// GET /api/osztaly/{kod}/het
-// Egy hét teljes órarendje az adott osztályra (tanárok.js alapján).
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
