@@ -25,6 +25,10 @@ if ($uri === '/') {
     $nap = mai_nap();
     $ido = aktualis_ido();
 
+    // Szünet elsőbbség: ha aktív szünet van, azt írjuk ki a "Hétvége" helyett
+    $aktiv_szunet = ticky_aktiv_szunet_nev();
+    $nap_cimke = $aktiv_szunet ?? $nap_nevek[$nap];
+
     // Navbar állapot
     $nav_user        = ticky_current_user();
     $nav_show_admin  = admin_can_see_ui();
@@ -162,7 +166,7 @@ if ($uri === '/') {
     <p style="color:rgba(255,255,255,.45);margin-top:10px;">Digitális terem-azonosító rendszer</p>
     <div style="color:#4ade80;font-size:12px;margin-top:16px;display:inline-flex;align-items:center;gap:8px;">
       <span class="pulse" style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;flex-shrink:0;"></span>
-      <?= htmlspecialchars($nap_nevek[$nap]) ?> · <?= htmlspecialchars($ido) ?> · Aktív
+      <?= htmlspecialchars($nap_cimke) ?> · <?= htmlspecialchars($ido) ?> · Aktív
     </div>
   </div>
 
