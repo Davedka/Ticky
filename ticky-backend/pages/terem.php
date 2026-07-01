@@ -325,6 +325,14 @@ async function fetchTimetable() {
   try {
     const d=await fetch(`/api/napirend/${teremSzam}?nap=heten`).then(r=>r.json())
     if(d.error) return
+    if(d.szunet){
+      document.getElementById('tt-skel').style.display='none'
+      const ttTitle=document.querySelector('.tt-title')
+      const ttWrap=document.querySelector('.tt-wrap')
+      if(ttTitle) ttTitle.style.display='none'
+      if(ttWrap) ttWrap.style.display='none'
+      return
+    }
     hetData={}
     ;(d.het||[]).forEach(nd=>{hetData[nd.nap]=nd.orak||[]})
     buildTT()
