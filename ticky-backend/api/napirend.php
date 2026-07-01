@@ -51,6 +51,17 @@ if (!$het_egeszben && $sz !== null) {
     ]);
 }
 
+// Szünet elsőbbség heti nézetnél is: üres hét + szünet név, ne épüljön fel a hét
+if ($het_egeszben && $sz !== null) {
+    json_response([
+        'terem'  => $szam,
+        'emelet' => $emelet,
+        'het'    => [],
+        'szunet' => $sz['nev'],
+        'uzenet' => $sz['nev'] . ' – nincs tanítás',
+    ]);
+}
+
 if (!$het_egeszben && ($nap === null || $nap < 1 || $nap > 5)) {
     json_response([
         'terem' => $szam,
