@@ -5,11 +5,21 @@ A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
 
 ---
 
-## [1.2.4] – 2026-05-28
+## [1.2.4] – 2026-06-29
 
 ### 📝Frissitve
 - Frissitve lett a dokumentáció mivel már elavult lett egy picit a readme teljesen átlett irva.
 - A legutobbi változtatásokat illetve javitásokat és fejlesztések belelettek irva hogy uptodate legyen a readme.
+- Frissitve lett az `órarend_csoportonként` excel fájl amibe voltak az összes csoportok az összes osztályal együtt.
+- Frissitve lett a `tanárok.js` mivel minél többször lett importálva az osztályok illetve tanárok egyre többször en mutatta az összes `osztály`-t/`tanárt`-/`termet`-ami kapcsolod egy órához.
+- Frissitve lett a `testek` között a importer fájlnak a testelése mielőtt beimportálja az összes `tanár`-t `osztály`-t illetve `termet` igy mostmár bárhogy importálja az ember a `orarend_csoportonként` excelből vagy a `tanárok.js` segitségével fixen beimportál minden létező `termet tanárt illetve osztály-t`.
+- Frissitve lett az `órarend_csoportonként` excel fájl segitségével ha egy `osztály`-nál az egyik csoport-nak nincs több órája az nap akkor `kiirja hogy csak az x.csoportnak van órája` ez azt előzi meg hogy mind a merge közben hogy ne legyen az hogy egyből pl 1.óra egybe van az egész osztály aztán egyből ugrik 3.órára hanem ha ott van egy 2.óra az nap akkor azt fogja mutatni hogy csak az x.csoportnak van órája.
+- Frissitve lett a szünetek mutatása kiirja az összes szünetet mostmár.
+
+ ### ✨ Hozzáadva
+ -Frissitett design ui/ux az egész oldalon.
+ -`Osztály nézetnél` uj gombokkal bővült ami a `mai nap` illetve `hét` gombjait takarja. 
+                                                -Fontosságuk abban merül fel hogy amikor debuggolás közben illetve osztály nézése közben hogy megtalálja az ember az orályát eléggé kellemetlen ha egyszerre megakarja nézni egy tanár az egész heti menetrendjét akkor várni kell napokat ezáltal csuszik az adminisztráció ezért egy kicsit könnyebbé teszi a helyzetet a két uj gomb ezáltal bármilyen osztály-t meglehet nézni naponta ha `mai nap` illetve a `hét` gomb-ra kattint a felhasználó. rohamosan kevesebb időbe került ezáltal hogy megnézze a heti menetrendet a tanárok.
 
 ### 🐛 Javítva
 - `Tanárok órája egybecsuszott`bug: a(z) `Osztálynézet` & `Termek` & `Kijelző` - mindegyiknél egybecsuszott a tanárok oróji ha egymás után van órája ugyanabban a teremben ugyanazzal az osztályal ugyanazon a napon, mostmár jól mutatja az órákat mindenhol.
@@ -26,7 +36,10 @@ A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
 
 ### 💡 Tervek
 - `Lyukas óra`: Következő tanévre szeretném megcsinálni a lyukasórát is mivel egy nagyon fontos dolog lehetne mind a tanároknak illetve diákoknak is.
-- `Tanár kereső`: A tulsok tanár miatt ugyérzem hogy mind telefonon mind számitógépen egy fokkal praktikusabb lenne az ha egy kereső lenne felül nem egy dropdown menü igy beirva a monogramot vagy a tanár teljes nevét könyebb keresési lehetőség.
+
+
+### 💡 Tervek alapján hozzzáadott featureok
+-`Lyukas óra`: `Osztálynézet`-nél több `osztály`-t urja kellet kalibrálni az excel illetve az adott adatok alapján.
 
 
 ## [1.2.0] – 2026-04-19
