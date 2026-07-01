@@ -73,13 +73,8 @@
   </button>
 </nav>
 
-<!-- Szünet banner (a szerver d.szunet mezője alapján; hétvége helyett ezt mutatjuk) -->
-<div id="szunet-banner" class="hidden relative z-10 max-w-5xl mx-auto px-4 pt-4">
-  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm" style="background:rgba(200,151,42,.12);border:1px solid rgba(200,151,42,.3);color:#f0c76b;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-    <span>Szünet – jelenleg nincs tanítás.</span>
-  </div>
-</div>
+<!-- Szünet banner (közös szerver-oldali helper: név + visszaszámlálás) -->
+<?php if (function_exists('render_szunet_banner')) render_szunet_banner(); ?>
 
 <!-- Filter bar -->
 <div class="relative z-10 max-w-5xl mx-auto px-4 pt-5 pb-3">
