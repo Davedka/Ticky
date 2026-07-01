@@ -60,6 +60,54 @@ function ticky_aktiv_szunet_nev(): ?string {
     return $nev === '' ? null : $nev;
 }
 
+/**
+ * Egységes, szerver-oldali szünet-banner. Ha épp szünet van, kiír egy arany sávot
+ * a szünet nevével és a hátralévő napokkal (a vege dátum alapján). Ha nincs szünet,
+ * semmit nem ír ki. Bárhol meghívható a body-ban (self-contained inline stílus),
+ * érdemes közvetlenül a navbar után elhelyezni.
+ */
+function render_szunet_banner(): void {
+    $sz = ticky_aktiv_szunet();
+    if (!is_array($sz)) {
+        return;
+    }
+    $nev = trim((string) ($sz['nev'] ?? ''));
+    if ($nev === '') {
+        return;
+    }
+    $vege = trim((string) ($sz['vege'] ?? ''));
+
+    $reszlet = 'jelenleg szünet van';
+    if ($vege !== '') {
+        try {
+            $ma    = new \DateTime(date('Y-m-d'));
+            $v     = new \DateTime($vege);
+            $napok = (int) $ma->diff($v)->days;
+            if ($napok > 0) {
+                $reszlet .= ' · még ' . $napok . ' nap (' . $vege . '-ig)';
+            } else {
+                $reszlet .= ' · utolsó nap (' . $vege . ')';
+            }
+        } catch (\Throwable $e) {
+            // rossz dátum esetén csak a nevet mutatjuk
+        }
+    }
+
+    $moon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+          . 'stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">'
+          . '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+
+    echo '<div style="position:relative;z-index:10;max-width:1100px;margin:16px auto 0;padding:0 20px;">'
+       . '<div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:14px;'
+       . 'font-size:14px;font-weight:600;background:rgba(200,151,42,.10);'
+       . 'border:1px solid rgba(200,151,42,.28);color:#f0c76b;'
+       . 'font-family:\'DM Sans\',system-ui,sans-serif;">'
+       . $moon
+       . '<span>' . htmlspecialchars($nev, ENT_QUOTES) . ' &ndash; '
+       . htmlspecialchars($reszlet, ENT_QUOTES) . '</span>'
+       . '</div></div>';
+}
+
 function ticky_group_merge_signature(array $groups): string {
     $normalized = [];
  
