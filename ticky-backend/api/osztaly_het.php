@@ -15,7 +15,11 @@ $kod = trim(urldecode((string) $params['kod']));
 if ($kod === '' || !preg_match('/^[\p{L}\p{N}\s._\/-]{1,64}$/u', $kod)) {
     json_error('Érvénytelen osztály kód', 400);
 }
-// Szünet idején is mutathatjuk a hetet (csak az aktuális napra van értelme a "szünet" üzenetnek).
+// Szünet idején ne mutassunk órarendet: üres hét + szünet név
+if ($aktiv_szunet !== null) {
+    json_response(['osztaly' => $kod, 'het' => [], 'szunet' => $aktiv_szunet]);
+}
+
 if (function_exists('ticky_source_class_lessons_for_week')) {
     try {
         $result = ticky_source_class_lessons_for_week($kod);
