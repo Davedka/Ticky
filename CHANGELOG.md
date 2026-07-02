@@ -15,11 +15,14 @@ A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
 - Frissitve lett a `testek` között a importer fájlnak a testelése mielőtt beimportálja az összes `tanár`-t `osztály`-t illetve `termet` igy mostmár bárhogy importálja az ember a `orarend_csoportonként` excelből vagy a `tanárok.js` segitségével fixen beimportál minden létező `termet tanárt illetve osztály-t`.
 - Frissitve lett az `órarend_csoportonként` excel fájl segitségével ha egy `osztály`-nál az egyik csoport-nak nincs több órája az nap akkor `kiirja hogy csak az x.csoportnak van órája` ez azt előzi meg hogy mind a merge közben hogy ne legyen az hogy egyből pl 1.óra egybe van az egész osztály aztán egyből ugrik 3.órára hanem ha ott van egy 2.óra az nap akkor azt fogja mutatni hogy csak az x.csoportnak van órája.
 - Frissitve lett a szünetek mutatása kiirja az összes szünetet mostmár.
+- Frissitve lett hogy ameddig szünet van addig nem mutatja sehol az órarendet de automatikusan mutatni fogja utánna miután vége a szünetnek.
+
 
  ### ✨ Hozzáadva
  -Frissitett design ui/ux az egész oldalon.
  -`Osztály nézetnél` uj gombokkal bővült ami a `mai nap` illetve `hét` gombjait takarja. 
                                                 -Fontosságuk abban merül fel hogy amikor debuggolás közben illetve osztály nézése közben hogy megtalálja az ember az orályát eléggé kellemetlen ha egyszerre megakarja nézni egy tanár az egész heti menetrendjét akkor várni kell napokat ezáltal csuszik az adminisztráció ezért egy kicsit könnyebbé teszi a helyzetet a két uj gomb ezáltal bármilyen osztály-t meglehet nézni naponta ha `mai nap` illetve a `hét` gomb-ra kattint a felhasználó. rohamosan kevesebb időbe került ezáltal hogy megnézze a heti menetrendet a tanárok.
+-Elkészült az első `Ticky` dokumentáció teljes első verziója.
 
 ### 🐛 Javítva
 - `Tanárok órája egybecsuszott`bug: a(z) `Osztálynézet` & `Termek` & `Kijelző` - mindegyiknél egybecsuszott a tanárok oróji ha egymás után van órája ugyanabban a teremben ugyanazzal az osztályal ugyanazon a napon, mostmár jól mutatja az órákat mindenhol.
@@ -32,6 +35,12 @@ A projekt összes jelentős változása ebben a fájlban lesz dokumentálva.
 ### ⚙️ WIP [2026-09-01 - 2026-11-01]
 - Nos mivel az iskola átesett nem régiben érettségi előtt egy épület bövitésen következő tanévben várhatóak az uj termek is.
 - Szeretnék pár tester-t szerezni aki tud minden ujdonságot tesztelni fejlesztés alatt van egy olyan tesztelési felület amivel tudnak tesztelni könnyen ugy hogy ne törjön el semmi.
+- Rendes support email elérhetőség megcsinálása és admin dashboard-al összekötése.
+- tester oldal bövitése.
+- admin oldal bövitése.
+- analytics.
+- teljes `felhasználói` dokumentáció magyarul/angolul.
+- teljes `fejlesztői` dokumentáció magyarul/angolul.
 
 
 ### 💡 Tervek
