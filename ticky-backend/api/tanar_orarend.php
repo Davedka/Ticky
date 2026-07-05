@@ -30,7 +30,7 @@ if ($sz !== null) {
     json_response([
         'tanar_nev' => null,
         'orak'      => [],
-        'szunet'    => true,
+        'szunet'    => $sz['nev'],
         'uzenet'    => $sz['nev'] . ' – nincs tanítás (' . $sz['kezdet'] . ' – ' . $sz['vege'] . ')',
     ]);
 }
