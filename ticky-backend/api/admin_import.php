@@ -1,191 +1,334 @@
 <?php
-// api/admin_import.php
+
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/_nav.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/timetable_validator.php';
+require_once __DIR__ . '/../utils/timetable_repo.php';
 
 if (!admin_can_see_ui()) {
-    http_response_code(401);
-    header('Content-Type: application/json');
-    echo json_encode(['hiba' => 'Bejelentkezés szükséges']);
-    exit;
+    json_error('Bejelentkezés szükséges', 401);
 }
 
 require_admin_api_request(['POST']);
 ticky_require_fresh_admin_auth();
 
-set_time_limit(120);
+set_time_limit(180);
 ignore_user_abort(true);
 
-$start_time = microtime(true);
-$errors     = [];
+$started_at = microtime(true);
 
-// ── 1. Forrás validáció ─────────────────────────────
+/**
+ * A tanárok.js sorait a közös import formátumra hozza, hogy ugyanaz a
+ * validátor és ugyanaz a draft-írás fusson rá, mint az Excel importnál.
+ *
+ * @return array{formatum:string,orak:array,problemak:array}
+ */
+function ticky_import_rows_from_source(): array
+{
+    $lessons = [];
+    $issues = [];
+
+    foreach (ticky_source_expected_lessons() as $index => $lesson) {
+        $where = 'tanárok.js#' . ($index + 1);
+
+        $start = substr((string) ($lesson['kezdes'] ?? ''), 0, 5);
+        $slot = ticky_timetable_match_slot($start);
+
+        if ($slot === null) {
+            $issues[] = ticky_timetable_issue(
+                'error',
+                'ISMERETLEN_ORASAV',
+                $where,
+                'A(z) "' . $start . '" kezdés nem szerepel a csengetési rendben.'
+            );
+            continue;
+        }
+
+        $lessons[] = [
+            'tanar'       => ticky_timetable_single_line((string) ($lesson['tanar'] ?? '')),
+            'terem'       => ticky_timetable_single_line((string) ($lesson['terem'] ?? '')),
+            'osztaly'     => ticky_timetable_single_line((string) ($lesson['osztaly'] ?? '')),
+            'tantargy'    => ticky_timetable_single_line((string) ($lesson['tantargy'] ?? '')),
+            'csoport'     => null, // a tanárok.js nem tartalmaz csoportszámot
+            'het_napja'   => (int) ($lesson['het_napja'] ?? 0),
+            'ora_sorszam' => $slot['ora_sorszam'],
+            'kezdes'      => $slot['kezdes'],
+            'vegzes'      => $slot['vegzes'],
+            'forras'      => $where,
+        ];
+    }
+
+    return ['formatum' => 'tanarok.js', 'orak' => $lessons, 'problemak' => $issues];
+}
+
+// ── A) Forrás ellenőrzése ────────────────────────────────────────
 $source_path = ticky_source_path();
 if (!is_file($source_path) || !is_readable($source_path)) {
-    json_error('tanárok.js nem található vagy nem olvasható: ' . $source_path, 400);
+    json_response([
+        'ok'     => false,
+        'kod'    => 'HIANYZO_FORRAS',
+        'uzenet' => 'tanárok.js nem található vagy nem olvasható: ' . $source_path,
+    ], 400);
 }
 
-$entries = ticky_source_load_schedule_entries();
-if ($entries === []) {
-    json_error('Nem sikerült bejegyzéseket olvasni a tanárok.js fájlból', 400);
+if (ticky_source_load_schedule_entries() === []) {
+    json_response([
+        'ok'     => false,
+        'kod'    => 'URES_FORRAS',
+        'uzenet' => 'Nem sikerült bejegyzéseket olvasni a tanárok.js fájlból.',
+    ], 400);
 }
 
-$expected      = ticky_source_expected_lessons();
-$teacher_codes = ticky_source_unique_teachers();
-$room_codes    = ticky_source_unique_rooms();
-$teacher_names = ticky_source_teacher_names();
-
-if ($teacher_codes === [] || $room_codes === []) {
-    json_error('Üres tanár- vagy teremlista a forrásban', 400);
+$schema = ticky_repo_schema_status();
+if (!$schema['ok']) {
+    json_response([
+        'ok'     => false,
+        'kod'    => 'HIANYZO_SEMA',
+        'uzenet' => 'Hiányzó adatbázis szerkezet: ' . implode(', ', $schema['hiany'])
+            . '. Futtasd le a ticky-backend/sql/001_orarend_verziok.sql szkriptet.',
+    ], 503);
 }
 
-// ── 2. Emelet értékek mentése ────────────────────────
-$existing_rooms = sb_get('termek', ['select' => 'terem_szam,emelet'], 'service');
-$emelet_map     = [];
-if (is_array($existing_rooms)) {
-    foreach ($existing_rooms as $r) {
-        $szam   = (string) ($r['terem_szam'] ?? '');
-        $emelet = $r['emelet'] ?? null;
-        if ($szam !== '' && $emelet !== null) {
-            $emelet_map[$szam] = $emelet;
+// ── B) + C) Validáció ────────────────────────────────────────────
+$parsed = ticky_import_rows_from_source();
+$report = ticky_validator_run(
+    $parsed,
+    array_keys(ticky_repo_teacher_map()),
+    array_keys(ticky_repo_room_map()),
+    ticky_repo_active_class_codes()
+);
+
+$lessons = $parsed['orak'];
+$current_user = ticky_current_user();
+$created_by = is_array($current_user) ? ($current_user['id'] ?? null) : null;
+
+$import_log = [
+    'verzio_id'              => null,
+    'fajlnev'                => basename($source_path),
+    'fajl_meret'             => (int) (filesize($source_path) ?: 0),
+    'fajl_sha256'            => (string) hash_file('sha256', $source_path),
+    'formatum'               => 'tanarok.js',
+    'statusz'                => 'ervenytelen',
+    'sorok_szama'            => count($lessons),
+    'hibak_szama'            => $report['hibak_szama'],
+    'figyelmeztetesek_szama' => $report['figyelmeztetesek_szama'],
+    'hibak'                  => $report['hibak'],
+    'figyelmeztetesek'       => $report['figyelmeztetesek'],
+    'statisztika'            => $report['statisztika'],
+    'letrehozta'             => $created_by,
+];
+
+if (!$report['ervenyes'] || $lessons === []) {
+    $import_id = ticky_repo_log_import($import_log);
+
+    json_response([
+        'ok'                     => false,
+        'kod'                    => 'VALIDACIOS_HIBA',
+        'uzenet'                 => $report['hibak_szama'] . ' hiba miatt nem jött létre draft verzió.',
+        'import_id'              => $import_id,
+        'verzio_id'              => null,
+        'formatum'               => 'tanarok.js',
+        'ervenyes'               => false,
+        'statisztika'            => $report['statisztika'],
+        'hibak'                  => $report['hibak'],
+        'figyelmeztetesek'       => $report['figyelmeztetesek'],
+        'hibak_szama'            => $report['hibak_szama'],
+        'figyelmeztetesek_szama' => $report['figyelmeztetesek_szama'],
+        'idotartam_ms'           => (int) round((microtime(true) - $started_at) * 1000),
+    ]);
+}
+
+// ── Draft létrehozása ────────────────────────────────────────────
+$version_id = null;
+try {
+    $teacher_codes = [];
+    $room_codes = [];
+    foreach ($lessons as $lesson) {
+        $teacher_codes[osztaly_lower((string) $lesson['tanar'])] = (string) $lesson['tanar'];
+        $room_codes[osztaly_lower((string) $lesson['terem'])] = (string) $lesson['terem'];
+    }
+
+    $created_entities = ticky_repo_ensure_entities(array_values($teacher_codes), array_values($room_codes));
+
+    // A tanárok.js TEACHER_NAMES blokkjából pótoljuk a hiányzó teljes neveket.
+    // Csak azokat írjuk, ahol tényleg nincs név – így nem küldünk feleslegesen
+    // tucatnyi PATCH kérést minden importnál.
+    $teacher_names = [];
+    foreach (ticky_source_teacher_names() as $code => $name) {
+        $teacher_names[osztaly_lower($code)] = $name;
+    }
+
+    $named = 0;
+    $stored_teachers = sb_get('tanarok', ['select' => 'id,rovid_nev,nev', 'limit' => TICKY_REPO_FETCH_LIMIT], 'service');
+    foreach (is_array($stored_teachers) ? $stored_teachers : [] as $stored) {
+        if (trim((string) ($stored['nev'] ?? '')) !== '') {
+            continue;
+        }
+
+        $name = $teacher_names[osztaly_lower((string) ($stored['rovid_nev'] ?? ''))] ?? null;
+        if ($name === null) {
+            continue;
+        }
+
+        if (sb_update('tanarok', ['nev' => $name], ['id' => 'eq.' . $stored['id']], 'service')['success']) {
+            $named++;
         }
     }
-}
 
-// ── 3. Törlés ────────────────────────────────────────
-// CSAK a 3 adat-táblát, FK-safe sorrendben.
-// View-ket (aktualis_orak, napi_orarend) NEM lehet DELETE-elni.
-// orak_rendje (csengetési rend) seed adat – nem szabad törölni.
-//
-// orarendek-nek van FK-ja termek és tanarok felé (ON DELETE CASCADE),
-// szóval elég lenne a termek + tanarok törlése, de explicit
-// orarendek DELETE elsőként biztonságosabb és gyorsabb.
-$delete_tables = ['orarendek', 'termek', 'tanarok'];
-foreach ($delete_tables as $table) {
-    $del = sb_request('DELETE', $table, null, ['id' => 'not.is.null'], 'service');
-    if (!$del['success']) {
-        $errors[] = 'Törlés sikertelen: ' . $table;
-    }
-    usleep(200_000);
-}
+    $version_id = ticky_repo_create_draft(
+        'tanárok.js – ' . date('Y-m-d H:i'),
+        ((int) date('n') >= 8) ? (date('Y') . '/' . ((int) date('Y') + 1)) : (((int) date('Y') - 1) . '/' . date('Y')),
+        $created_by,
+        'Importálva a tanárok.js forrásból.'
+    );
 
-// ── 4. Tanárok insert ────────────────────────────────
-$teacher_rows = [];
-foreach ($teacher_codes as $code) {
-    $teacher_rows[] = [
-        'rovid_nev' => $code,
-        'nev'       => $teacher_names[$code] ?? null,
-    ];
-}
-
-$tanarok_inserted = 0;
-foreach (array_chunk($teacher_rows, 100) as $batch) {
-    $res = sb_request('POST', 'tanarok', $batch, [], 'service');
-    if ($res['success']) {
-        $tanarok_inserted += count($batch);
-    } else {
-        $errors[] = 'Tanár insert hiba: ' . substr((string) ($res['error'] ?? ''), 0, 200);
-    }
-}
-
-// ── 5. Termek insert ─────────────────────────────────
-$room_rows = [];
-foreach ($room_codes as $room) {
-    $room_rows[] = ['terem_szam' => $room];
-}
-
-$termek_inserted = 0;
-foreach (array_chunk($room_rows, 100) as $batch) {
-    $res = sb_request('POST', 'termek', $batch, [], 'service');
-    if ($res['success']) {
-        $termek_inserted += count($batch);
-    } else {
-        $errors[] = 'Terem insert hiba: ' . substr((string) ($res['error'] ?? ''), 0, 200);
-    }
-}
-
-// ── 6. ID-k lekérése ─────────────────────────────────
-$db_teachers = sb_get('tanarok', ['select' => 'id,rovid_nev', 'limit' => '10000'], 'service');
-$db_rooms    = sb_get('termek',  ['select' => 'id,terem_szam', 'limit' => '10000'], 'service');
-
-$teacher_id_map = [];
-if (is_array($db_teachers)) {
-    foreach ($db_teachers as $t) {
-        $teacher_id_map[ticky_source_normalize_token((string) ($t['rovid_nev'] ?? ''))] = $t['id'];
-    }
-}
-
-$room_id_map = [];
-if (is_array($db_rooms)) {
-    foreach ($db_rooms as $r) {
-        $room_id_map[ticky_source_normalize_token((string) ($r['terem_szam'] ?? ''))] = $r['id'];
-    }
-}
-
-// ── 7. Órarendek összeállítás + insert ───────────────
-$lesson_rows = [];
-foreach ($expected as $lesson) {
-    $teacher_key = ticky_source_normalize_token((string) ($lesson['tanar'] ?? ''));
-    $room_key    = ticky_source_normalize_token((string) ($lesson['terem'] ?? ''));
-
-    $teacher_id = $teacher_id_map[$teacher_key] ?? null;
-    $room_id    = $room_id_map[$room_key] ?? null;
-
-    if ($teacher_id === null) {
-        $errors[] = 'Nem találom tanár ID-t: ' . $teacher_key;
-        continue;
-    }
-    if ($room_id === null) {
-        $errors[] = 'Nem találom terem ID-t: ' . $room_key;
-        continue;
+    $inserted = ticky_repo_insert_lessons($version_id, $lessons);
+} catch (TickyRepoException $error) {
+    if ($version_id !== null) {
+        try {
+            ticky_repo_delete_draft($version_id);
+        } catch (TickyRepoException) {
+            // Az eredeti hiba a fontosabb.
+        }
     }
 
-    $lesson_rows[] = [
-        'terem_id'    => $room_id,
-        'tanar_id'    => $teacher_id,
-        'osztaly'     => (string) ($lesson['osztaly'] ?? ''),
-        'tantargy'    => (string) ($lesson['tantargy'] ?? ''),
-        'het_napja'   => (int) ($lesson['het_napja'] ?? 0),
-        'ora_sorszam' => $lesson['ora_sorszam'],
-        'kezdes'      => (string) ($lesson['kezdes'] ?? ''),
-        'vegzes'      => (string) ($lesson['vegzes'] ?? ''),
-        'aktiv'       => true,
-    ];
+    ticky_repo_log_import($import_log);
+    json_response(['ok' => false, 'kod' => 'ADATBAZIS_HIBA', 'uzenet' => $error->getMessage()], 502);
 }
 
-$orarendek_inserted = 0;
-foreach (array_chunk($lesson_rows, 200) as $batch) {
-    $res = sb_request('POST', 'orarendek', $batch, [], 'service');
-    if ($res['success']) {
-        $orarendek_inserted += count($batch);
-    } else {
-        $errors[] = 'Órarend insert hiba: ' . substr((string) ($res['error'] ?? ''), 0, 200);
-    }
-}
+$active_version = ticky_repo_active_version();
 
-// ── 8. Emelet helyreállítás ──────────────────────────
-$emelet_restored = 0;
-foreach ($emelet_map as $szam => $emelet) {
-    $res = sb_update('termek', ['emelet' => $emelet], ['terem_szam' => 'eq.' . $szam], 'service');
-    if ($res['success']) {
-        $emelet_restored++;
-    }
-}
-
-// ── Válasz ───────────────────────────────────────────
-$duration_ms = (int) round((microtime(true) - $start_time) * 1000);
-
-$unique_errors = array_values(array_unique($errors));
+$import_log['verzio_id'] = $version_id;
+$import_log['statusz'] = 'feldolgozva';
+$import_id = ticky_repo_log_import($import_log);
 
 json_response([
-    'ok'                  => count($unique_errors) === 0 || $orarendek_inserted > 0,
-    'tanarok_inserted'    => $tanarok_inserted,
-    'termek_inserted'     => $termek_inserted,
-    'orarendek_inserted'  => $orarendek_inserted,
-    'emelet_restored'     => $emelet_restored,
-    'errors'              => array_slice($unique_errors, 0, 30),
-    'duration_ms'         => $duration_ms,
+    'ok'                     => true,
+    'import_id'              => $import_id,
+    'verzio_id'              => $version_id,
+    'formatum'               => 'tanarok.js',
+    'ervenyes'               => true,
+    'beszurt_sorok'          => $inserted,
+    'uj_entitasok'           => $created_entities,
+    'tanar_nevek_frissitve'  => $named,
+    'aktiv_verzio'           => $active_version,
+    'elteresek'              => ticky_repo_diff($version_id, $active_version === null ? null : (int) $active_version['id']),
+    'statisztika'            => $report['statisztika'],
+    'hibak'                  => [],
+    'figyelmeztetesek'       => $report['figyelmeztetesek'],
+    'hibak_szama'            => 0,
+    'figyelmeztetesek_szama' => $report['figyelmeztetesek_szama'],
+    'uzenet'                 => 'Draft verzió létrejött. Az élesítéshez publikáld az Órarend szekcióban.',
+    'idotartam_ms'           => (int) round((microtime(true) - $started_at) * 1000),
 ]);
+```
+
+## `ticky-backend/api/osztalyok.php`
+
+MÓDOSÍTOTT — teljes tartalom (1 sor változott).  
+Sorok: 78
+
+```php
+<?php
+// api/osztalyok.php
+require_once __DIR__ . '/../config/supabase.php';
+require_once __DIR__ . '/../utils/helpers.php';
+require_once __DIR__ . '/../utils/tanarok_source.php';
+
+
+handle_cors();
+
+function _osz_normalize(string $v): string {
+    $v = trim($v);
+    return $v === '' ? '' : (preg_replace('/\s+/u', ' ', $v) ?? $v);
+}
+
+function _osz_is_room(string $v): bool {
+    $compact = preg_replace('/\s+/u', '', _osz_normalize($v)) ?? '';
+    if ($compact === '') return false;
+    if (str_contains($compact, '.') || str_contains($compact, '_')) return false;
+    if (preg_match('/^\d+$/', $compact)) return (int)$compact > 30;
+    return preg_match('/^(?:K\d{1,4}|T\d{1,2}|M\d{1,3}|KT)$/iu', $compact) === 1;
+}
+
+function _osz_split_and_collect(string $raw, array &$codes): void {
+    if (str_contains($raw, ',')) {
+        foreach (explode(',', $raw) as $part) _osz_split_and_collect($part, $codes);
+        return;
+    }
+    if (preg_match('/^\d+\/\d+/', trim($raw))) {
+        $c = _osz_normalize($raw);
+        if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
+        return;
+    }
+    if (str_contains($raw, '/')) {
+        foreach (explode('/', $raw) as $part) _osz_split_and_collect($part, $codes);
+        return;
+    }
+    $c = _osz_normalize($raw);
+    if ($c !== '' && !_osz_is_room($c)) {
+        $codes[mb_strtolower($c, 'UTF-8')] = $c;
+    }
+}
+
+$codes = [];
+
+// Csak az aktív verzió sorai: a draft órarend osztályai nem szivároghatnak ki
+// a publikus API-n keresztül.
+$db_classes = sb_get('orarendek', ['select' => 'osztaly', 'aktiv' => 'eq.true']);
+if ($db_classes) {
+    foreach ($db_classes as $row) {
+        if (!empty($row['osztaly'])) _osz_split_and_collect($row['osztaly'], $codes);
+    }
+}
+
+$js_path = ticky_source_path();
+if (is_file($js_path)) {
+    $contents = file_get_contents($js_path);
+    preg_match_all("/\bclass\s*:\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
+    foreach ($matches[1] as $raw) _osz_split_and_collect($raw, $codes);
+}
+
+$result = array_values($codes);
+
+usort($result, function($a, $b) {
+    $get_grade = function($name) {
+        $upper = strtoupper($name);
+        if (str_contains($upper, 'HT') || str_contains($name, '_')) return 999;
+        if (preg_match('/^(\d+)\./', $name, $m)) return (int)$m[1];
+        if (preg_match('/\/(\d+)/', $name, $m))  return (int)$m[1];
+        if (preg_match('/^(\d+)/', $name, $m))   return (int)$m[1];
+        return 999;
+    };
+    $ga = $get_grade($a);
+    $gb = $get_grade($b);
+    if ($ga !== $gb) return $ga <=> $gb;
+    return strnatcasecmp($a, $b);
+});
+
+json_response(['osztalyok' => $result, 'count' => count($result)]);
+```
+
+## `package.json`
+
+MÓDOSÍTOTT — teljes tartalom.  
+Sorok: 14
+
+```json
+{
+  "name": "ticky-importer",
+  "version": "6.0.0",
+  "type": "module",
+  "scripts": {
+    "import": "node importer.js",
+    "test": "node tests/orarend-import.test.mjs && node tests/php-suite.test.mjs && node tests/security-hardening.test.mjs && node tests/timetable-merge-audit.test.mjs && node tests/import-source.test.mjs",
+    "test:php": "node tests/php-suite.test.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7"
+  }
+}
