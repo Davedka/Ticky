@@ -141,6 +141,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
     <aside class="sidebar">
       <div class="glass rounded-2xl p-3">
         <button class="navbtn active" data-section="dashboard">Dashboard</button>
+        <button class="navbtn" data-section="orarend">Órarend</button>
         <button class="navbtn" data-section="felhasznalok">Felhasznalok</button>
         <button class="navbtn" data-section="szunetek">Szunetek</button>
         <button class="navbtn" data-section="tanarok">Tanarok</button>
@@ -262,6 +263,49 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
         </div>
       </section>
 
+      <section id="section-orarend" class="section">
+        <div class="flex items-center justify-between gap-4 mb-5">
+          <div>
+            <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Órarend</h1>
+            <p class="small mt-2">Excel feltöltés → validáció → draft → előnézet → publikálás. A feltöltés soha nem írja felül azonnal az éles órarendet.</p>
+          </div>
+          <button class="btn btn-ghost" id="reload-orarend">Frissítés</button>
+        </div>
+
+        <div id="orarend-schema" class="mb-5"></div>
+
+        <div class="glass rounded-2xl p-5 mb-5">
+          <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Aktív verzió</h3>
+          <div id="orarend-active" class="small">Betöltés...</div>
+        </div>
+
+        <div class="glass rounded-2xl p-5 mb-5">
+          <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Forrás</h3>
+          <p class="small mb-4">Támogatott formátumok: <strong>Ticky Import Format v1</strong> (fejléces tábla), illetve az iskolai csoportonkénti órarend export.</p>
+          <div class="grid md:grid-cols-2 gap-3 mb-4">
+            <label class="small block">Verzió neve (opcionális)
+              <input id="orarend-nev" class="inp mt-1" placeholder="pl. 2026/2027 szeptember">
+            </label>
+            <label class="small block">Tanév (opcionális)
+              <input id="orarend-tanev" class="inp mt-1" placeholder="pl. 2026/2027">
+            </label>
+          </div>
+          <input id="orarend-fajl" type="file" accept=".xlsx,.xlsm" class="inp mb-4">
+          <div class="flex items-center gap-3 flex-wrap">
+            <button class="btn btn-gold" id="orarend-upload">Excel feltöltése és ellenőrzése</button>
+            <button class="btn btn-ghost" id="orarend-template">Sablon letöltése</button>
+            <span id="orarend-status" class="small"></span>
+          </div>
+        </div>
+
+        <div id="orarend-report"></div>
+
+        <div class="glass rounded-2xl p-3 overflow-auto">
+          <h3 class="text-sm font-bold uppercase tracking-wider mb-3 px-2 pt-2" style="color:rgba(255,255,255,.4)">Verziók</h3>
+          <table class="table" id="orarend-versions"></table>
+        </div>
+      </section>
+
       <section id="section-diagnosztika" class="section">
         <div class="flex items-center justify-between gap-4 mb-5">
           <div>
@@ -302,9 +346,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
 
         <div class="glass rounded-2xl p-5">
           <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Import</h3>
-          <p class="small mb-4">Teljes ujraimportalas a tanarok.js forrásból. Minden tanár, terem és órarend sor törlődik, majd újra beíródik.</p>
+          <p class="small mb-4">Draft órarend verzió készítése a tanárok.js forrásból. Semmi nem törlődik és nem lép azonnal életbe – a draftot az <strong>Órarend</strong> szekcióban tudod ellenőrizni és publikálni.</p>
           <div class="flex items-center gap-3">
-            <button class="btn btn-gold" id="run-import">Teljes import</button>
+            <button class="btn btn-gold" id="run-import">Draft készítése</button>
             <span id="import-status" class="small"></span>
           </div>
           <div id="import-result" class="mt-4"></div>
@@ -316,7 +360,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
 </div>
 
 <script>
-const state={section:'dashboard',users:[],breaks:[],teachers:[],rooms:[]};
+const state={section:'dashboard',users:[],breaks:[],teachers:[],rooms:[],versions:[],draft:null};
 const currentUserId=<?= json_encode($current_user['id'] ?? null, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 const csrfToken=<?= json_encode($csrf_token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
@@ -385,12 +429,26 @@ async function adminFetch(url,options={}){
   const headers=new Headers(init.headers||{});
   headers.set('X-Ticky-Admin','1');
   headers.set('X-CSRF-Token',csrfToken);
-  if(init.body&&typeof init.body!=='string'){headers.set('Content-Type','application/json');init.body=JSON.stringify(init.body)}
+  // FormData eseten a bongeszo allitja be a Content-Type-ot a boundary-val.
+  const isFormData=(typeof FormData!=='undefined')&&(init.body instanceof FormData);
+  if(init.body&&typeof init.body!=='string'&&!isFormData){headers.set('Content-Type','application/json');init.body=JSON.stringify(init.body)}
   init.headers=headers;
   const res=await fetch(url,init);
   const data=await readJson(res);
-  if(!res.ok){throw new Error(data.error||('HTTP '+res.status))}
+  if(!res.ok){throw new Error(data.error||data.uzenet||('HTTP '+res.status))}
   return data;
+}
+
+// Az import valaszara 4xx eseten is szukseg van (a validacios riport miatt),
+// ezert itt nem dobunk, hanem visszaadjuk a torzset a statusszal egyutt.
+async function adminFetchReport(url,options={}){
+  const init={credentials:'same-origin',...options};
+  const headers=new Headers(init.headers||{});
+  headers.set('X-Ticky-Admin','1');
+  headers.set('X-CSRF-Token',csrfToken);
+  init.headers=headers;
+  const res=await fetch(url,init);
+  return {status:res.status,data:await readJson(res)};
 }
 
 async function logout(){
@@ -409,7 +467,7 @@ function setSection(name){
   state.section=name;
   document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='section-'+name));
   document.querySelectorAll('.navbtn[data-section]').forEach(el=>el.classList.toggle('active',el.dataset.section===name));
-  const loaders={dashboard:loadDashboard,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:()=>{loadDiagnosztika();loadGithubInfo()}};
+  const loaders={dashboard:loadDashboard,orarend:loadOrarendVersions,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:()=>{loadDiagnosztika();loadGithubInfo()}};
   loaders[name]?.();
 }
 document.querySelectorAll('.navbtn[data-section]').forEach(btn=>btn.addEventListener('click',()=>setSection(btn.dataset.section)));
@@ -658,22 +716,31 @@ async function loadDiagnosztika(){
 }
 
 async function runImport(){
-  if(!confirm('FIGYELEM: Minden tanar, terem es orarend adat torlodik es ujra importalodik a tanarok.js forrasbol. Biztosan folytatod?')) return;
-  q('import-status').textContent='Import folyamatban...';
+  if(!confirm('Draft orarend verzio keszul a tanarok.js forrasbol.\n\nSemmi nem torlodik es nem lep azonnal eletbe – a publikalas kulon lepes. Folytatod?')) return;
+  q('import-status').textContent='Feldolgozas...';
   q('import-result').innerHTML='';
   q('run-import').disabled=true;
   try{
-    const d=await adminFetch('/api/admin/import',{method:'POST',body:{mode:'full'}});
+    const {data}=await adminFetchReport('/api/admin/import',{method:'POST'});
     q('import-status').textContent='';
-    let html=`<div class="glass rounded-xl p-4 mt-3"><p><strong style="color:#86efac">Import kesz!</strong></p><p class="small mt-1">Tanarok: ${d.tanarok_inserted??0} | Termek: ${d.termek_inserted??0} | Orarendek: ${d.orarendek_inserted??0}</p><p class="small">Emelet visszaallitva: ${d.emelet_restored??0} | Ido: ${d.duration_ms??0} ms</p>`;
-    if((d.errors||[]).length>0){
-      html+=`<p class="small mt-2" style="color:#fda4af">Hibak (${d.errors.length}):</p><ul class="small" style="color:#fda4af">`;
-      for(const e of d.errors.slice(0,15)) html+=`<li>${esc(e)}</li>`;
-      html+='</ul>';
+
+    if(data.ok){
+      const s=data.statisztika||{};
+      q('import-result').innerHTML=`<div class="glass rounded-xl p-4 mt-3">
+        <p><strong style="color:#86efac">Draft verzio #${Number(data.verzio_id)} letrejott.</strong></p>
+        <p class="small mt-1">Orak: ${Number(s.orak||0)} | Tanarok: ${Number(s.tanarok||0)} | Termek: ${Number(s.termek||0)} | Osztalyok: ${Number(s.osztalyok||0)}</p>
+        <p class="small">Figyelmeztetesek: ${Number(data.figyelmeztetesek_szama||0)} | Ido: ${Number(data.idotartam_ms||0)} ms</p>
+        <p class="small mt-2">Az elesitesehez valtsd az Orarend szekciora.</p></div>`;
+      toast('Draft letrejott – publikalas az Orarend szekcioban','ok');
+    }else{
+      q('import-result').innerHTML=`<div class="glass rounded-xl p-4 mt-3" style="border-color:rgba(244,63,94,.3)">
+        <p style="color:#fda4af">${esc(data.uzenet||'Sikertelen import')}</p></div>`;
+      toast(data.uzenet||'Sikertelen import','err');
     }
-    html+='</div>';
-    q('import-result').innerHTML=html;
-    toast('Import sikeres!');
+
+    // A reszletes hiba/figyelmeztetes riportot az Orarend szekcio jeleniti meg.
+    renderOrarendReport(data);
+    await loadOrarendVersions();
     loadDiagnosztika();
   }catch(error){
     q('import-status').textContent='';
@@ -732,6 +799,227 @@ q('run-github-sync').addEventListener('click',runGithubSync);
 q('reload-dashboard').addEventListener('click',loadDashboard);
 q('create-user').addEventListener('click',createUser);
 q('reload-users').addEventListener('click',loadUsers);
+// ── Órarend verziókezelés ────────────────────────────────────────
+const ORAREND_STATUS={draft:{label:'DRAFT',chip:'blue'},active:{label:'AKTÍV',chip:'green'},archived:{label:'ARCHIVÁLT',chip:'gold'}};
+
+function orarendStatusChip(status){
+  const meta=ORAREND_STATUS[status]||{label:String(status||'?').toUpperCase(),chip:'red'};
+  return statusChip(meta.label,meta.chip);
+}
+function orarendDate(value){return String(value||'').replace('T',' ').slice(0,16)}
+function orarendSigned(n){const v=Number(n)||0;return v>0?('+'+v):String(v)}
+
+function renderOrarendSchemaWarning(payload){
+  const el=q('orarend-schema'); if(!el) return;
+  if(payload&&payload.kod==='HIANYZO_SEMA'){
+    el.innerHTML=`<div class="glass rounded-2xl p-5" style="border-color:rgba(244,63,94,.28)">
+      <div style="color:#fda4af;font-weight:700;margin-bottom:6px">Hiányzó adatbázis szerkezet</div>
+      <div class="small">${esc(payload.uzenet||'')}</div></div>`;
+    return;
+  }
+  el.innerHTML='';
+}
+
+function renderOrarendActive(active,versions){
+  const el=q('orarend-active'); if(!el) return;
+  if(!active){
+    el.innerHTML='<span style="color:rgba(255,255,255,.5)">Még nincs publikált órarend verzió.</span>';
+    return;
+  }
+  const row=(versions||[]).find(v=>Number(v.id)===Number(active.id));
+  el.innerHTML=`<div style="font-size:18px;color:#fff;font-family:'Playfair Display',serif">${esc(active.nev||'')}</div>
+    <div class="mt-1">${esc(active.tanev||'')} · publikálva: ${esc(orarendDate(active.published_at))}
+    ${row?(' · '+row.sorok_szama+' órarend sor'):''}</div>`;
+}
+
+function renderOrarendVersions(versions){
+  const table=q('orarend-versions'); if(!table) return;
+  if(!versions.length){table.innerHTML='<tr><td class="small">Még nincs verzió.</td></tr>';return}
+
+  const rows=versions.map(v=>{
+    const id=Number(v.id);
+    const actions=[];
+    if(v.statusz==='draft'){
+      actions.push(`<button class="btn btn-gold" data-orarend-publish="${id}">Publikálás</button>`);
+      actions.push(`<button class="btn btn-ghost" data-orarend-delete="${id}">Törlés</button>`);
+    }else if(v.statusz==='archived'){
+      actions.push(`<button class="btn btn-ghost" data-orarend-rollback="${id}">Visszaállítás</button>`);
+    }
+    return `<tr>
+      <td>${orarendStatusChip(v.statusz)}</td>
+      <td>${esc(v.nev||'')}<div class="small">${esc(v.megjegyzes||'')}</div></td>
+      <td>${esc(v.tanev||'')}</td>
+      <td class="mono">${Number(v.sorok_szama||0)}</td>
+      <td class="small">${esc(orarendDate(v.created_at))}</td>
+      <td><div class="flex gap-2 flex-wrap">${actions.join('')}</div></td>
+    </tr>`;
+  }).join('');
+
+  table.innerHTML=`<thead><tr><th>Állapot</th><th>Név</th><th>Tanév</th><th>Sorok</th><th>Létrehozva</th><th>Művelet</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function renderOrarendIssues(title, issues, total, tone){
+  if(!total) return '';
+  const shown=issues.slice(0,25).map(i=>`<li style="margin-bottom:6px">
+    <span class="chip ${tone}">${esc(i.kod||'')}</span>
+    <span class="mono small" style="margin:0 6px">${esc(i.hely||'')}</span>
+    ${esc(i.uzenet||'')}</li>`).join('');
+  const more=total>shown.length?`<div class="small mt-2">… és további ${total-issues.slice(0,25).length} tétel.</div>`:'';
+  return `<div class="glass rounded-2xl p-5 mb-4">
+    <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">${esc(title)} (${total})</h3>
+    <ul class="small" style="list-style:none;padding:0;margin:0">${shown}</ul>${more}</div>`;
+}
+
+function renderOrarendDiff(diff){
+  if(!diff) return '';
+  const labels={orak:'órarend sor',tanarok:'tanár',termek:'terem',osztalyok:'osztály'};
+  const items=Object.keys(labels).filter(k=>diff[k]).map(k=>`<div class="stat glass rounded-2xl">
+      <div class="small">${esc(labels[k])}</div>
+      <div style="font-size:22px;font-weight:700">${Number(diff[k].utana)}</div>
+      <div class="small">előtte ${Number(diff[k].elotte)} · ${esc(orarendSigned(diff[k].valtozas))}</div>
+    </div>`).join('');
+  return `<div class="grid md:grid-cols-4 gap-3 mb-4">${items}</div>`;
+}
+
+function renderOrarendReport(payload){
+  const el=q('orarend-report'); if(!el) return;
+  if(!payload){el.innerHTML='';return}
+
+  const stats=payload.statisztika||{};
+  const valid=payload.ok===true;
+  const head=`<div class="glass rounded-2xl p-5 mb-4">
+    <div class="flex items-center gap-3 flex-wrap mb-3">
+      ${valid?statusChip('ELLENŐRZÉS RENDBEN','green'):statusChip('HIBÁS IMPORT','red')}
+      ${payload.formatum?statusChip(String(payload.formatum).toUpperCase()+' formátum','blue'):''}
+      ${statusChip(Number(payload.hibak_szama||0)+' hiba',Number(payload.hibak_szama||0)?'red':'green')}
+      ${statusChip(Number(payload.figyelmeztetesek_szama||0)+' figyelmeztetés','gold')}
+    </div>
+    <div class="small">${esc(payload.uzenet||'')}</div>
+    <div class="grid md:grid-cols-5 gap-3 mt-4">
+      ${['orak','tanarok','termek','osztalyok','tantargyak'].map(k=>`<div class="stat glass rounded-2xl">
+        <div class="small">${esc(k)}</div><div style="font-size:22px;font-weight:700">${Number(stats[k]||0)}</div></div>`).join('')}
+    </div>
+  </div>`;
+
+  const publishBox=valid&&payload.verzio_id?`<div class="glass rounded-2xl p-5 mb-4">
+    <h3 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,.4)">Előnézet – draft #${Number(payload.verzio_id)}</h3>
+    ${renderOrarendDiff(payload.elteresek)}
+    <p class="small mb-3">A publikálás lecseréli az aktuális élő órarendet. A régi verzió archiválódik, bármikor visszaállítható.</p>
+    <div class="flex items-center gap-3 flex-wrap">
+      <button class="btn btn-gold" data-orarend-publish="${Number(payload.verzio_id)}">Órarend publikálása</button>
+      <button class="btn btn-ghost" data-orarend-delete="${Number(payload.verzio_id)}">Draft elvetése</button>
+    </div></div>`:'';
+
+  el.innerHTML=head+publishBox
+    +renderOrarendIssues('Hibák – ezek nélkül nem publikálható',payload.hibak||[],Number(payload.hibak_szama||0),'red')
+    +renderOrarendIssues('Figyelmeztetések – publikálható, de nézd át',payload.figyelmeztetesek||[],Number(payload.figyelmeztetesek_szama||0),'gold');
+}
+
+// A sablon vedett admin vegponton van, ezert fetch-csel kerjuk le a fejlecekkel,
+// es blobkent mentjuk – egy sima <a href> nem tudna CSRF tokent kuldeni.
+async function downloadOrarendTemplate(){
+  try{
+    const res=await fetch('/api/admin/orarend/sablon',{
+      credentials:'same-origin',
+      headers:{'X-Ticky-Admin':'1','X-CSRF-Token':csrfToken}
+    });
+    if(!res.ok){throw new Error((await readJson(res)).uzenet||('HTTP '+res.status))}
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url; link.download='Ticky_Import_Template.xlsx';
+    link.click();
+    URL.revokeObjectURL(url);
+  }catch(error){toast(error.message,'err')}
+}
+
+async function loadOrarendVersions(){
+  try{
+    const data=await adminFetch('/api/admin/orarend/verziok');
+    renderOrarendSchemaWarning(null);
+    state.versions=data.verziok||[];
+    renderOrarendVersions(state.versions);
+    renderOrarendActive(state.versions.find(v=>v.statusz==='active')||null,state.versions);
+  }catch(error){
+    // A hiányzó migrációt külön jelezzük, mert az adminnak SQL-t kell futtatnia.
+    const res=await adminFetchReport('/api/admin/orarend/verziok');
+    if(res.data&&res.data.kod==='HIANYZO_SEMA'){renderOrarendSchemaWarning(res.data)}
+    else{toast(error.message,'err')}
+    renderOrarendVersions([]);
+    renderOrarendActive(null,[]);
+  }
+}
+
+async function uploadOrarend(){
+  const input=q('orarend-fajl');
+  const file=input&&input.files&&input.files[0];
+  if(!file){toast('Válassz ki egy .xlsx fájlt','err');return}
+
+  const body=new FormData();
+  body.append('fajl',file);
+  body.append('nev',q('orarend-nev').value.trim());
+  body.append('tanev',q('orarend-tanev').value.trim());
+
+  const button=q('orarend-upload');
+  button.disabled=true;
+  q('orarend-status').textContent='Feldolgozás…';
+  renderOrarendReport(null);
+
+  try{
+    const {data}=await adminFetchReport('/api/admin/orarend/import',{method:'POST',body});
+    renderOrarendReport(data);
+    if(data.ok){
+      q('orarend-status').textContent='Draft létrejött ('+Number(data.idotartam_ms||0)+' ms)';
+      toast('Ellenőrzés kész – a draft publikálásra vár','ok');
+    }else{
+      q('orarend-status').textContent='Az import elutasítva';
+      toast(data.uzenet||'Hibás import','err');
+    }
+    await loadOrarendVersions();
+  }catch(error){
+    q('orarend-status').textContent='';
+    toast(error.message,'err');
+  }finally{
+    button.disabled=false;
+  }
+}
+
+async function publishOrarendVersion(id,mode){
+  const version=state.versions.find(v=>Number(v.id)===Number(id));
+  const active=state.versions.find(v=>v.statusz==='active');
+  const question=mode==='rollback'
+    ? 'Visszaállítod ezt a verziót?\n\n'+(version?version.nev:('#'+id))
+    : 'Publikálod ezt az órarendet?\n\nAktuális: '+(active?active.nev:'nincs')+'\nÚj: '+(version?version.nev:('#'+id));
+  if(!window.confirm(question)) return;
+
+  try{
+    const data=await adminFetch('/api/admin/orarend/'+Number(id)+'/'+(mode==='rollback'?'rollback':'publish'),{method:'POST'});
+    toast(data.uzenet||'Kész','ok');
+    renderOrarendReport(null);
+    await loadOrarendVersions();
+  }catch(error){toast(error.message,'err')}
+}
+
+async function deleteOrarendDraft(id){
+  if(!window.confirm('Biztosan törlöd ezt a draft verziót a hozzá tartozó sorokkal együtt?')) return;
+  try{
+    await adminFetch('/api/admin/orarend/'+Number(id),{method:'DELETE'});
+    toast('Draft törölve','ok');
+    renderOrarendReport(null);
+    await loadOrarendVersions();
+  }catch(error){toast(error.message,'err')}
+}
+
+// Egy delegált figyelő az egész szekcióra: a gombok dinamikusan jönnek létre.
+document.getElementById('section-orarend')?.addEventListener('click',event=>{
+  const publish=event.target.closest('[data-orarend-publish]');
+  if(publish){publishOrarendVersion(publish.dataset.orarendPublish,'publish');return}
+  const rollback=event.target.closest('[data-orarend-rollback]');
+  if(rollback){publishOrarendVersion(rollback.dataset.orarendRollback,'rollback');return}
+  const remove=event.target.closest('[data-orarend-delete]');
+  if(remove){deleteOrarendDraft(remove.dataset.orarendDelete)}
+});
+
 q('user-search').addEventListener('input',renderUsers);
 q('export-users').addEventListener('click',exportUsers);
 q('create-break').addEventListener('click',createBreak);
@@ -744,6 +1032,9 @@ q('room-search').addEventListener('input',renderRooms);
 q('reload-rooms').addEventListener('click',loadRooms);
 q('autofill-rooms').addEventListener('click',autofillRooms);
 q('export-rooms').addEventListener('click',exportRooms);
+q('orarend-upload').addEventListener('click',uploadOrarend);
+q('orarend-template').addEventListener('click',downloadOrarendTemplate);
+q('reload-orarend').addEventListener('click',loadOrarendVersions);
 q('logout-btn').addEventListener('click',logout);
 
 loadDashboard();
