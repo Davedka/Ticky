@@ -310,25 +310,4 @@ usort($result, function($a, $b) {
 });
 
 json_response(['osztalyok' => $result, 'count' => count($result)]);
-```
 
-## `package.json`
-
-MÓDOSÍTOTT — teljes tartalom.  
-Sorok: 14
-
-```json
-{
-  "name": "ticky-importer",
-  "version": "6.0.0",
-  "type": "module",
-  "scripts": {
-    "import": "node importer.js",
-    "test": "node tests/orarend-import.test.mjs && node tests/php-suite.test.mjs && node tests/security-hardening.test.mjs && node tests/timetable-merge-audit.test.mjs && node tests/import-source.test.mjs",
-    "test:php": "node tests/php-suite.test.mjs"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
-    "dotenv": "^16.4.7"
-  }
-}
