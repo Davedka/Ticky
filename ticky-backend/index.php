@@ -351,6 +351,32 @@ if ($params !== false) {
     require __DIR__.'/api/admin_terem.php'; exit;
 }
 
+// ── Órarend verziókezelés ────────────────────────────────────────
+// A konkrét útvonalak előbb, hogy a {id} minta ne nyelje el őket.
+if ($uri === '/api/admin/orarend/import')  { require __DIR__.'/api/admin_orarend_import.php'; exit; }
+if ($uri === '/api/admin/orarend/verziok') { require __DIR__.'/api/admin_orarend_verziok.php'; exit; }
+if ($uri === '/api/admin/orarend/sablon')  { require __DIR__.'/api/admin_orarend_sablon.php'; exit; }
+
+$params = match_route('/api/admin/orarend/{id}/publish', $uri);
+if ($params !== false) {
+    $_GET['id']   = $params['id'];
+    $_GET['mode'] = 'publish';
+    require __DIR__.'/api/admin_orarend_publish.php'; exit;
+}
+
+$params = match_route('/api/admin/orarend/{id}/rollback', $uri);
+if ($params !== false) {
+    $_GET['id']   = $params['id'];
+    $_GET['mode'] = 'rollback';
+    require __DIR__.'/api/admin_orarend_publish.php'; exit;
+}
+
+$params = match_route('/api/admin/orarend/{id}', $uri);
+if ($params !== false) {
+    $_GET['id'] = $params['id'];
+    require __DIR__.'/api/admin_orarend_verzio.php'; exit;
+}
+
 
 // 404
 http_response_code(404);
