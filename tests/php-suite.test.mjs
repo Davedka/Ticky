@@ -2,7 +2,10 @@ import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '..')
-const SUITES = ['tests/php/timetable_import.test.php']
+const SUITES = [
+  'tests/php/timetable_import.test.php',
+  'tests/php/orarend_view.test.php',
+]
 
 const probe = spawnSync('php', ['--version'], { encoding: 'utf8' })
 
