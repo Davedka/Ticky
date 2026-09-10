@@ -112,6 +112,46 @@ for (const file of ['api/termek.php', 'api/terem.php', 'api/napirend.php', 'api/
   )
 }
 
+// ── Publikus nézetek az adatbázisból ─────────────────────────────
+
+// A /osztaly és /tanar oldalak korábban a tanárok.js-t olvasták, ezért egy
+// publikált órarend nem látszott rajtuk. Az adatbázisnak kell elöl lennie.
+for (const file of ['osztaly_orarend.php', 'osztaly_het.php', 'tanar_orarend.php']) {
+  const source = read(`ticky-backend/api/${file}`)
+
+  assert.match(
+    source,
+    /require_once __DIR__ \. '\/\.\.\/utils\/orarend_view\.php';/,
+    `${file}: nincs betöltve az orarend_view.php`
+  )
+
+  const dbAt = source.search(/ticky_view_(class_day|class_week|teacher_day)\b/)
+  const sourceAt = source.search(/ticky_source_(class_lessons|teacher_day_schedule)/)
+
+  assert.ok(dbAt !== -1, `${file}: nem hívja az adatbázis nézetet`)
+  assert.ok(sourceAt !== -1, `${file}: elveszett a tanárok.js tartalék`)
+  assert.ok(dbAt < sourceAt, `${file}: a tanárok.js megelőzi az adatbázist`)
+}
+
+// A heti nézetnek korábban egyáltalán nem volt adatbázis ága.
+assert.match(
+  read('ticky-backend/api/osztaly_het.php'),
+  /ticky_view_class_week\(/,
+  'a heti osztálynézetnek kell adatbázis ág'
+)
+
+// A több tanórát átfogó sor nem veszhet el.
+assert.match(
+  read('ticky-backend/utils/timetable_import.php'),
+  /function ticky_timetable_expand_period_range/,
+  'hiányzik a többórás blokk kibontása'
+)
+assert.match(
+  read('ticky-backend/api/admin_import.php'),
+  /ticky_timetable_expand_period_range\(/,
+  'a tanárok.js import is ki kell bontsa a többórás blokkokat'
+)
+
 // ── Útvonalak ────────────────────────────────────────────────────
 
 for (const route of [
@@ -168,4 +208,4 @@ assert.ok(
   'az admin oldal nem hivatkozhat a service key-re'
 )
 
-console.log('orarend-import.test.mjs: minden szerkezeti ellenőrzés rendben');
+console.log('orarend-import.test.mjs: minden szerkezeti ellenőrzés rendben')
