@@ -225,6 +225,61 @@ test('hibás sorok kódolt hibát adnak, a jó sorok átmennek', function (): vo
     unlink($path);
 });
 
+test('több tanórát átfogó sorból óránként külön sor lesz', function (): void {
+    // 12:05–13:35 = 6. ÉS 7. óra. Ha egyetlen sorként importálnánk, a 7. óra
+    // eltűnne az órarendből.
+    $path = make_workbook([['nev' => 'Órarend', 'sorok' => [
+        flat_header(),
+        ['TM', '111', '10.c', 'viai', 'Szerda', '12:05', '13:35', ''],
+    ]]]);
+
+    $parsed = ticky_timetable_parse_file($path);
+    assert_same(2, count($parsed['orak']), 'a blokkból két tanóra lesz');
+    assert_same([6, 7], array_column($parsed['orak'], 'ora_sorszam'));
+    assert_same(['12:05', '12:55'], array_column($parsed['orak'], 'kezdes'));
+    assert_same(['12:50', '13:35'], array_column($parsed['orak'], 'vegzes'));
+    assert_same([], $parsed['problemak'], 'a szabályos blokk nem hiba');
+    unlink($path);
+});
+
+test('a teljes napot átfogó blokk mind a nyolc órára bomlik', function (): void {
+    $path = make_workbook([['nev' => 'Órarend', 'sorok' => [
+        flat_header(),
+        ['FL', 'T1', '9.a', 'tn.', 'Hétfő', '07:30', '14:20', ''],
+    ]]]);
+
+    $parsed = ticky_timetable_parse_file($path);
+    assert_same(8, count($parsed['orak']));
+    unlink($path);
+});
+
+test('tanórahatárra nem eső vége figyelmeztetést kap', function (): void {
+    $path = make_workbook([['nev' => 'Órarend', 'sorok' => [
+        flat_header(),
+        ['BUP', '202', '9.a', 'mt', 'Hétfő', '07:30', '08:05', ''],
+    ]]]);
+
+    $parsed = ticky_timetable_parse_file($path);
+    assert_same(1, count($parsed['orak']));
+    assert_same('08:10', $parsed['orak'][0]['vegzes'], 'a hivatalos sávvégre igazítjuk');
+    assert_same(['IGAZITOTT_IDO'], issue_codes($parsed['problemak']));
+    assert_same('warning', $parsed['problemak'][0]['szint']);
+    unlink($path);
+});
+
+test('a kibontás önmagában is helyes', function (): void {
+    assert_same(
+        [['ora_sorszam' => 6, 'kezdes' => '12:05', 'vegzes' => '12:50'],
+         ['ora_sorszam' => 7, 'kezdes' => '12:55', 'vegzes' => '13:35']],
+        ticky_timetable_expand_period_range('12:05', '13:35')
+    );
+    assert_same(
+        [['ora_sorszam' => 1, 'kezdes' => '07:30', 'vegzes' => '08:10']],
+        ticky_timetable_expand_period_range('07:30', '08:10')
+    );
+    assert_same([], ticky_timetable_expand_period_range('06:00', '06:45'), 'ismeretlen kezdés');
+});
+
 // ─────────────────────────────────────────────────────────────────
 echo PHP_EOL . 'GRID formátum' . PHP_EOL;
 
