@@ -1,4 +1,4 @@
-<?php
+?php
 // api/admin_orarend_verzio.php
 // GET    /api/admin/orarend/{id} – egy verzió részletei és import riportja
 // DELETE /api/admin/orarend/{id} – draft verzió törlése
