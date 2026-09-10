@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/orarend_view.php';
 $aktiv_szunet = ticky_aktiv_szunet_nev();
 handle_cors();
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -20,6 +21,25 @@ if ($aktiv_szunet !== null) {
     json_response(['osztaly' => $kod, 'het' => [], 'szunet' => $aktiv_szunet]);
 }
 
+// ELSŐDLEGES: az aktív, publikált órarend az adatbázisból.
+// Ennek a végpontnak korábban egyáltalán nem volt adatbázis ága, ezért egy
+// publikált órarend a heti nézeten sosem jelent volna meg.
+if (function_exists('ticky_view_class_week')) {
+    try {
+        $result = ticky_view_class_week($kod);
+        if ($result !== null) {
+            json_response([
+                'osztaly' => $result['osztaly'],
+                'het'     => $result['het'],
+                'szunet'  => $aktiv_szunet,
+            ]);
+        }
+    } catch (\Throwable $e) {
+        // Folytatás a tanárok.js tartalékkal
+    }
+}
+
+// MÁSODLAGOS: tanárok.js (amíg nincs publikált verzió)
 if (function_exists('ticky_source_class_lessons_for_week')) {
     try {
         $result = ticky_source_class_lessons_for_week($kod);
@@ -31,7 +51,8 @@ if (function_exists('ticky_source_class_lessons_for_week')) {
             ]);
         }
     } catch (\Throwable $e) {
-        // Fallback alább
+        // Üres válasz alább
     }
 }
+
 json_response(['osztaly' => $kod, 'het' => [], 'szunet' => $aktiv_szunet]);
