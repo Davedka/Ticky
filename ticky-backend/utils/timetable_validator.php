@@ -1,3 +1,6 @@
+<?php
+
+
 require_once __DIR__ . '/timetable_import.php';
 
 const TICKY_VALIDATOR_MAX_REPORTED = 200; // riportban visszaadott problémák felső határa
