@@ -1,3 +1,6 @@
+<?php
+
+
 require_once __DIR__ . '/xlsx_reader.php';
 require_once __DIR__ . '/osztaly.php';
 
@@ -121,6 +124,53 @@ function ticky_timetable_period_slots(): array
         7 => ['12:55', '13:35'],
         8 => ['13:40', '14:20'],
     ];
+}
+
+/**
+ * Egy [kezdés, vége] tartomány kibontása tanórasávokra.
+ *
+ * Egy sor átfoghat több tanórát (pl. 12:05–13:35 = 6. és 7. óra). Ilyenkor
+ * óránként külön sort kell készíteni, különben a köztes órák elvesznének az
+ * órarendből – a megjelenítés a merge_consecutive_orak()-kal úgyis
+ * visszavonja őket egyetlen blokká.
+ *
+ * @return array<int,array{ora_sorszam:int,kezdes:string,vegzes:string}>
+ *         üres tömb, ha a kezdés nem szerepel a csengetési rendben
+ */
+function ticky_timetable_expand_period_range(string $start, string $end): array
+{
+    $slots = ticky_timetable_period_slots();
+
+    $first = null;
+    $last = null;
+    foreach ($slots as $number => [$slot_start, $slot_end]) {
+        if ($slot_start === $start) {
+            $first = $number;
+        }
+        if ($slot_end === $end) {
+            $last = $number;
+        }
+    }
+
+    if ($first === null) {
+        return [];
+    }
+
+    // Ha a vége nem esik pontosan egy sáv végére, egyetlen tanórának vesszük.
+    if ($last === null || $last < $first) {
+        $last = $first;
+    }
+
+    $expanded = [];
+    for ($number = $first; $number <= $last; $number++) {
+        $expanded[] = [
+            'ora_sorszam' => $number,
+            'kezdes'      => $slots[$number][0],
+            'vegzes'      => $slots[$number][1],
+        ];
+    }
+
+    return $expanded;
 }
 
 /**
@@ -344,8 +394,7 @@ function ticky_timetable_parse_flat(array $workbook): array
                 continue;
             }
 
-            $lesson = ticky_timetable_build_lesson($values, $where, $issues);
-            if ($lesson !== null) {
+            foreach (ticky_timetable_build_lesson($values, $where, $issues) as $lesson) {
                 $lessons[] = $lesson;
             }
         }
@@ -355,10 +404,14 @@ function ticky_timetable_parse_flat(array $workbook): array
 }
 
 /**
- * Egy nyers mezőhalmazból normalizált óra-sor. A hiányzó/érvénytelen
- * alapmezők itt hibát adnak, mert nélkülük a sor értelmezhetetlen.
+ * Egy nyers mezőhalmazból normalizált óra-sor(ok).
+ *
+ * Több tanórát átfogó sorból óránként egy-egy sor lesz. A hiányzó vagy
+ * érvénytelen alapmezők hibát adnak, mert nélkülük a sor értelmezhetetlen.
+ *
+ * @return array<int,array> nulla vagy több óra
  */
-function ticky_timetable_build_lesson(array $values, string $where, array &$issues): ?array
+function ticky_timetable_build_lesson(array $values, string $where, array &$issues): array
 {
     $day = ticky_timetable_day_index((string) ($values['nap'] ?? ''));
     if ($day === null) {
@@ -368,7 +421,7 @@ function ticky_timetable_build_lesson(array $values, string $where, array &$issu
             $where,
             'Ismeretlen nap: "' . (string) ($values['nap'] ?? '') . '" (Hétfő–Péntek várható)'
         );
-        return null;
+        return [];
     }
 
     $start = ticky_timetable_parse_time((string) ($values['kezdes'] ?? ''));
@@ -376,7 +429,7 @@ function ticky_timetable_build_lesson(array $values, string $where, array &$issu
 
     if ($start === null || $end === null) {
         $issues[] = ticky_timetable_issue('error', 'ERVENYTELEN_IDO', $where, 'Nem értelmezhető kezdés vagy vége időpont.');
-        return null;
+        return [];
     }
 
     if ($end <= $start) {
@@ -386,18 +439,27 @@ function ticky_timetable_build_lesson(array $values, string $where, array &$issu
             $where,
             'A befejezés (' . $end . ') nem későbbi, mint a kezdés (' . $start . ').'
         );
-        return null;
+        return [];
     }
 
-    $slot = ticky_timetable_match_slot($start);
-    if ($slot === null) {
+    $slots = ticky_timetable_expand_period_range($start, $end);
+    if ($slots === []) {
         $issues[] = ticky_timetable_issue(
             'error',
             'ISMERETLEN_ORASAV',
             $where,
             'A(z) ' . $start . ' kezdés nem szerepel a csengetési rendben.'
         );
-        return null;
+        return [];
+    }
+
+    if (count($slots) === 1 && $slots[0]['vegzes'] !== $end) {
+        $issues[] = ticky_timetable_issue(
+            'warning',
+            'IGAZITOTT_IDO',
+            $where,
+            'A(z) ' . $end . ' vége nem esik tanórahatárra, ezért ' . $slots[0]['vegzes'] . '-ra igazítottuk.'
+        );
     }
 
     $teacher  = ticky_timetable_single_line((string) ($values['tanar'] ?? ''));
@@ -408,29 +470,34 @@ function ticky_timetable_build_lesson(array $values, string $where, array &$issu
 
     if ($teacher === '') {
         $issues[] = ticky_timetable_issue('error', 'HIANYZO_TANAR', $where, 'Hiányzó tanárkód.');
-        return null;
+        return [];
     }
     if ($room === '') {
         $issues[] = ticky_timetable_issue('error', 'HIANYZO_TEREM', $where, 'Hiányzó teremkód.');
-        return null;
+        return [];
     }
     if ($class === '') {
         $issues[] = ticky_timetable_issue('error', 'HIANYZO_OSZTALY', $where, 'Hiányzó osztálykód.');
-        return null;
+        return [];
     }
 
-    return [
-        'tanar'       => $teacher,
-        'terem'       => $room,
-        'osztaly'     => $class,
-        'tantargy'    => $subject,
-        'csoport'     => ($group !== '' && ctype_digit($group)) ? (int) $group : null,
-        'het_napja'   => $day,
-        'ora_sorszam' => $slot['ora_sorszam'],
-        'kezdes'      => $slot['kezdes'],
-        'vegzes'      => $slot['vegzes'],
-        'forras'      => $where,
-    ];
+    $lessons = [];
+    foreach ($slots as $slot) {
+        $lessons[] = [
+            'tanar'       => $teacher,
+            'terem'       => $room,
+            'osztaly'     => $class,
+            'tantargy'    => $subject,
+            'csoport'     => ($group !== '' && ctype_digit($group)) ? (int) $group : null,
+            'het_napja'   => $day,
+            'ora_sorszam' => $slot['ora_sorszam'],
+            'kezdes'      => $slot['kezdes'],
+            'vegzes'      => $slot['vegzes'],
+            'forras'      => $where,
+        ];
+    }
+
+    return $lessons;
 }
 
 // ─────────────────────────────────────────────────────────────────
