@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/orarend_view.php';
 $aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
@@ -43,7 +44,25 @@ if ($nap === 0) {
 $source_teacher_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
 
 // ───────────────────────────────────────────────────────────────
-// ELSŐDLEGES: source helper (tanárok.js)
+// ELSŐDLEGES: az aktív, publikált órarend az adatbázisból.
+// A tanárok.js csak akkor jön szóba, ha még nincs publikált verzió.
+// ───────────────────────────────────────────────────────────────
+if (function_exists('ticky_view_teacher_day')) {
+    try {
+        $result = ticky_view_teacher_day($kod, $nap);
+        if ($result !== null) {
+            json_response([
+                'tanar_nev' => $result['tanar_nev'] ?? ($source_teacher_names[$kod] ?? null),
+                'orak'      => merge_consecutive_orak($result['orak']),
+            ]);
+        }
+    } catch (\Throwable $e) {
+        // Folytatás a tanárok.js tartalékkal
+    }
+}
+
+// ───────────────────────────────────────────────────────────────
+// MÁSODLAGOS: tanárok.js
 // ───────────────────────────────────────────────────────────────
 if (function_exists('ticky_source_teacher_day_schedule')) {
     try {
@@ -60,7 +79,7 @@ if (function_exists('ticky_source_teacher_day_schedule')) {
 }
 
 // ───────────────────────────────────────────────────────────────
-// MÁSODLAGOS: DB fallback
+// HARMADLAGOS: nyers DB olvasás (verziózás előtti sorok)
 // ───────────────────────────────────────────────────────────────
 $tanarok = sb_get('tanarok', ['rovid_nev' => 'eq.' . $kod, 'select' => 'id,rovid_nev,nev']);
 $tanar = $tanarok[0] ?? null;
