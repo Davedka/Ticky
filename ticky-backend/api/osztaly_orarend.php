@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/orarend_view.php';
 $aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
@@ -41,7 +42,28 @@ if ($nap === 0) {
 }
 
 // ───────────────────────────────────────────────────────────────
-// ELSŐDLEGES: source helper (tanárok.js)
+// ELSŐDLEGES: az aktív, publikált órarend az adatbázisból.
+//
+// Korábban a tanárok.js volt az első. Emiatt egy frissen publikált órarend
+// nem látszott ezen az oldalon, miközben a termek oldalak már az újat
+// mutatták. A Supabase a source of truth; a tanárok.js csak tartalék.
+// ───────────────────────────────────────────────────────────────
+if (function_exists('ticky_view_class_day')) {
+    try {
+        $result = ticky_view_class_day($kod, $nap);
+        if ($result !== null) {
+            json_response([
+                'osztaly' => $result['osztaly'],
+                'orak'    => merge_consecutive_orak($result['orak']),
+            ]);
+        }
+    } catch (\Throwable $e) {
+        // Folytatás a tanárok.js tartalékkal
+    }
+}
+
+// ───────────────────────────────────────────────────────────────
+// MÁSODLAGOS: tanárok.js (ha még nincs publikált órarend az adatbázisban)
 // ───────────────────────────────────────────────────────────────
 if (function_exists('ticky_source_class_lessons_for_day')) {
     try {
@@ -53,12 +75,12 @@ if (function_exists('ticky_source_class_lessons_for_day')) {
             ]);
         }
     } catch (\Throwable $e) {
-        // Folytatás a DB fallback-kal
+        // Folytatás a régi DB ágon
     }
 }
 
 // ───────────────────────────────────────────────────────────────
-// MÁSODLAGOS: DB fallback (ha source nem talál egyezést)
+// HARMADLAGOS: nyers DB olvasás (verziózás előtti sorok)
 // ───────────────────────────────────────────────────────────────
 $orak_raw = sb_get('orarendek', [
     'osztaly'   => 'eq.' . $kod,
