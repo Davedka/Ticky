@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/orarend_nap_cache.php';
 $aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
@@ -30,12 +31,8 @@ $ido = aktualis_ido();
 $nap_nevek = [1 => 'Hétfő', 2 => 'Kedd', 3 => 'Szerda', 4 => 'Csütörtök', 5 => 'Péntek'];
 $source_teacher_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
 
-$termek = sb_get('termek', [
-    'terem_szam' => 'eq.' . $szam,
-    'select' => 'id,terem_szam,emelet',
-]);
-
-$terem = $termek[0] ?? null;
+// Cache-elt teremlista – közös bejegyzés a /api/termek és /api/terem végponttal.
+$terem = ticky_terem_sor($szam);
 $terem_id = $terem['id'] ?? null;
 $emelet = $terem['emelet'] ?? null;
 
@@ -73,37 +70,32 @@ if (!$het_egeszben && ($nap === null || $nap < 1 || $nap > 5)) {
     ]);
 }
 
+// A napi cache-bol építjük fel: a heti nézet is ugyanazt az öt bejegyzést
+// használja, amit a többi végpont. A napok növekvo sorrendben, a napon belül
+// kezdés szerint jönnek – ez megegyezik a korábbi het_napja.asc,kezdes.asc
+// rendezéssel.
 $orak = [];
 if ($terem_id !== null) {
-    $orarendek_params = [
-        'terem_id' => 'eq.' . $terem_id,
-        'aktiv' => 'eq.true',
-        'select' => 'osztaly,tantargy,kezdes,vegzes,ora_sorszam,het_napja,tanar_id',
-        'order' => 'het_napja.asc,kezdes.asc',
-    ];
-    if ($het_egeszben) {
-        $orarendek_params['het_napja'] = 'in.(1,2,3,4,5)';
-    } else {
-        $orarendek_params['het_napja'] = 'eq.' . $nap;
+    $kert_napok = $het_egeszben ? [1, 2, 3, 4, 5] : [(int) $nap];
+
+    foreach ($kert_napok as $kert_nap) {
+        foreach (ticky_nap_orai($kert_nap) as $ora) {
+            if ((string) ($ora['terem_id'] ?? '') === (string) $terem_id) {
+                $orak[] = $ora;
+            }
+        }
     }
-    $orak = sb_get('orarendek', $orarendek_params);
 }
 
 if ($het_egeszben) {
     if (!empty($orak)) {
         $tanar_map = [];
-        $ids = array_unique(array_filter(array_column($orak, 'tanar_id')));
-        if (!empty($ids)) {
-            foreach (sb_get('tanarok', [
-                'id' => 'in.(' . implode(',', $ids) . ')',
-                'select' => 'id,rovid_nev,nev',
-            ]) as $tanar) {
-                $rovid = (string) ($tanar['rovid_nev'] ?? '?');
-                $tanar_map[$tanar['id']] = [
-                    'rovid_nev' => $rovid,
-                    'nev' => $tanar['nev'] ?? ($source_teacher_names[$rovid] ?? null),
-                ];
-            }
+        foreach (ticky_tanarok_mind() as $tanar) {
+            $rovid = (string) ($tanar['rovid_nev'] ?? '?');
+            $tanar_map[$tanar['id']] = [
+                'rovid_nev' => $rovid,
+                'nev' => $tanar['nev'] ?? ($source_teacher_names[$rovid] ?? null),
+            ];
         }
 
         $het_grouped = [];
@@ -219,18 +211,12 @@ if ($het_egeszben) {
 
 if (!empty($orak)) {
     $tanar_map = [];
-    $ids = array_unique(array_filter(array_column($orak, 'tanar_id')));
-    if (!empty($ids)) {
-        foreach (sb_get('tanarok', [
-            'id' => 'in.(' . implode(',', $ids) . ')',
-            'select' => 'id,rovid_nev,nev',
-        ]) as $tanar) {
-            $rovid = (string) ($tanar['rovid_nev'] ?? '?');
-            $tanar_map[$tanar['id']] = [
-                'rovid_nev' => $rovid,
-                'nev' => $tanar['nev'] ?? ($source_teacher_names[$rovid] ?? null),
-            ];
-        }
+    foreach (ticky_tanarok_mind() as $tanar) {
+        $rovid = (string) ($tanar['rovid_nev'] ?? '?');
+        $tanar_map[$tanar['id']] = [
+            'rovid_nev' => $rovid,
+            'nev' => $tanar['nev'] ?? ($source_teacher_names[$rovid] ?? null),
+        ];
     }
 
     $grouped = [];
