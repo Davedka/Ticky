@@ -1,3 +1,6 @@
+<?php
+
+
 /**
  * @param array<int,array{nev:string,sorok:array<int,array<int,string>>}> $sheets
  */
