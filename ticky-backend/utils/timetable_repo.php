@@ -6,7 +6,6 @@ require_once __DIR__ . '/osztaly.php';
 
 const TICKY_REPO_LESSON_BATCH = 200;
 const TICKY_REPO_ENTITY_BATCH = 100;
-const TICKY_REPO_FETCH_LIMIT  = '20000';
 
 class TickyRepoException extends RuntimeException
 {
@@ -51,7 +50,7 @@ function ticky_repo_schema_status(): array
 /** @return array<string,mixed> normalizált kód => id */
 function ticky_repo_teacher_map(): array
 {
-    $rows = sb_get('tanarok', ['select' => 'id,rovid_nev', 'limit' => TICKY_REPO_FETCH_LIMIT], 'service');
+    $rows = sb_get_all('tanarok', ['select' => 'id,rovid_nev'], 'service');
 
     $map = [];
     foreach (is_array($rows) ? $rows : [] as $row) {
@@ -67,7 +66,7 @@ function ticky_repo_teacher_map(): array
 /** @return array<string,mixed> normalizált kód => id */
 function ticky_repo_room_map(): array
 {
-    $rows = sb_get('termek', ['select' => 'id,terem_szam', 'limit' => TICKY_REPO_FETCH_LIMIT], 'service');
+    $rows = sb_get_all('termek', ['select' => 'id,terem_szam'], 'service');
 
     $map = [];
     foreach (is_array($rows) ? $rows : [] as $row) {
@@ -83,10 +82,9 @@ function ticky_repo_room_map(): array
 /** Az aktív órarendben szereplő osztálykódok. */
 function ticky_repo_active_class_codes(): array
 {
-    $rows = sb_get('orarendek', [
+    $rows = sb_get_all('orarendek', [
         'select' => 'osztaly',
         'aktiv'  => 'eq.true',
-        'limit'  => TICKY_REPO_FETCH_LIMIT,
     ], 'service');
 
     $codes = [];
@@ -258,33 +256,26 @@ function ticky_repo_active_version(): ?array
 /** Egy verzióhoz tartozó sorok száma. */
 function ticky_repo_version_lesson_count(int $version_id): int
 {
-    $rows = sb_get('orarendek', [
-        'verzio_id' => 'eq.' . $version_id,
-        'select'    => 'id',
-        'limit'     => TICKY_REPO_FETCH_LIMIT,
-    ], 'service');
-
-    return is_array($rows) ? count($rows) : 0;
+    return sb_count('orarendek', ['verzio_id' => 'eq.' . $version_id], 'service') ?? 0;
 }
 
 /** Egy verzió összegzése: tanárok, termek, osztályok, sorszám. */
 function ticky_repo_version_summary(int $version_id): array
 {
-    $rows = sb_get('orarendek', [
+    $rows = sb_get_all('orarendek', [
         'verzio_id' => 'eq.' . $version_id,
         'select'    => 'tanar_id,terem_id,osztaly',
-        'limit'     => TICKY_REPO_FETCH_LIMIT,
     ], 'service');
 
     $teachers = $rooms = $classes = [];
-    foreach (is_array($rows) ? $rows : [] as $row) {
+    foreach ($rows as $row) {
         $teachers[(string) ($row['tanar_id'] ?? '')] = true;
         $rooms[(string) ($row['terem_id'] ?? '')] = true;
         $classes[osztaly_lower((string) ($row['osztaly'] ?? ''))] = true;
     }
 
     return [
-        'orak'      => is_array($rows) ? count($rows) : 0,
+        'orak'      => count($rows),
         'tanarok'   => count($teachers),
         'termek'    => count($rooms),
         'osztalyok' => count($classes),
