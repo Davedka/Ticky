@@ -32,3 +32,76 @@ function sb_get($table, $params = [], $key = 'anon') {
 function sb_update($table, $body, $filters, $key = 'service') { 
     return sb_request('PATCH', $table, $body, $filters, $key); 
 }
+
+
+
+const SB_PAGE_SIZE     = 1000;
+const SB_MAX_PAGES     = 100;   // 100 000 sor felső határ, védelem végtelen ciklus ellen
+
+/**
+ * Sorok darabszáma sorok letöltése nélkül.
+ *
+ * @param array $filters PostgREST szűrők, pl. ['aktiv' => 'eq.true']
+ * @return int|null null, ha a lekérdezés hibázott (pl. nincs ilyen tábla)
+ */
+function sb_count(string $table, array $filters = [], string $key = 'service'): ?int {
+    $apiKey = ($key === 'service') ? SUPABASE_SERVICE_KEY : SUPABASE_ANON_KEY;
+    $params = array_merge($filters, ['select' => 'id']);
+    $url = rtrim(SUPABASE_URL, '/') . '/rest/v1/' . ltrim($table, '/')
+         . '?' . str_replace('%3D', '=', http_build_query($params));
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_NOBODY         => true,   // HEAD: nem jön vissza egyetlen sor sem
+        CURLOPT_HEADER         => true,
+        CURLOPT_HTTPHEADER     => [
+            "apikey: $apiKey",
+            "Authorization: Bearer $apiKey",
+            'Prefer: count=exact',
+        ],
+    ]);
+
+    $response = curl_exec($ch);
+    $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response === false || $status < 200 || $status >= 300) {
+        return null;
+    }
+
+    // "Content-Range: 0-999/2273" vagy "*/2273"
+    if (preg_match('#content-range:\s*[^/]+/(\d+)#i', (string) $response, $matches) !== 1) {
+        return null;
+    }
+
+    return (int) $matches[1];
+}
+
+
+function sb_get_all(string $table, array $params = [], string $key = 'anon'): array {
+    unset($params['limit'], $params['offset']);
+
+    $rows = [];
+    for ($page = 0; $page < SB_MAX_PAGES; $page++) {
+        $batch = sb_get($table, array_merge($params, [
+            'limit'  => (string) SB_PAGE_SIZE,
+            'offset' => (string) ($page * SB_PAGE_SIZE),
+        ]), $key);
+
+        if (!is_array($batch) || $batch === []) {
+            break;
+        }
+
+        foreach ($batch as $row) {
+            $rows[] = $row;
+        }
+
+        // Az utolsó oldal rövidebb a lapméretnél.
+        if (count($batch) < SB_PAGE_SIZE) {
+            break;
+        }
+    }
+
+    return $rows;
+}
