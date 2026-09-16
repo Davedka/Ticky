@@ -1,10 +1,12 @@
 <?php
+// api/admin_orarend_import.php
 
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/timetable_validator.php';
 require_once __DIR__ . '/../utils/timetable_repo.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
 
 if (!admin_can_see_ui()) {
     json_error('Bejelentkezés szükséges', 401);
@@ -161,6 +163,10 @@ $diff = ticky_repo_diff($version_id, $active_version === null ? null : (int) $ac
 $import_log['verzio_id'] = $version_id;
 $import_log['statusz'] = 'feldolgozva';
 $import_id = ticky_repo_log_import($import_log);
+
+// Az import új tanárt/termet hozhat létre és tanárnevet frissíthet, ezért
+// a listák cache-e elavul. A draft órarend nem publikus, azt nem érinti.
+ticky_cache_urit();
 
 json_response([
     'ok'                     => true,
