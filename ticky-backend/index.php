@@ -93,7 +93,7 @@ if ($uri === '/') {
   .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
   /* MAIN */
   .main{position:relative;z-index:10;padding:48px 20px 60px;max-width:680px;margin:0 auto;}
-  .hero{text-align:center;margin-bottom:40px;}.hero-cim{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3.5vw,22px);}
+  .hero{text-align:center;margin-bottom:40px;}.hero-cim{position:relative;display:inline-block;}.hero-cim .tm{position:absolute;right:100%;top:50%;transform:translateY(-50%);margin-right:clamp(6px,2vw,18px);}
   .hero h1{font-family:'Playfair Display',serif;font-size:clamp(56px,16vw,80px);font-weight:700;line-height:1;letter-spacing:-2px;}
   .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px;}
   @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
@@ -101,6 +101,8 @@ if ($uri === '/') {
     .ticky-sidebar{display:none;}.nav-links{display:none;}.hamburger{display:flex;}
     .grid3{grid-template-columns:1fr;}
   }
+  /* Nagyon keskeny telefonon a kabala kilógna balra a cím mellől. */
+  @media(max-width:370px){.hero-cim .tm{--tm-meret:clamp(48px,16vw,64px)!important;}}
   @media(min-width:601px){.mobile-menu{display:none!important;}.hamburger{display:none!important;}}
 </style>
 </head>
