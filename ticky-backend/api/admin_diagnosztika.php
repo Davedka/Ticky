@@ -29,7 +29,7 @@ $teacher_names = $file_exists ? ticky_source_teacher_names()         : [];
 // ── Database lekérések ────────────────────────────────
 $db_teachers   = sb_get('tanarok',   ['select' => 'id,rovid_nev,nev'],   'service');
 $db_rooms      = sb_get('termek',    ['select' => 'id,terem_szam'],       'service');
-$db_orarendek  = sb_get('orarendek', ['select' => 'id,terem_id,tanar_id,aktiv', 'limit' => '10000'], 'service');
+$db_orarendek  = sb_get_all('orarendek', ['select' => 'id,terem_id,tanar_id,aktiv'], 'service');
 
 if (!is_array($db_teachers))  $db_teachers  = [];
 if (!is_array($db_rooms))     $db_rooms     = [];
