@@ -1,3 +1,6 @@
+// tests/php-suite.test.mjs
+
+
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
@@ -6,6 +9,10 @@ const SUITES = [
   'tests/php/timetable_import.test.php',
   'tests/php/orarend_view.test.php',
   'tests/php/supabase_paging.test.php',
+  'tests/php/mascot.test.php',
+  'tests/php/valasz_cache.test.php',
+  'tests/php/terem_allapot.test.php',
+  'tests/php/orarend_nap_cache.test.php',
 ]
 
 const probe = spawnSync('php', ['--version'], { encoding: 'utf8' })
