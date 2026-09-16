@@ -5,13 +5,15 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
 
 handle_cors();
 
-$tanarok = sb_get('tanarok', [
+// A tanárok listája ritkán változik, és minden oldalbetöltéskor kell.
+$tanarok = ticky_cache_lekerdez('tanarok:nev_lista', TICKY_CACHE_LISTA_MP, static fn(): array => sb_get('tanarok', [
     'select' => 'rovid_nev,nev',
     'order'  => 'rovid_nev.asc',
-]);
+]));
 
 $source_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
 $merged = [];
