@@ -26,22 +26,12 @@ if (!$schema['ok']) {
 
 $versions = ticky_repo_versions();
 
-// A sorszámokat egyben kérjük le, hogy ne legyen N+1 hívás a Supabase felé.
-$counts = [];
-$rows = sb_get('orarendek', [
-    'select' => 'verzio_id',
-    'limit'  => TICKY_REPO_FETCH_LIMIT,
-], 'service');
-
-foreach (is_array($rows) ? $rows : [] as $row) {
-    $version_id = $row['verzio_id'] ?? null;
-    if ($version_id !== null) {
-        $counts[(int) $version_id] = ($counts[(int) $version_id] ?? 0) + 1;
-    }
-}
-
+// Verziónként pontos darabszám. Sorokat szándékosan NEM töltünk le: a
+// PostgREST 1000 sornál elvágná a választ, és a számláló csendben hazudna.
 foreach ($versions as &$version) {
-    $version['sorok_szama'] = $counts[(int) $version['id']] ?? 0;
+    $version['sorok_szama'] = sb_count('orarendek', [
+        'verzio_id' => 'eq.' . (int) $version['id'],
+    ], 'service') ?? 0;
 }
 unset($version);
 
