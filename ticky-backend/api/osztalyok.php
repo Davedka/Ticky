@@ -42,7 +42,9 @@ function _osz_split_and_collect(string $raw, array &$codes): void {
 
 $codes = [];
 
-$db_classes = sb_get('orarendek', ['select' => 'osztaly']);
+// Csak az aktív verzió sorai: a draft órarend osztályai nem szivároghatnak ki
+// a publikus API-n keresztül.
+$db_classes = sb_get_all('orarendek', ['select' => 'osztaly', 'aktiv' => 'eq.true']);
 if ($db_classes) {
     foreach ($db_classes as $row) {
         if (!empty($row['osztaly'])) _osz_split_and_collect($row['osztaly'], $codes);
