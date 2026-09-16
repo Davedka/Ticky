@@ -99,8 +99,8 @@ assert.match(
 
 assert.match(
   classesApi,
-  /sb_get\('orarendek', \['select' => 'osztaly', 'aktiv' => 'eq\.true'\]\)/,
-  'az osztálylista csak az aktív órarendet olvashatja'
+  /sb_get_all\('orarendek', \['select' => 'osztaly', 'aktiv' => 'eq\.true'\]\)/,
+  'az osztálylista csak az aktív órarendet olvashatja (lapozva)'
 )
 
 // A publikus végpont nem fogadhat el kliens oldali verzió paramétert.
@@ -151,6 +151,45 @@ assert.match(
   /ticky_timetable_expand_period_range\(/,
   'a tanárok.js import is ki kell bontsa a többórás blokkokat'
 )
+
+// ── Sorlevágás elleni védelem ────────────────────────────────────
+
+// A PostgREST csendben elvágja a választ (Supabase-en 1000 sornál). Ahol az
+// ÖSSZES sor kell, ott lapozni muszáj, darabszámhoz pedig count=exact jár.
+const supabaseConfig = read('ticky-backend/config/supabase.php')
+assert.match(supabaseConfig, /function sb_count\(/, 'hiányzik az sb_count()')
+assert.match(supabaseConfig, /function sb_get_all\(/, 'hiányzik az sb_get_all()')
+assert.match(supabaseConfig, /Prefer: count=exact/, 'az sb_count() nem kér pontos darabszámot')
+
+// Darabszám sosem sorok megszámolásából.
+assert.match(
+  read('ticky-backend/api/admin_orarend_verziok.php'),
+  /sb_count\('orarendek'/,
+  'a verziólista sorszámát count=exact-tal kell kérni'
+)
+
+// Ahol minden sor kell, ott lapozott lekérdezés legyen.
+for (const [file, pattern] of [
+  ['ticky-backend/api/osztalyok.php', /sb_get_all\('orarendek'/],
+  ['ticky-backend/api/admin_diagnosztika.php', /sb_get_all\('orarendek'/],
+  ['ticky-backend/utils/orarend_view.php', /sb_get_all\('orarendek'/],
+  ['ticky-backend/utils/timetable_repo.php', /sb_get_all\('orarendek'/],
+]) {
+  assert.match(read(file), pattern, `${file}: lapozatlan lekérdezés az orarendek táblán`)
+}
+
+// A régi, fix felső határos konstansok ne éledjenek újra.
+for (const file of [
+  'ticky-backend/utils/timetable_repo.php',
+  'ticky-backend/utils/orarend_view.php',
+  'ticky-backend/api/admin_import.php',
+  'ticky-backend/api/admin_orarend_verziok.php',
+]) {
+  assert.ok(
+    !/FETCH_LIMIT/.test(read(file)),
+    `${file}: fix sorlimit helyett lapozást vagy count=exact-ot kell használni`
+  )
+}
 
 // ── Útvonalak ────────────────────────────────────────────────────
 
