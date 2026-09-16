@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/_nav.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
 
 if (!admin_can_see_ui()) {
     http_response_code(401);
@@ -87,6 +88,9 @@ if (isset($http_response_header)) {
 if ($result === false || $http_code >= 400) {
     json_error('Supabase frissítési hiba (HTTP ' . $http_code . ')', 500);
 }
+
+// A termek tábla cache-elve van a publikus végpontokon.
+ticky_cache_urit();
 
 json_response([
     'ok'     => true,
