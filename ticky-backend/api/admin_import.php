@@ -1,5 +1,14 @@
 <?php
-
+// api/admin_import.php
+// POST /api/admin/import – import a tanárok.js forrásból.
+//
+// KORÁBBAN: ez az endpoint törölte az orarendek/termek/tanarok táblákat, majd
+// újra beszúrta a sorokat. Egy hibás forrás vagy egy félbeszakadt kérés így
+// működésképtelen órarendet hagyott maga után.
+//
+// MOST: ugyanaz a draft → validáció → publikálás folyamat fut, mint az Excel
+// importnál. Ez az endpoint csak DRAFT verziót hoz létre; az élesítés külön
+// lépés (POST /api/admin/orarend/{id}/publish), és semmit nem töröl.
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
@@ -7,6 +16,7 @@ require_once __DIR__ . '/../utils/_nav.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
 require_once __DIR__ . '/../utils/timetable_validator.php';
 require_once __DIR__ . '/../utils/timetable_repo.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
 
 if (!admin_can_see_ui()) {
     json_error('Bejelentkezés szükséges', 401);
@@ -210,6 +220,10 @@ $active_version = ticky_repo_active_version();
 $import_log['verzio_id'] = $version_id;
 $import_log['statusz'] = 'feldolgozva';
 $import_id = ticky_repo_log_import($import_log);
+
+// Az import új tanárt/termet hozhat létre és tanárnevet frissíthet, ezért
+// a listák cache-e elavul. A draft órarend nem publikus, azt nem érinti.
+ticky_cache_urit();
 
 json_response([
     'ok'                     => true,
