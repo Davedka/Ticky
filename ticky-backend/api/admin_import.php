@@ -35,9 +35,13 @@ function ticky_import_rows_from_source(): array
         $where = 'tanárok.js#' . ($index + 1);
 
         $start = substr((string) ($lesson['kezdes'] ?? ''), 0, 5);
-        $slot = ticky_timetable_match_slot($start);
+        $end   = substr((string) ($lesson['vegzes'] ?? ''), 0, 5);
 
-        if ($slot === null) {
+        // Egy bejegyzés átfoghat több tanórát (pl. 12:05–13:35 = 6. és 7. óra).
+        // Óránként külön sort készítünk, különben a köztes órák elvesznének.
+        $slots = ticky_timetable_expand_period_range($start, $end);
+
+        if ($slots === []) {
             $issues[] = ticky_timetable_issue(
                 'error',
                 'ISMERETLEN_ORASAV',
@@ -47,18 +51,20 @@ function ticky_import_rows_from_source(): array
             continue;
         }
 
-        $lessons[] = [
-            'tanar'       => ticky_timetable_single_line((string) ($lesson['tanar'] ?? '')),
-            'terem'       => ticky_timetable_single_line((string) ($lesson['terem'] ?? '')),
-            'osztaly'     => ticky_timetable_single_line((string) ($lesson['osztaly'] ?? '')),
-            'tantargy'    => ticky_timetable_single_line((string) ($lesson['tantargy'] ?? '')),
-            'csoport'     => null, // a tanárok.js nem tartalmaz csoportszámot
-            'het_napja'   => (int) ($lesson['het_napja'] ?? 0),
-            'ora_sorszam' => $slot['ora_sorszam'],
-            'kezdes'      => $slot['kezdes'],
-            'vegzes'      => $slot['vegzes'],
-            'forras'      => $where,
-        ];
+        foreach ($slots as $slot) {
+            $lessons[] = [
+                'tanar'       => ticky_timetable_single_line((string) ($lesson['tanar'] ?? '')),
+                'terem'       => ticky_timetable_single_line((string) ($lesson['terem'] ?? '')),
+                'osztaly'     => ticky_timetable_single_line((string) ($lesson['osztaly'] ?? '')),
+                'tantargy'    => ticky_timetable_single_line((string) ($lesson['tantargy'] ?? '')),
+                'csoport'     => null, // a tanárok.js nem tartalmaz csoportszámot
+                'het_napja'   => (int) ($lesson['het_napja'] ?? 0),
+                'ora_sorszam' => $slot['ora_sorszam'],
+                'kezdes'      => $slot['kezdes'],
+                'vegzes'      => $slot['vegzes'],
+                'forras'      => $where,
+            ];
+        }
     }
 
     return ['formatum' => 'tanarok.js', 'orak' => $lessons, 'problemak' => $issues];
@@ -162,8 +168,8 @@ try {
     }
 
     $named = 0;
-    $stored_teachers = sb_get('tanarok', ['select' => 'id,rovid_nev,nev', 'limit' => TICKY_REPO_FETCH_LIMIT], 'service');
-    foreach (is_array($stored_teachers) ? $stored_teachers : [] as $stored) {
+    $stored_teachers = sb_get_all('tanarok', ['select' => 'id,rovid_nev,nev'], 'service');
+    foreach ($stored_teachers as $stored) {
         if (trim((string) ($stored['nev'] ?? '')) !== '') {
             continue;
         }
@@ -224,90 +230,3 @@ json_response([
     'uzenet'                 => 'Draft verzió létrejött. Az élesítéshez publikáld az Órarend szekcióban.',
     'idotartam_ms'           => (int) round((microtime(true) - $started_at) * 1000),
 ]);
-```
-
-## `ticky-backend/api/osztalyok.php`
-
-MÓDOSÍTOTT — teljes tartalom (1 sor változott).  
-Sorok: 78
-
-```php
-<?php
-// api/osztalyok.php
-require_once __DIR__ . '/../config/supabase.php';
-require_once __DIR__ . '/../utils/helpers.php';
-require_once __DIR__ . '/../utils/tanarok_source.php';
-
-
-handle_cors();
-
-function _osz_normalize(string $v): string {
-    $v = trim($v);
-    return $v === '' ? '' : (preg_replace('/\s+/u', ' ', $v) ?? $v);
-}
-
-function _osz_is_room(string $v): bool {
-    $compact = preg_replace('/\s+/u', '', _osz_normalize($v)) ?? '';
-    if ($compact === '') return false;
-    if (str_contains($compact, '.') || str_contains($compact, '_')) return false;
-    if (preg_match('/^\d+$/', $compact)) return (int)$compact > 30;
-    return preg_match('/^(?:K\d{1,4}|T\d{1,2}|M\d{1,3}|KT)$/iu', $compact) === 1;
-}
-
-function _osz_split_and_collect(string $raw, array &$codes): void {
-    if (str_contains($raw, ',')) {
-        foreach (explode(',', $raw) as $part) _osz_split_and_collect($part, $codes);
-        return;
-    }
-    if (preg_match('/^\d+\/\d+/', trim($raw))) {
-        $c = _osz_normalize($raw);
-        if ($c !== '' && !_osz_is_room($c)) $codes[mb_strtolower($c, 'UTF-8')] = $c;
-        return;
-    }
-    if (str_contains($raw, '/')) {
-        foreach (explode('/', $raw) as $part) _osz_split_and_collect($part, $codes);
-        return;
-    }
-    $c = _osz_normalize($raw);
-    if ($c !== '' && !_osz_is_room($c)) {
-        $codes[mb_strtolower($c, 'UTF-8')] = $c;
-    }
-}
-
-$codes = [];
-
-// Csak az aktív verzió sorai: a draft órarend osztályai nem szivároghatnak ki
-// a publikus API-n keresztül.
-$db_classes = sb_get('orarendek', ['select' => 'osztaly', 'aktiv' => 'eq.true']);
-if ($db_classes) {
-    foreach ($db_classes as $row) {
-        if (!empty($row['osztaly'])) _osz_split_and_collect($row['osztaly'], $codes);
-    }
-}
-
-$js_path = ticky_source_path();
-if (is_file($js_path)) {
-    $contents = file_get_contents($js_path);
-    preg_match_all("/\bclass\s*:\s*['\"]([^'\"]+)['\"]/u", $contents, $matches);
-    foreach ($matches[1] as $raw) _osz_split_and_collect($raw, $codes);
-}
-
-$result = array_values($codes);
-
-usort($result, function($a, $b) {
-    $get_grade = function($name) {
-        $upper = strtoupper($name);
-        if (str_contains($upper, 'HT') || str_contains($name, '_')) return 999;
-        if (preg_match('/^(\d+)\./', $name, $m)) return (int)$m[1];
-        if (preg_match('/\/(\d+)/', $name, $m))  return (int)$m[1];
-        if (preg_match('/^(\d+)/', $name, $m))   return (int)$m[1];
-        return 999;
-    };
-    $ga = $get_grade($a);
-    $gb = $get_grade($b);
-    if ($ga !== $gb) return $ga <=> $gb;
-    return strnatcasecmp($a, $b);
-});
-
-json_response(['osztalyok' => $result, 'count' => count($result)]);
-
