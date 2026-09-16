@@ -1,14 +1,6 @@
 <?php
 // api/admin_import.php
-// POST /api/admin/import – import a tanárok.js forrásból.
-//
-// KORÁBBAN: ez az endpoint törölte az orarendek/termek/tanarok táblákat, majd
-// újra beszúrta a sorokat. Egy hibás forrás vagy egy félbeszakadt kérés így
-// működésképtelen órarendet hagyott maga után.
-//
-// MOST: ugyanaz a draft → validáció → publikálás folyamat fut, mint az Excel
-// importnál. Ez az endpoint csak DRAFT verziót hoz létre; az élesítés külön
-// lépés (POST /api/admin/orarend/{id}/publish), és semmit nem töröl.
+
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
