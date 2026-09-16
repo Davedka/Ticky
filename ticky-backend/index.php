@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config/supabase.php';
 require_once __DIR__ . '/utils/helpers.php';
 require_once __DIR__ . '/utils/_nav.php';
+require_once __DIR__ . '/utils/mascot.php';
 
 
 send_security_headers();
@@ -92,7 +93,7 @@ if ($uri === '/') {
   .tsb-divider{width:20px;height:1px;background:rgba(255,255,255,.10);margin:2px 0;}
   /* MAIN */
   .main{position:relative;z-index:10;padding:48px 20px 60px;max-width:680px;margin:0 auto;}
-  .hero{text-align:center;margin-bottom:40px;}
+  .hero{text-align:center;margin-bottom:40px;}.hero-cim{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3.5vw,22px);}
   .hero h1{font-family:'Playfair Display',serif;font-size:clamp(56px,16vw,80px);font-weight:700;line-height:1;letter-spacing:-2px;}
   .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px;}
   @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
@@ -162,7 +163,10 @@ if ($uri === '/') {
 
 <div class="main">
   <div class="hero fade-up">
-    <h1>Ticky</h1>
+    <div class="hero-cim">
+      <?php render_ticky_mascot(); ?>
+      <h1>Ticky</h1>
+    </div>
     <p style="color:rgba(255,255,255,.45);margin-top:10px;">Digitális terem-azonosító rendszer</p>
     <div style="color:#4ade80;font-size:12px;margin-top:16px;display:inline-flex;align-items:center;gap:8px;">
       <span class="pulse" style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;flex-shrink:0;"></span>
