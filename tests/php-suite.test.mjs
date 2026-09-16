@@ -5,6 +5,7 @@ const ROOT = resolve(import.meta.dirname, '..')
 const SUITES = [
   'tests/php/timetable_import.test.php',
   'tests/php/orarend_view.test.php',
+  'tests/php/supabase_paging.test.php',
 ]
 
 const probe = spawnSync('php', ['--version'], { encoding: 'utf8' })
