@@ -1,10 +1,6 @@
 <?php
 // api/admin_orarend_publish.php
-// POST /api/admin/orarend/{id}/publish   – draft élesítése
-// POST /api/admin/orarend/{id}/rollback  – archivált verzió visszaállítása
-//
-// Mindkettő ugyanazt az adatbázis-függvényt hívja, ami egyetlen tranzakcióban
-// vált órarendet. Így nem fordulhat elő félig kicserélt állapot.
+
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
