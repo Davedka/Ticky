@@ -9,6 +9,7 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/timetable_repo.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
 
 if (!admin_can_see_ui()) {
     json_error('Bejelentkezés szükséges', 401);
@@ -77,12 +78,18 @@ try {
     json_response(['ok' => false, 'uzenet' => $error->getMessage()], 502);
 }
 
+// A publikálás kicserélte az aktív órarendet, tehát MINDEN cache-elt publikus
+// válasz elavult. Ürítés nélkül a felhasználók a TICKY_CACHE_ORAREND_MP
+// lejártáig még a régi órarendet látnák.
+$torolt_cache = ticky_cache_urit();
+
 json_response([
     'ok'             => true,
     'mod'            => $mode,
     'verzio'         => ticky_repo_version($version_id),
     'elozo_verzio'   => $previous,
     'eredmeny'       => $result,
+    'cache_uritve'   => $torolt_cache,
     'uzenet'         => $mode === 'rollback'
         ? 'Az órarend visszaállítva a korábbi verzióra.'
         : 'Órarend sikeresen publikálva.',
