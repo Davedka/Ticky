@@ -3,8 +3,16 @@ services:
     name: ticky-api
     runtime: php
     buildCommand: echo "No build needed"
-    startCommand: php -S 0.0.0.0:$PORT index.php
+    startCommand: >-
+      php
+      -d opcache.enable_cli=1
+      -d opcache.memory_consumption=64
+      -d opcache.validate_timestamps=0
+      -S 0.0.0.0:$PORT index.php
     envVars:
+
+      - key: PHP_CLI_SERVER_WORKERS
+        value: "4"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY
