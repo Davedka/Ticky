@@ -1,3 +1,6 @@
+<?php
+
+
 const TICKY_XLSX_MAX_FILE_BYTES  = 12 * 1024 * 1024;  // feltöltött fájl felső határ
 const TICKY_XLSX_MAX_ENTRY_BYTES = 64 * 1024 * 1024;  // egy kicsomagolt XML felső határa (zip bomb védelem)
 const TICKY_XLSX_MAX_SHEETS      = 200;
