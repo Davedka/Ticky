@@ -8,8 +8,6 @@ if (is_file(__DIR__ . '/csoport_terkep.php')) {
     require_once __DIR__ . '/csoport_terkep.php';
 }
 
-const TICKY_VIEW_FETCH_LIMIT = '5000';
-
 // ─────────────────────────────────────────────────────────────────
 // Lekérdezések
 // ─────────────────────────────────────────────────────────────────
@@ -52,28 +50,26 @@ function ticky_view_class_rows(string $requested_class): ?array
 
 function ticky_view_fetch_class_rows(string $class): array
 {
-    $rows = sb_get('orarendek', [
+    return sb_get_all('orarendek', [
         'osztaly' => 'eq.' . $class,
         'aktiv'   => 'eq.true',
         'select'  => ticky_view_select_columns(),
         'order'   => 'het_napja.asc,kezdes.asc',
-        'limit'   => TICKY_VIEW_FETCH_LIMIT,
     ]);
-
-    return is_array($rows) ? $rows : [];
 }
 
 /** Az aktív órarendben szereplő osztálykód megkeresése kis/nagybetű nélkül. */
 function ticky_view_resolve_class_code(string $requested_class): ?string
 {
-    $rows = sb_get('orarendek', [
+    // Lapozva: az aktív órarend simán túllépi az egy válaszban visszaadható
+    // sorszámot, és a hiányzó sorokból hiányzó osztályok lennének.
+    $rows = sb_get_all('orarendek', [
         'aktiv'  => 'eq.true',
         'select' => 'osztaly',
-        'limit'  => TICKY_VIEW_FETCH_LIMIT,
     ]);
 
     $requested_lower = osztaly_lower($requested_class);
-    foreach (is_array($rows) ? $rows : [] as $row) {
+    foreach ($rows as $row) {
         $code = trim((string) ($row['osztaly'] ?? ''));
         if ($code !== '' && osztaly_lower($code) === $requested_lower) {
             return $code;
@@ -106,15 +102,14 @@ function ticky_view_teacher_rows(string $requested_teacher): ?array
     }
 
     $teacher = $teachers[0];
-    $rows = sb_get('orarendek', [
+    $rows = sb_get_all('orarendek', [
         'tanar_id' => 'eq.' . $teacher['id'],
         'aktiv'    => 'eq.true',
         'select'   => ticky_view_select_columns(),
         'order'    => 'het_napja.asc,kezdes.asc',
-        'limit'    => TICKY_VIEW_FETCH_LIMIT,
     ]);
 
-    if (!is_array($rows) || $rows === []) {
+    if ($rows === []) {
         return null;
     }
 
