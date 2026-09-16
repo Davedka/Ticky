@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
 
 
 if (!admin_can_see_ui()) {
@@ -145,4 +146,52 @@ json_response([
         'status' => $status,
         'issues' => $issues,
     ],
+    // ── Teljesítmény ──────────────────────────────────────────────
+    // Ez a két blokk dönti el, hogy a szerver mennyi kérést bír el.
+    // Az opcache nélkül minden kérés újraolvassa a ~190 KB PHP forrást,
+    // ami mérve tízszeres CPU-igényt jelent kérésenként.
+    'teljesitmeny' => ticky_diag_teljesitmeny(),
 ]);
+
+/**
+ * Az opcache és a válasz-cache állapota.
+ *
+ * Az opcache a php -S alatt a CLI SAPI-ban fut, ahol alapértelmezésben KI van
+ * kapcsolva (opcache.enable_cli=0). A hivatalos php:8.2-cli image-ben a
+ * kiterjesztés be van fordítva, de nincs engedélyezve.
+ */
+function ticky_diag_teljesitmeny(): array
+{
+    $statusz = function_exists('opcache_get_status') ? @opcache_get_status(false) : null;
+    $bekapcsolva = is_array($statusz) ? (bool) ($statusz['opcache_enabled'] ?? false) : false;
+
+    $javaslat = null;
+    if (!function_exists('opcache_get_status')) {
+        $javaslat = 'Az opcache kiterjesztés nincs betöltve. Dockerfile: docker-php-ext-enable opcache';
+    } elseif (!$bekapcsolva) {
+        $javaslat = 'Az opcache be van töltve, de ki van kapcsolva. Indítás: php -d opcache.enable_cli=1 ...';
+    }
+
+    return [
+        'opcache' => [
+            'kiterjesztes_betoltve' => function_exists('opcache_get_status'),
+            'bekapcsolva'           => $bekapcsolva,
+            'enable_cli_ini'        => ini_get('opcache.enable_cli'),
+            'gyorsitotarazott_szkriptek' => is_array($statusz)
+                ? ($statusz['opcache_statistics']['num_cached_scripts'] ?? null)
+                : null,
+            'javaslat'              => $javaslat,
+        ],
+        'valasz_cache' => ticky_cache_statisztika() + [
+            'konyvtar'      => ticky_cache_konyvtar(),
+            'irhato'        => is_writable(ticky_cache_konyvtar()),
+            'orarend_ttl_mp'=> TICKY_CACHE_ORAREND_MP,
+            'lista_ttl_mp'  => TICKY_CACHE_LISTA_MP,
+        ],
+        'szerver' => [
+            'sapi'           => PHP_SAPI,
+            'php_verzio'     => PHP_VERSION,
+            'worker_szam'    => getenv('PHP_CLI_SERVER_WORKERS') ?: '1 (nincs beállítva)',
+        ],
+    ];
+}
