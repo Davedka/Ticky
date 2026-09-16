@@ -3,6 +3,11 @@ define('SUPABASE_URL',         getenv('SUPABASE_URL')         ?: '');
 define('SUPABASE_ANON_KEY',    getenv('SUPABASE_ANON_KEY')    ?: '');
 define('SUPABASE_SERVICE_KEY', getenv('SUPABASE_SERVICE_KEY') ?: '');
 define('TZ',                   getenv('TIMEZONE')             ?: 'Europe/Budapest');
+
+
+const SB_CONNECT_TIMEOUT = 3;   // TCP + TLS felépítés másodpercben
+const SB_TIMEOUT         = 8;   // olvasás felso korlátja
+const SB_TIMEOUT_IRAS    = 30;  // import/publikálás: sok sor, lassabb válasz
 date_default_timezone_set(TZ);
 
 function sb_request($method, $path, $body = null, $params = [], $key = 'service') {
@@ -15,6 +20,9 @@ function sb_request($method, $path, $body = null, $params = [], $key = 'service'
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, SB_CONNECT_TIMEOUT);
+    // Az írás (POST/PATCH/DELETE) sok sort mozgathat, annak több ido kell.
+    curl_setopt($ch, CURLOPT_TIMEOUT, $method === 'GET' ? SB_TIMEOUT : SB_TIMEOUT_IRAS);
     if ($body) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
 
     $response = curl_exec($ch);
@@ -33,7 +41,16 @@ function sb_update($table, $body, $filters, $key = 'service') {
     return sb_request('PATCH', $table, $body, $filters, $key); 
 }
 
-
+// ─────────────────────────────────────────────────────────────────
+// Nagy találathalmazok
+//
+// A PostgREST felső korlátot tesz az egy válaszban visszaadott sorokra
+// (Supabase-en tipikusan 1000). Ha ezt figyelmen kívül hagyjuk, a lekérdezés
+// NEM hibázik, csak csendben kevesebb sort ad vissza – ebből lesz a
+// "2273 sorból 1000" jellegű hibás számolás. Ezért:
+//   - darabszámhoz sosem töltünk le sorokat, hanem count=exact fejlécet kérünk
+//   - ha tényleg minden sor kell, lapozunk
+// ─────────────────────────────────────────────────────────────────
 
 const SB_PAGE_SIZE     = 1000;
 const SB_MAX_PAGES     = 100;   // 100 000 sor felső határ, védelem végtelen ciklus ellen
@@ -55,6 +72,8 @@ function sb_count(string $table, array $filters = [], string $key = 'service'): 
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_NOBODY         => true,   // HEAD: nem jön vissza egyetlen sor sem
         CURLOPT_HEADER         => true,
+        CURLOPT_CONNECTTIMEOUT => SB_CONNECT_TIMEOUT,
+        CURLOPT_TIMEOUT        => SB_TIMEOUT,
         CURLOPT_HTTPHEADER     => [
             "apikey: $apiKey",
             "Authorization: Bearer $apiKey",
@@ -78,7 +97,13 @@ function sb_count(string $table, array $filters = [], string $key = 'service'): 
     return (int) $matches[1];
 }
 
-
+/**
+ * Minden sor lekérése lapozással.
+ *
+ * Akkor használd, ha tényleg az összes sorra szükség van (pl. egyedi
+ * osztálykódok gyűjtése). A hívó által megadott limit/offset figyelmen kívül
+ * marad, mert a lapozást ez a függvény intézi.
+ */
 function sb_get_all(string $table, array $params = [], string $key = 'anon'): array {
     unset($params['limit'], $params['offset']);
 
