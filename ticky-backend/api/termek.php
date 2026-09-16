@@ -1,9 +1,19 @@
 <?php
 // api/termek.php
+//
+// A legforróbb végpont: a kijelző 30 másodpercenként, a termek oldal
+// percenként kéri. Ezért minden adatbázis-lekérdezés cache-elve van.
+//
+// A cache NYERS sorokat tárol, nem kész választ: a nap, az idő és az aktív
+// szünet minden kérésnél frissen számolódik, így a cache nem mutathat
+// elavult órát. A cache-t a publikálás üríti (ticky_cache_urit()).
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/room_sort.php';
+require_once __DIR__ . '/../utils/valasz_cache.php';
+require_once __DIR__ . '/../utils/terem_allapot.php';
+require_once __DIR__ . '/../utils/orarend_nap_cache.php';
 $aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
@@ -11,14 +21,10 @@ handle_cors();
 $nap = mai_nap();
 $ido = aktualis_ido();
 
-// ─── Összes terem (Supabase) ────────────────────────────────────────
+// ─── Összes terem (cache-elve) ──────────────────────────────────────
 $termek_raw = [];
 try {
-    $termek_raw = sb_get('termek', [
-        'select' => 'id,terem_szam,emelet',
- 
-        'order'  => 'terem_szam.asc',
-    ]);
+    $termek_raw = ticky_termek_lista();
 } catch (\Throwable $e) {
     $termek_raw = [];
 }
@@ -65,49 +71,32 @@ if ($allapot_kell && $nap > 0 && $aktiv_szunet === null) {
     $foglalt_map = [];
 
     if (!empty($terem_ids)) {
-        $id_filter = 'in.(' . implode(',', $terem_ids) . ')';
-
+        // A nap ÖSSZES aktív órája egyetlen, cache-elt lekérdezéssel.
+        //
+        // Korábban itt idő szerint szűrt lekérdezés ment ki, ami percenként
+        // más – tehát cache-elhetetlen volt. A napi lekérdezés napon belül
+        // állandó, a "most melyik óra" szűrés PHP-ban történik
+        // (utils/terem_allapot.php).
+        //
+        // Ugyanezt a bejegyzést használja a /api/terem/{szam} is.
         $orak = [];
         try {
-            $orak = sb_get('orarendek', [
-                'terem_id'  => $id_filter,
-                'het_napja' => 'eq.' . $nap,
-                'aktiv'     => 'eq.true',
-                'kezdes'    => 'lte.' . $ido . ':00',
-                'vegzes'    => 'gte.' . $ido . ':00',
-                'select'    => 'terem_id,osztaly,tantargy,kezdes,vegzes,tanar_id',
-            ]);
+            $orak = ticky_nap_orai($nap);
         } catch (\Throwable $e) {
             $orak = [];
         }
 
-        // Tanárnevek lekérése – csak ha van aktív óra
+        // A tanárok listája ritkán változik, és kicsi – egyben cache-elve,
+        // így nincs szükség kérésenkénti in.(...) lekérdezésre.
         $tanar_map = [];
         if (!empty($orak)) {
-            $tanar_ids = array_unique(array_filter(array_column($orak, 'tanar_id')));
-            if (!empty($tanar_ids)) {
-                try {
-                    $tanarok = sb_get('tanarok', [
-                        'id'     => 'in.(' . implode(',', $tanar_ids) . ')',
-                        'select' => 'id,rovid_nev',
-                    ]);
-                    foreach ($tanarok as $t) {
-                        $tanar_map[$t['id']] = $t['rovid_nev'];
-                    }
-                } catch (\Throwable $e) {
-                }
+            try {
+                $tanar_map = ticky_tanar_nev_map(ticky_tanarok_mind());
+            } catch (\Throwable $e) {
             }
         }
 
-        foreach ($orak as $o) {
-            $foglalt_map[$o['terem_id']] = [
-                'tanar'    => $tanar_map[$o['tanar_id']] ?? '?',
-                'osztaly'  => $o['osztaly'],
-                'tantargy' => $o['tantargy'],
-                'kezdes'   => substr($o['kezdes'], 0, 5),
-                'vegzes'   => substr($o['vegzes'], 0, 5),
-            ];
-        }
+        $foglalt_map = ticky_terem_foglalt_map($orak, $tanar_map, $ido, $terem_ids);
     }
 
     foreach ($termek as &$terem) {
