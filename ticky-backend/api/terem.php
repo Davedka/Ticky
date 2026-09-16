@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
 require_once __DIR__ . '/../utils/szunet.php';
 require_once __DIR__ . '/../utils/tanarok_source.php';
+require_once __DIR__ . '/../utils/orarend_nap_cache.php';
 $aktiv_szunet = ticky_aktiv_szunet_nev();
 
 handle_cors();
@@ -21,8 +22,8 @@ $nap = mai_nap();
 $ido = aktualis_ido();
 $sz  = aktiv_szunet();
 
-$termek = sb_get('termek', ['terem_szam'=>'eq.'.$szam,'select'=>'id,terem_szam,emelet']);
-$terem = $termek[0] ?? null;
+// Cache-elt teremlista (52 sor) – ugyanaz a bejegyzés, amit a /api/termek használ.
+$terem = ticky_terem_sor($szam);
 $terem_id = $terem['id'] ?? null;
 $emelet = $terem['emelet'] ?? null;
 
@@ -43,29 +44,25 @@ if ($nap === 0) {
     json_response(['terem'=>$szam,'emelet'=>$emelet,'allapot'=>'szabad','uzenet'=>'Hétvége','aktualis'=>null,'kovetkezo'=>null]);
 }
 
+// A nap összes órája egyetlen cache-elt lekérdezésbol, teremre szurve.
+// Így az egész iskolára naponta EGY Supabase kérés jut, nem termenként egy.
 $orak = [];
 if ($terem_id !== null) {
-    $orak = sb_get('orarendek', [
-        'terem_id'  => 'eq.'.$terem_id,
-        'het_napja' => 'eq.'.$nap,
-        'aktiv'     => 'eq.true',
-        'select'    => 'id,osztaly,tantargy,kezdes,vegzes,ora_sorszam,tanar_id',
-        'order'     => 'kezdes.asc',
-    ]);
+    $orak = array_values(array_filter(
+        ticky_nap_orai($nap),
+        static fn(array $ora): bool => (string) ($ora['terem_id'] ?? '') === (string) $terem_id
+    ));
 }
 
 $tanar_nevek = [];
 if (!empty($orak)) {
     $source_teacher_names = function_exists('ticky_source_teacher_names') ? ticky_source_teacher_names() : [];
-    $ids = array_unique(array_filter(array_column($orak,'tanar_id')));
-    if (!empty($ids)) {
-        foreach (sb_get('tanarok',['id'=>'in.('.implode(',',$ids).')','select'=>'id,rovid_nev,nev']) as $t) {
-            $rovid = (string) ($t['rovid_nev'] ?? '?');
-            $tanar_nevek[$t['id']] = [
-                'rovid_nev' => $rovid,
-                'nev' => $t['nev'] ?? ($source_teacher_names[$rovid] ?? null),
-            ];
-        }
+    foreach (ticky_tanarok_mind() as $t) {
+        $rovid = (string) ($t['rovid_nev'] ?? '?');
+        $tanar_nevek[$t['id']] = [
+            'rovid_nev' => $rovid,
+            'nev' => $t['nev'] ?? ($source_teacher_names[$rovid] ?? null),
+        ];
     }
 }
 
@@ -121,12 +118,12 @@ foreach ($slots as $ora) {
 if ($aktualis!==null) {
     $k=$aktualis['kezdes']; $v=$aktualis['vegzes'];
     $pm=(strtotime($v)-strtotime($ido))/60;
-    json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'allapot'=>'foglalt',
+    json_response(['terem'=>$szam,'emelet'=>$emelet,'allapot'=>'foglalt',
         'aktualis'=>['ora_sorszam'=>$aktualis['ora_sorszam'],'tanar'=>$aktualis['tanar'],'tanar_nev'=>$aktualis['tanar_nev'],'osztaly'=>$aktualis['osztaly'],'tantargy'=>$aktualis['tantargy'],'kezdes'=>$k,'vegzes'=>$v,'perc_maradt'=>max(0,(int)$pm)],
         'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>$kovetkezo['kezdes'],'vegzes'=>$kovetkezo['vegzes']]:null,
     ]);
 } else {
-    json_response(['terem'=>$szam,'emelet'=>$terem['emelet'],'allapot'=>'szabad','aktualis'=>null,
+    json_response(['terem'=>$szam,'emelet'=>$emelet,'allapot'=>'szabad','aktualis'=>null,
         'kovetkezo'=>$kovetkezo?['ora_sorszam'=>$kovetkezo['ora_sorszam'],'tanar'=>$kovetkezo['tanar'],'osztaly'=>$kovetkezo['osztaly'],'tantargy'=>$kovetkezo['tantargy'],'kezdes'=>$kovetkezo['kezdes'],'vegzes'=>$kovetkezo['vegzes']]:null,
     ]);
 }
