@@ -1,15 +1,6 @@
 <?php
 // utils/orarend_view.php
-// Publikus órarend-nézetek az AKTÍV (publikált) adatbázis-verzióból.
-//
-// Miért van rá szükség: az /osztaly és /tanar oldalak korábban a tanárok.js
-// fájlból olvastak, ezért egy frissen publikált órarend nem látszott rajtuk –
-// miközben a termek oldalak (amelyek az adatbázisból olvasnak) már az újat
-// mutatták. Ez a modul ugyanazt a válaszszerkezetet állítja elő az
-// adatbázisból, amit a tanarok_source.php adott, így a frontend változatlan.
-//
-// A "melyik verzió aktív" kérdést nem külön lekérdezés dönti el, hanem az
-// orarendek.aktiv oszlop: a publikálás egyetlen tranzakcióban állítja át.
+
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/osztaly.php';
