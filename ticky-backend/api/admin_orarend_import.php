@@ -1,6 +1,13 @@
 <?php
 // api/admin_orarend_import.php
-
+// POST /api/admin/orarend/import  (multipart/form-data, mező: fajl)
+//
+// A feltöltés SOHA nem írja felül az éles órarendet. A folyamat:
+//   strukturális validáció → parse → tartalmi + üzleti validáció
+//   → ha nincs hiba: DRAFT verzió az adatbázisban → előnézet
+//   → ha van hiba: nem jön létre draft, csak a hibariport
+//
+// Az élesítés külön lépés: POST /api/admin/orarend/{id}/publish
 
 require_once __DIR__ . '/../config/supabase.php';
 require_once __DIR__ . '/../utils/helpers.php';
@@ -141,49 +148,3 @@ try {
 
     $version_id = ticky_repo_create_draft($version_name, $school_year, $created_by, 'Feltöltve: ' . $upload['fajlnev']);
     $inserted = ticky_repo_insert_lessons($version_id, $lessons);
-} catch (TickyRepoException $error) {
-    // Ne maradjon félkész draft: takarítunk, majd jelentjük a hibát.
-    if ($version_id !== null) {
-        try {
-            ticky_repo_delete_draft($version_id);
-        } catch (TickyRepoException) {
-            // A takarítás hibáját elnyeljük, az eredeti hiba a fontosabb.
-        }
-    }
-
-    $import_log['statusz'] = 'ervenytelen';
-    ticky_repo_log_import($import_log);
-
-    json_response(['ok' => false, 'kod' => 'ADATBAZIS_HIBA', 'uzenet' => $error->getMessage()], 502);
-}
-
-$active_version = ticky_repo_active_version();
-$diff = ticky_repo_diff($version_id, $active_version === null ? null : (int) $active_version['id']);
-
-$import_log['verzio_id'] = $version_id;
-$import_log['statusz'] = 'feldolgozva';
-$import_id = ticky_repo_log_import($import_log);
-
-// Az import új tanárt/termet hozhat létre és tanárnevet frissíthet, ezért
-// a listák cache-e elavul. A draft órarend nem publikus, azt nem érinti.
-ticky_cache_urit();
-
-json_response([
-    'ok'                     => true,
-    'import_id'              => $import_id,
-    'verzio_id'              => $version_id,
-    'verzio_nev'             => $version_name,
-    'tanev'                  => $school_year,
-    'formatum'               => $parsed['formatum'],
-    'ervenyes'               => true,
-    'beszurt_sorok'          => $inserted,
-    'uj_entitasok'           => $created_entities,
-    'aktiv_verzio'           => $active_version,
-    'elteresek'              => $diff,
-    'statisztika'            => $report['statisztika'],
-    'hibak'                  => [],
-    'figyelmeztetesek'       => $report['figyelmeztetesek'],
-    'hibak_szama'            => 0,
-    'figyelmeztetesek_szama' => $report['figyelmeztetesek_szama'],
-    'idotartam_ms'           => (int) round((microtime(true) - $started_at) * 1000),
-]);
