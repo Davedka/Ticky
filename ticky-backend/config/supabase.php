@@ -4,7 +4,14 @@ define('SUPABASE_ANON_KEY',    getenv('SUPABASE_ANON_KEY')    ?: '');
 define('SUPABASE_SERVICE_KEY', getenv('SUPABASE_SERVICE_KEY') ?: '');
 define('TZ',                   getenv('TIMEZONE')             ?: 'Europe/Budapest');
 
-
+// ─────────────────────────────────────────────────────────────────
+// Idokorlátok
+//
+// Idokorlát nélkül egy beragadt Supabase kérés a php -S egyetlen worker
+// folyamatát fogja, és ezzel az EGÉSZ oldalt megállítja, nem csak azt az
+// egy kérést. A curl alapértelmezése gyakorlatilag végtelen, ezért kötelezo
+// explicit értéket adni.
+// ─────────────────────────────────────────────────────────────────
 const SB_CONNECT_TIMEOUT = 3;   // TCP + TLS felépítés másodpercben
 const SB_TIMEOUT         = 8;   // olvasás felso korlátja
 const SB_TIMEOUT_IRAS    = 30;  // import/publikálás: sok sor, lassabb válasz
