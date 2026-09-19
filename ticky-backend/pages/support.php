@@ -139,14 +139,21 @@ textarea.inp{resize:vertical;min-height:90px;}
           <label style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;">Üzenet</label>
           <textarea id="f-uzenet" class="inp" rows="4" placeholder="Írd le részletesen a problémát…"></textarea>
         </div>
+        <!-- Csapda mezo: valódi felhasználó nem látja, tehát nem tölti ki.
+             Ha mégis kitöltve érkezik, robot küldte, és a szerver eldobja. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+          <label for="f-weboldal">Weboldal</label>
+          <input type="text" id="f-weboldal" name="weboldal" tabindex="-1" autocomplete="off">
+        </div>
         <button class="gold-btn" id="send-btn" onclick="sendForm()">Üzenet küldése →</button>
-        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,.2);">A levél a tickysupport@gmail.com-ra lesz elküldve</p>
+        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,.2);">Az üzenet a Ticky supportjához kerül, és a tickysupport@gmail.com-ra is megy értesítés</p>
       </div>
       <!-- Siker -->
       <div id="form-success" style="display:none;text-align:center;padding:24px 0;">
         <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px;margin:0 auto 10px;display:block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
         <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#4ade80;margin-bottom:6px;">Elküldve!</p>
         <p style="font-size:13px;color:rgba(255,255,255,.45);">Hamarosan válaszolunk a megadott email címre.</p>
+        <p id="jegy-szam" style="font-size:12px;color:rgba(255,255,255,.3);margin-top:6px;"></p>
         <button onclick="resetForm()" style="margin-top:16px;font-size:13px;padding:8px 16px;border-radius:8px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);background:transparent;cursor:pointer;">Új üzenet</button>
       </div>
     </div>
@@ -186,27 +193,63 @@ function toggleFaq(i){
   document.querySelectorAll('.faq-item').forEach(f=>f.classList.remove('open'))
   if(!was)el.classList.add('open')
 }
-function sendForm(){
-  const nev=document.getElementById('f-nev').value.trim()
-  const email=document.getElementById('f-email').value.trim()
-  const targy=document.getElementById('f-targy').value
-  const uzenet=document.getElementById('f-uzenet').value.trim()
-  if(!nev||!email||!targy||!uzenet){showToast('Kérlek töltsd ki az összes mezőt!');return}
-  if(!email.includes('@')){showToast('Érvénytelen email cím!');return}
+// A kategória kulcsok a szerveroldali TICKY_SUPPORT_KATEGORIAK-kal egyeznek.
+const KATEGORIA_NEVEK={hiba:'Hibajelentés',kerdes:'Általános kérdés',terem:'Terem / órarend probléma',tanar:'Tanár adat módosítás',osztaly:'Osztály / osztálynézet probléma',javaslat:'Fejlesztési javaslat',egyeb:'Egyéb'}
+
+function mezoErtek(id){const el=document.getElementById(id);return el?el.value.trim():''}
+
+// Tartalék hálózati hibára: legalább a levelezőt megnyitjuk, előkészített
+// levéllel. NEM jelzünk sikert, mert ilyenkor tolünk semmi nem indult el.
+function mailtoTartalek(adat){
+  const targy=encodeURIComponent('[Ticky Support] '+(KATEGORIA_NEVEK[adat.kategoria]||adat.kategoria)+' – '+adat.nev)
+  const torzs=encodeURIComponent('Feladó: '+adat.nev+'\nEmail: '+adat.email+'\n\n'+adat.uzenet)
+  return 'mailto:tickysupport@gmail.com?subject='+targy+'&body='+torzs
+}
+
+async function sendForm(){
+  const adat={
+    nev:mezoErtek('f-nev'),
+    email:mezoErtek('f-email'),
+    kategoria:document.getElementById('f-targy').value,
+    uzenet:mezoErtek('f-uzenet'),
+    weboldal:mezoErtek('f-weboldal')
+  }
+
+  if(!adat.nev||!adat.email||!adat.kategoria||!adat.uzenet){showToast('Kérlek töltsd ki az összes mezőt!');return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(adat.email)){showToast('Érvénytelen email cím!');return}
+  if(adat.uzenet.length<10){showToast('Az üzenet legalább 10 karakter legyen.');return}
+
   const btn=document.getElementById('send-btn')
-  btn.disabled=true;btn.innerHTML='Küldés…'
-  const targyNevek={hiba:'🐛 Hibajelentés',kerdes:'❓ Általános kérdés',terem:'🏫 Terem / órarend',tanar:'👩‍🏫 Tanár adat',osztaly:'🎓 Osztály / osztálynézet probléma',javaslat:'💡 Fejlesztési javaslat',egyeb:'📋 Egyéb'}
-  const subject=encodeURIComponent('[Ticky Support] '+(targyNevek[targy]||targy)+' – '+nev)
-  const body=encodeURIComponent('Feladó: '+nev+'\nEmail: '+email+'\nKategória: '+(targyNevek[targy]||targy)+'\n\nÜzenet:\n'+uzenet)
-  setTimeout(()=>{
-    window.location.href='mailto:tickysupport@gmail.com?subject='+subject+'&body='+body
+  btn.disabled=true;btn.textContent='Küldés…'
+
+  try{
+    const valasz=await fetch('/api/support/uzenet',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(adat)
+    })
+    const eredmeny=await valasz.json().catch(()=>({}))
+
+    if(!valasz.ok||!eredmeny.ok){
+      const elsoHiba=eredmeny.hibak?Object.values(eredmeny.hibak)[0]:null
+      showToast(elsoHiba||eredmeny.uzenet||('Küldési hiba ('+valasz.status+')'))
+      return
+    }
+
+    const jegy=document.getElementById('jegy-szam')
+    if(jegy)jegy.textContent=eredmeny.azonosito?('Azonosító: #'+eredmeny.azonosito):''
     document.getElementById('support-form').style.display='none'
     document.getElementById('form-success').style.display='block'
-    btn.disabled=false;btn.innerHTML='Üzenet küldése →'
-  },800)
+  }catch(hiba){
+    showToast('A szerver nem elérhető. Megnyitjuk a levelezőt…')
+    window.location.href=mailtoTartalek(adat)
+  }finally{
+    btn.disabled=false;btn.textContent='Üzenet küldése →'
+  }
 }
+
 function resetForm(){
-  ['f-nev','f-email','f-uzenet'].forEach(id=>document.getElementById(id).value='')
+  ['f-nev','f-email','f-uzenet','f-weboldal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})
   document.getElementById('f-targy').value=''
   document.getElementById('support-form').style.display='flex'
   document.getElementById('form-success').style.display='none'
