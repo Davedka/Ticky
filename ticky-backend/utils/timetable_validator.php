@@ -1,12 +1,26 @@
 <?php
 // utils/timetable_validator.php
-
+// Órarend validáció három szinten.
+//
+//   A) STRUKTURÁLIS – a feltöltött fájlra (méret, típus, olvashatóság).
+//      Ez a timetable_upload.php-ban fut, még a parse előtt.
+//   B) TARTALMI     – soronként: kötelező mezők, karakterkészlet, hosszak,
+//                     érvényes nap és órasáv.
+//   C) ÜZLETI       – az egész órarendre: tanárütközés, teremütközés,
+//                     osztályütközés, ismeretlen entitások.
+//
+// ERROR  = nem publikálható.
+// WARNING = publikálható, de az adminnak látnia kell.
 
 require_once __DIR__ . '/timetable_import.php';
 
 const TICKY_VALIDATOR_MAX_REPORTED = 200; // riportban visszaadott problémák felső határa
 
+// ─────────────────────────────────────────────────────────────────
+// B) Tartalmi validáció
+// ─────────────────────────────────────────────────────────────────
 
+/** Tanárkód: betű, szám, pont, kötőjel; ékezet megengedett (SZiÁ, PÁI, MÉ). */
 function ticky_validator_teacher_code_is_valid(string $code): bool
 {
     return preg_match('/^[\p{L}\p{N}.\-]{1,' . TICKY_IMPORT_MAX_TEACHER_LENGTH . '}$/u', $code) === 1;
@@ -108,7 +122,21 @@ function ticky_validator_check_rows(array $lessons): array
     return $issues;
 }
 
+// ─────────────────────────────────────────────────────────────────
+// C) Üzleti validáció
+// ─────────────────────────────────────────────────────────────────
 
+/**
+ * Ütközések keresése.
+ *
+ *  - Tanárütközés (ERROR): egy tanár ugyanabban a sávban két különböző teremben.
+ *    Ha a terem azonos, az összevont osztály (pl. 12.a+12.b együtt), nem hiba.
+ *  - Teremütközés (ERROR): egy teremben ugyanabban a sávban két különböző tanár.
+ *  - Osztályütközés (WARNING): egy osztály ugyanazon csoportja két teremben.
+ *    Ez lehet valós nyelvi alcsoport-bontás is, ezért csak figyelmeztetés.
+ *
+ * @return array<int,array>
+ */
 /**
  * Ütközés-ellenorzés.
  *
