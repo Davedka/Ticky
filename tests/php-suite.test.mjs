@@ -1,5 +1,8 @@
 // tests/php-suite.test.mjs
-
+// A PHP oldali tesztek futtatása a Node teszt-sorozatból.
+//
+// Ha a gépen nincs PHP, a suite kihagyja magát (nem buktatja el a buildet),
+// de a kihagyást hangosan kiírja, hogy ne tűnjön zöldnek egy meg nem futott teszt.
 
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
@@ -13,6 +16,7 @@ const SUITES = [
   'tests/php/valasz_cache.test.php',
   'tests/php/terem_allapot.test.php',
   'tests/php/orarend_nap_cache.test.php',
+  'tests/php/support_repo.test.php',
 ]
 
 const probe = spawnSync('php', ['--version'], { encoding: 'utf8' })
