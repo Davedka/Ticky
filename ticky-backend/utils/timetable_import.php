@@ -1,6 +1,21 @@
 <?php
 // utils/timetable_import.php
-
+// Órarend import: beolvasás → normalizálás.
+//
+// Két bemeneti formátumot ismer:
+//
+//   FLAT  – "Ticky Import Format v1": egy munkalap, fejléces tábla
+//           | Tanár | Terem | Osztály | Tantárgy | Nap | Kezdés | Vége | (Csoport)
+//           Ez az ajánlott formátum, mert minden mező explicit.
+//
+//   GRID  – az iskolai "órarend csoportonként" export: munkalaponként egy
+//           (osztály, csoport) pár, soronként egy nap, oszloponként egy tanóra.
+//           A cellák szövege tördelt ("tantárgy\nterem tanár"), ezért itt
+//           lényegesen több a bizonytalanság – amit nem tudunk biztosan
+//           értelmezni, azt hibaként jelentjük, NEM találgatunk.
+//
+// A modul nem ír adatbázisba és nem validál üzleti szabályt: csak sorokat és
+// beolvasási problémákat ad vissza. A validálás a timetable_validator.php-ban van.
 
 require_once __DIR__ . '/xlsx_reader.php';
 require_once __DIR__ . '/osztaly.php';
