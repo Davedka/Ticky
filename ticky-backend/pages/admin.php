@@ -147,11 +147,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
         <button class="navbtn" data-section="tanarok">Tanarok</button>
         <button class="navbtn" data-section="termek">Termek</button>
         <button class="navbtn" data-section="diagnosztika">Diagnosztika</button>
+        <button class="navbtn" data-section="support">Support <span id="support-badge" class="chip gold" style="display:none;margin-left:6px;">0</span></button>
         <div class="mt-4 pt-4 border-t border-white/10 space-y-2">
           <a href="/termek" class="navbtn block">Termek live</a>
           <a href="/kijelzo" class="navbtn block">Kijelzo</a>
           <a href="/tester" class="navbtn block">🧪 Tester felulet</a>
-          <a href="/support" class="navbtn block">Support</a>
+          <a href="/support" class="navbtn block">Support oldal</a>
         </div>
       </div>
     </aside>
@@ -355,6 +356,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
         </div>
       </section>
 
+      <section id="section-support" class="section">
+        <div class="flex items-center justify-between gap-4 mb-5">
+          <div>
+            <h1 class="text-3xl font-bold" style="font-family:'Playfair Display',serif;">Support</h1>
+            <p class="small mt-2">A /support oldalon beérkezett üzenetek. Az adatbázis az elsődleges tároló – ami itt látszik, az akkor is megvan, ha az email küldés hibázott.</p>
+          </div>
+          <div class="tool-row">
+            <select id="support-filter" class="inp" style="width:auto;">
+              <option value="mind">Mind</option>
+              <option value="uj">Új</option>
+              <option value="folyamatban">Folyamatban</option>
+              <option value="lezart">Lezárt</option>
+            </select>
+            <button class="btn btn-ghost" id="reload-support">Frissítés</button>
+          </div>
+        </div>
+        <div id="support-mail-allapot" class="glass rounded-2xl p-4 mb-4 small"></div>
+        <div id="support-lista" class="space-y-3"></div>
+      </section>
     </main>
   </div>
 </div>
@@ -467,12 +487,85 @@ function setSection(name){
   state.section=name;
   document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='section-'+name));
   document.querySelectorAll('.navbtn[data-section]').forEach(el=>el.classList.toggle('active',el.dataset.section===name));
-  const loaders={dashboard:loadDashboard,orarend:loadOrarendVersions,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:()=>{loadDiagnosztika();loadGithubInfo()}};
+  const loaders={dashboard:loadDashboard,orarend:loadOrarendVersions,felhasznalok:loadUsers,szunetek:loadBreaks,tanarok:loadTeachers,termek:loadRooms,diagnosztika:()=>{loadDiagnosztika();loadGithubInfo()},support:loadSupport};
   loaders[name]?.();
 }
 document.querySelectorAll('.navbtn[data-section]').forEach(btn=>btn.addEventListener('click',()=>setSection(btn.dataset.section)));
 
 function statusChip(label,type){return `<span class="chip ${type}">${esc(label)}</span>`}
+
+// ── Support üzenetek ─────────────────────────────────────────────
+const SUPPORT_STATUSZ_STILUS={uj:'gold',folyamatban:'blue',lezart:'green'};
+const SUPPORT_KEZBESITES_SZOVEG={elkuldve:'Email elküldve',sikertelen:'Email HIBA',fuggoben:'Email függőben',kikapcsolva:'Email kikapcsolva'};
+const SUPPORT_KEZBESITES_STILUS={elkuldve:'green',sikertelen:'red',fuggoben:'gold',kikapcsolva:'blue'};
+
+function supportFilter(){const el=q('support-filter');return el?el.value:'mind'}
+
+async function loadSupport(){
+  const lista=q('support-lista');
+  if(!lista) return;
+  lista.innerHTML='<div class="glass rounded-2xl p-5 small">Betoltes...</div>';
+  try{
+    const adat=await adminFetch('/api/admin/support?statusz='+encodeURIComponent(supportFilter()));
+    renderSupport(adat);
+  }catch(error){
+    lista.innerHTML=`<div class="glass rounded-2xl p-5 small">Hiba: ${esc(error.message)}</div>`;
+  }
+}
+
+function renderSupport(adat){
+  const uzenetek=adat.uzenetek||[];
+  const allapot=q('support-mail-allapot');
+  if(allapot){
+    allapot.innerHTML=adat.email_kuldes
+      ?'Email tovabbitas BEKAPCSOLVA. Az uzenetek a support postafiokba is megerkeznek.'
+      :'Email tovabbitas KIKAPCSOLVA (nincs SUPPORT_MAIL_API_KEY). Az uzenetek itt olvashatok, de nem megy rolok ertesito level.';
+  }
+
+  const badge=q('support-badge');
+  if(badge){
+    const nyitott=Number(adat.nyitott||0);
+    badge.textContent=String(nyitott);
+    badge.style.display=nyitott>0?'inline-flex':'none';
+  }
+
+  const lista=q('support-lista');
+  if(!uzenetek.length){lista.innerHTML='<div class="glass rounded-2xl p-5 small">Nincs uzenet ebben a nezetben.</div>';return}
+
+  lista.innerHTML=uzenetek.map(item=>{
+    const statusz=String(item.statusz||'uj');
+    const kezbesites=String(item.kezbesites||'fuggoben');
+    const kategoria=(adat.kategoriak&&adat.kategoriak[item.kategoria])||item.kategoria||'';
+    const hiba=item.kezbesites_hiba?`<p class="small" style="color:#fda4af;margin-top:6px;">Kezbesitesi hiba: ${esc(item.kezbesites_hiba)}</p>`:'';
+    return `<div class="glass rounded-2xl p-5">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div style="min-width:0;">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            ${statusChip(statusz,SUPPORT_STATUSZ_STILUS[statusz]||'gold')}
+            ${statusChip(kategoria,'blue')}
+            ${statusChip(SUPPORT_KEZBESITES_SZOVEG[kezbesites]||kezbesites,SUPPORT_KEZBESITES_STILUS[kezbesites]||'gold')}
+          </div>
+          <p class="font-bold">${esc(item.nev||'')} <span class="small">#${esc(String(item.id))}</span></p>
+          <p class="small"><a href="mailto:${esc(item.email||'')}" style="color:#f0c76b;">${esc(item.email||'')}</a> · ${esc(String(item.created_at||'').replace('T',' ').slice(0,16))}</p>
+        </div>
+        <div class="tool-row">
+          <button class="btn btn-ghost" onclick="setSupportStatus(${Number(item.id)},'folyamatban')">Folyamatban</button>
+          <button class="btn btn-gold" onclick="setSupportStatus(${Number(item.id)},'lezart')">Lezar</button>
+        </div>
+      </div>
+      <p style="white-space:pre-wrap;margin-top:12px;font-size:13px;line-height:1.7;color:rgba(255,255,255,.75);">${esc(item.uzenet||'')}</p>
+      ${hiba}
+    </div>`;
+  }).join('');
+}
+
+async function setSupportStatus(id,statusz){
+  try{
+    await adminFetch('/api/admin/support/'+encodeURIComponent(id),{method:'PATCH',body:{statusz}});
+    toast('Statusz frissitve');
+    loadSupport();
+  }catch(error){toast(error.message,'err')}
+}
 function detectFloor(room){
   const s=String(room||'').toUpperCase();
   if(s.startsWith('K')||s.startsWith('M')||s.startsWith('T')||s==='KT') return 0;
@@ -1035,6 +1128,8 @@ q('export-rooms').addEventListener('click',exportRooms);
 q('orarend-upload').addEventListener('click',uploadOrarend);
 q('orarend-template').addEventListener('click',downloadOrarendTemplate);
 q('reload-orarend').addEventListener('click',loadOrarendVersions);
+q('reload-support').addEventListener('click',loadSupport);
+q('support-filter').addEventListener('change',loadSupport);
 q('logout-btn').addEventListener('click',logout);
 
 loadDashboard();
