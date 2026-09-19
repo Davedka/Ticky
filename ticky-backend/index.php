@@ -257,6 +257,7 @@ if ($uri === '/osztaly' || $params !== false) {
 if ($uri === '/qr')      { require __DIR__.'/pages/qr.php'; exit; }
 if ($uri === '/kijelzo') { require __DIR__.'/pages/kijelzo.php'; exit; }
 if ($uri === '/support') { require __DIR__.'/pages/support.php'; exit; }
+if ($uri === '/api/support/uzenet') { require __DIR__.'/api/support_uzenet.php'; exit; }
 
 // Napirend – előbb mint /terem/{szam}!
 $params = match_route('/terem/{szam}/nap', $uri);
@@ -343,6 +344,12 @@ if ($uri === '/api/admin/tanar') { require __DIR__.'/api/admin_tanar.php'; exit;
 if ($uri === '/api/admin/diagnosztika') { require __DIR__.'/api/admin_diagnosztika.php'; exit; }
 if ($uri === '/api/admin/import') { require __DIR__.'/api/admin_import.php'; exit; }
 if ($uri === '/api/admin/github_sync') { require __DIR__.'/api/admin_github_sync.php'; exit; }
+if ($uri === '/api/admin/support') { require __DIR__.'/api/admin_support.php'; exit; }
+$params = match_route('/api/admin/support/{id}', $uri);
+if ($params !== false) {
+    $_GET['id'] = $params['id'];
+    require __DIR__.'/api/admin_support.php'; exit;
+}
 if ($uri === '/api/admin/szunetek') { require __DIR__.'/api/admin_szunet.php'; exit; }
 $params = match_route('/api/admin/szunet/{id}', $uri);
 if ($uri === '/api/admin/szunet' || $params !== false) {
